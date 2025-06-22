@@ -32,6 +32,8 @@ enum class UpgradeTab
 };
 
 UpgradeTab currentTab = UpgradeTab::Items;
+int itemPage = 0;
+constexpr int itemsPerPage = 10;
 
 // Global Textures
 map<string, sf::Texture> loadUpgradeTextures()
@@ -55,7 +57,7 @@ static map<string, sf::Texture> upgradeTextures = loadUpgradeTextures();
 
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.0.7-beta";
+string gameVersion = "v1.1.0-beta";
 
 const long double shopInflationMultiplier = 1.15L;
 
@@ -64,6 +66,9 @@ long double allTimeBubbles = 0.0L;
 long double allTimeBubblesPerClick = 0.0L;
 
 long double bubblesPerSecond = 0.0L;
+
+long double baseBubblesPerClick = 1.0L;
+long double clickMultiplier = 1.0L;
 
 long double totalUpgradeCount = 0.0L;
 
@@ -108,7 +113,7 @@ void handleBubbleClick(
             long double bubbleComboMultiplier = 1.0 + (static_cast<long double>(currentBubbleCombo - 1) * 0.1L);
             int randomMultiplier = (rand() % (maxMult - minMult)) + minMult;
             
-			long double bubbleGain = realBubblesPerSecond * randomMultiplier * bubbleMultiplier * bubbleComboMultiplier;
+            long double bubbleGain = (realBubblesPerSecond * randomMultiplier * bubbleMultiplier * bubbleComboMultiplier) / 2;
             
             addBubbles(bubbleGain, bubbles, allTimeBubbles);
 
@@ -209,9 +214,6 @@ int main()
 	// Bubbles variables here
     long double displayBubbles = 0.0L;
 
-    long double baseBubblesPerClick = 1.0L;
-    long double clickMultiplier = 1.0L;
-
     long double duckCounter = 0.0L;
 
     // Buffs variables here
@@ -280,8 +282,13 @@ int main()
     upgrades.push_back({ "Bubble Bath", 0, 18000.0, 18000.0, 15.0, 20000.0, false, false, 0.0, true, false, false, false, true, true });
     upgrades.push_back({ "Bathtub Jet", 0, 40000.0, 40000.0, 22.0, 50000.0, false, false, 0.0, true, false, false, false, true, true });
     upgrades.push_back({ "Luxury Spa", 0, 100000.0, 100000.0, 35.0, 150000.0, false, false, 0.0, true, false, false, false, true, true });
-    upgrades.push_back({ "Foam Pit", 0, 150000.0, 150000.0, 50, 200000.0, false, false, 0.0, true, false, false, false, true, true });
-    upgrades.push_back({ "Foam Party", 0, 250000.0, 250000.0, 75, 500000.0, false, false, 0.0, true, false, false, false, true, true });
+    upgrades.push_back({ "Foam Pit", 0, 150000.0, 150000.0, 50.0, 200000.0, false, false, 0.0, true, false, false, false, true, true });
+    upgrades.push_back({ "Foam Party", 0, 250000.0, 250000.0, 75.0, 500000.0, false, false, 0.0, true, false, false, false, true, true });
+    upgrades.push_back({ "Sudsy Soap", 0, 400000.0, 400000.0, 130.0, 750000.0, false, false, 0.0, true, false, false, false, true, true });
+    upgrades.push_back({ "Bubble Machine", 0, 750000.0, 750000.0, 200.0, 1000000.0, false, false, 0.0, true, false, false, false, true, true });
+    upgrades.push_back({ "Bubbly Pool", 0, 1200000.0, 1200000.0, 300.0, 1500000.0, false, false, 0.0, true, false, false, false, true, true });
+
+    //addOtherMilestoneUpgrade(upgrades, "Bubble Boost I", 100.0, 250.0);
 
     generateItemMilestoneUpgrades(upgrades, "Soap", 10.0);
     generateItemMilestoneUpgrades(upgrades, "Hand Wash", 75.0);
@@ -294,6 +301,9 @@ int main()
     generateItemMilestoneUpgrades(upgrades, "Luxury Spa", 100000.0);
     generateItemMilestoneUpgrades(upgrades, "Foam Pit", 150000.0);
     generateItemMilestoneUpgrades(upgrades, "Foam Party", 250000.0);
+    generateItemMilestoneUpgrades(upgrades, "Sudsy Soap", 400000.0);
+    generateItemMilestoneUpgrades(upgrades, "Bubble Machine", 750000.0);
+    generateItemMilestoneUpgrades(upgrades, "Bubbly Pool", 1200000.0);
 
     for (auto& upgrade : upgrades)
     {
@@ -310,6 +320,7 @@ int main()
             cerr << "No texture found for " << upgrade.name << endl;
         }
     }
+
     // Loading game file (if it exists)
     loadFileFromJson(
         savedTimestamp,
@@ -414,13 +425,32 @@ int main()
 
         // Bubbles per second buff not showing on display fix
         bubblesPerSecond = 0.0L;
+        baseBubblesPerClick = 1.0L;
         for (const auto& u : upgrades)
         {
             bubblesPerSecond += getBuffedProduction(u, upgrades);
         }
 
         long double realBubblesPerSecond = bubblesPerSecond;
+        long double realClickMultiplier = clickMultiplier;
         long double realBubbles = bubbles;
+
+        // More upgrade stuff
+        map<string, function<void()>> upgradeEffects = {
+            { "Bubble Boost I", [&]() { realClickMultiplier *= 1.5; } },
+            { "Bubble Boost II", [&]() { realBubblesPerSecond *= 1.25; } },
+            { "Bubble Boost III", [&]() { realClickMultiplier *= 2.0; bubblesPerSecond *= 1.1; } }
+        };
+
+        for (const auto& upgrade : upgrades)
+        {
+            if (upgrade.count > 0)
+            {
+                auto it = upgradeEffects.find(upgrade.name);
+                if (it != upgradeEffects.end())
+                    it->second(); // apply effect like multipliers
+            }
+        }
 
         if (isGlobalBubbleBuffActive)
             realBubblesPerSecond *= globalBubbleBuffMultiplier;
@@ -429,8 +459,6 @@ int main()
             realBubblesPerSecond *= rubberDuckBuffMultiplier;
 
         // Clicking buffs
-        long double realClickMultiplier = clickMultiplier;
-
         if (isGlobalBubbleBuffActive)
             realClickMultiplier *= globalBubbleBuffMultiplier;
 
@@ -441,16 +469,16 @@ int main()
         bool isCurrentlyPressed = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
         bool justClicked = isCurrentlyPressed && !isButtonPressed;
 
+        // Display bubbles and bubbles per second, along with other time logic
+        float deltaTime = deltaClock.restart().asSeconds();
+        float  smoothingFactor = 1.0f;
+
 		// Get the mouse position relative to the window
         sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
         sf::Vector2f mousePositionF(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y));
 
         if (justClicked)
         {
-            // Mouse Position
-            sf::Vector2i mousePosI = sf::Mouse::getPosition(window);
-            sf::Vector2f mousePosF(static_cast<float>(mousePosI.x), static_cast<float>(mousePosI.y));
-
             // Tab Switching
             sf::Vector2f tabStartPos(
                 window.getSize().x - UIConstants::TabWidth - UIConstants::TabRightMargin,
@@ -467,26 +495,26 @@ int main()
                 { UIConstants::TabWidth, UIConstants::TabHeight }
             );
 
-            if (itemsTabRect.contains(mousePosF))
+            if (itemsTabRect.contains(mousePositionF))
             {
                 currentTab = UpgradeTab::Items;
             }
-            else if (upgradesTabRect.contains(mousePosF))
+            else if (upgradesTabRect.contains(mousePositionF))
             {
                 currentTab = UpgradeTab::Milestones;
             }
 
             // Click Bubble
-            if (clickArea.contains(mousePosF))
+            if (clickArea.contains(mousePositionF))
             {
-                long double clickValue = (baseBubblesPerClick + (bubblesPerSecond * 0.05)) * clickMultiplier;
+                long double clickValue = (baseBubblesPerClick + (bubblesPerSecond * 0.05)) * realClickMultiplier;
                 addBubbles(clickValue, bubbles, allTimeBubbles, &allTimeBubblesPerClick, true);
             }
 
             // Buff Clicks
-            handleBubbleClick(activeChaosBubbles, mousePosF, bubbles, realBubblesPerSecond, bubbleChaosBuffMultiplier, bubblePopping);
-            handleBubbleClick(activeFrenzyBubbles, mousePosF, bubbles, realBubblesPerSecond, bubbleFrenzyBuffMultiplier, bubblePopping);
-            handleBubbleClick(activeMayhemBubbles, mousePosF, bubbles, realBubblesPerSecond, bubbleMayhemBuffMultiplier, bubblePopping);
+            handleBubbleClick(activeChaosBubbles, mousePositionF, bubbles, realBubblesPerSecond, bubbleChaosBuffMultiplier, bubblePopping);
+            handleBubbleClick(activeFrenzyBubbles, mousePositionF, bubbles, realBubblesPerSecond, bubbleFrenzyBuffMultiplier, bubblePopping);
+            handleBubbleClick(activeMayhemBubbles, mousePositionF, bubbles, realBubblesPerSecond, bubbleMayhemBuffMultiplier, bubblePopping);
 
             // Upgrade Purchases
             float startX = window.getSize().x - UIConstants::TabWidth - UIConstants::TabRightMargin;
@@ -498,26 +526,54 @@ int main()
                 constexpr float boxHeight = 60.f;
                 constexpr float boxSpacing = 70.f;
 
-                float currentY = startY;
-
+                // Collect visible item upgrades
+                vector<UpgradeItem*> visibleItems;
                 for (auto& upgrade : upgrades)
                 {
-                    if (upgrade.isMilestone || !upgrade.isUnlocked(allTimeBubbles, upgrades))
+                    if (!upgrade.isItemUpgrade || !upgrade.isUnlocked(allTimeBubbles, upgrades))
                         continue;
+                    visibleItems.push_back(&upgrade);
+                }
 
-                    sf::FloatRect upgradeBoxRect(
-                        { startX - boxWidth - 20.f, currentY },
-                        { boxWidth, boxHeight }
-                    );
+                int totalPages = (visibleItems.size() + itemsPerPage - 1) / itemsPerPage;
+                itemPage = std::clamp(itemPage, 0, std::max(0, totalPages - 1));
 
-                    if (upgradeBoxRect.contains(mousePosF) && upgrade.canAfford(bubbles))
+                int startIdx = itemPage * itemsPerPage;
+                int endIdx = std::min<int>(startIdx + itemsPerPage, visibleItems.size());
+
+                float currentY = startY;
+
+                // Item click detection
+                for (int i = startIdx; i < endIdx; ++i)
+                {
+                    UpgradeItem& upgrade = *visibleItems[i];
+
+                    sf::Vector2f boxPos = { startX - boxWidth - 20.f, currentY };
+                    sf::Vector2f boxSize = { boxWidth, boxHeight };
+
+                    if (sf::FloatRect(boxPos, boxSize).contains(mousePositionF))
                     {
-                        upgrade.purchase(bubbles);
+                        if (upgrade.canAfford(bubbles))
+                        {
+                            upgrade.purchase(bubbles);
+                        }
                     }
 
                     currentY += boxSpacing;
                 }
+
+                // Pagination buttons
+                sf::Vector2f prevPos = { startX - boxWidth - 20.f, currentY + 40.f };
+                sf::Vector2f nextPos = { startX - boxWidth + 80.f, currentY + 40.f };
+                sf::Vector2f buttonSize = { 80.f, 30.f };
+
+                if (sf::FloatRect(prevPos, buttonSize).contains(mousePositionF) && itemPage > 0)
+                    itemPage--;
+
+                if (sf::FloatRect(nextPos, buttonSize).contains(mousePositionF) && (itemPage + 1) < totalPages)
+                    itemPage++;
             }
+
             else if (currentTab == UpgradeTab::Milestones)
             {
                 constexpr float milestoneSize = 80.f;
@@ -530,7 +586,7 @@ int main()
                 int index = 0;
                 for (auto& upgrade : upgrades)
                 {
-                    if (!upgrade.isMilestone || !upgrade.isUnlocked(allTimeBubbles, upgrades) || upgrade.count >= 1)
+                    if ((upgrade.isItemUpgrade && !upgrade.isMilestone) || !upgrade.isUnlocked(allTimeBubbles, upgrades) || upgrade.count >= 1)
                         continue;
 
                     int row = index / itemsPerRow;
@@ -543,7 +599,7 @@ int main()
 
                     sf::FloatRect milestoneBoxRect(pos, { milestoneSize, milestoneSize });
 
-                    if (milestoneBoxRect.contains(mousePosF) && upgrade.canAfford(bubbles))
+                    if (milestoneBoxRect.contains(mousePositionF) && upgrade.canAfford(bubbles))
                     {
                         upgrade.purchase(bubbles);
                     }
@@ -552,10 +608,6 @@ int main()
                 }
             }
         }
-
-		// Display bubbles and bubbles per second, along with other time logic
-        float deltaTime = deltaClock.restart().asSeconds();
-        float  smoothingFactor = 0.8f;
 
         stringstream displayBubblesStream;
         stringstream bubblesPerSecondStream;
@@ -751,7 +803,7 @@ int main()
             int index = 0;
             for (auto& upgrade : upgrades)
             {
-                if (!upgrade.isMilestone || !upgrade.isUnlocked(allTimeBubbles, upgrades) || upgrade.count >= 1)
+                if ((upgrade.isItemUpgrade && !upgrade.isMilestone) || !upgrade.isUnlocked(allTimeBubbles, upgrades) || upgrade.count >= 1)
                     continue;
 
                 int row = index / itemsPerRow;
@@ -802,15 +854,30 @@ int main()
                 ++index;
             }
         }
+
         else if (currentTab == UpgradeTab::Items)
         {
+            vector<UpgradeItem*> visibleItems;
             for (auto& upgrade : upgrades)
             {
-                if (upgrade.isMilestone || !upgrade.isUnlocked(allTimeBubbles, upgrades))
+                if (!upgrade.isItemUpgrade || !upgrade.isUnlocked(allTimeBubbles, upgrades))
                     continue;
+                visibleItems.push_back(&upgrade);
+            }
+
+            int totalPages = (visibleItems.size() + itemsPerPage - 1) / itemsPerPage;
+            itemPage = std::clamp(itemPage, 0, max(0, totalPages - 1));
+            int startIdx = itemPage * itemsPerPage;
+            int endIdx = min<int>(startIdx + itemsPerPage, visibleItems.size());
+
+            float upgradeY = startY;
+
+            for (int i = startIdx; i < endIdx; ++i)
+            {
+                UpgradeItem& upgrade = *visibleItems[i];
 
                 sf::RectangleShape box({ boxWidth, boxHeight });
-                box.setPosition({ startX - boxWidth - 20.f, currentY });
+                box.setPosition({ startX - boxWidth - 20.f, upgradeY });
                 box.setFillColor(upgrade.canAfford(bubbles) ? sf::Color(220, 255, 220) : sf::Color(140, 140, 140));
                 window.draw(box);
 
@@ -834,7 +901,8 @@ int main()
                 countText.setCharacterSize(14);
                 countText.setString("x" + std::to_string(upgrade.count));
                 auto bounds = countText.getLocalBounds();
-                countText.setOrigin({ bounds.position.x + bounds.size.x / 2.f, 0.f });
+                sf::Vector2f center = bounds.position + bounds.size / 2.f;
+                countText.setOrigin({ center.x, 0.f });
                 countText.setPosition({
                     iconOffsetX + spriteSize / 2.f,
                     box.getPosition().y + (upgrade.spriteUpgrade.has_value() ? 2.f : 32.f)
@@ -859,8 +927,44 @@ int main()
                 costText.setFillColor(sf::Color::Black);
                 window.draw(costText);
 
-                currentY += boxSpacing;
+                upgradeY += boxSpacing;
             }
+
+            // Pages
+            sf::Text pageText(font);
+            pageText.setCharacterSize(14);
+            pageText.setString("Page " + to_string(itemPage + 1) + " / " + to_string(max(1, totalPages)));
+            pageText.setFillColor(sf::Color::White);
+            pageText.setPosition({ startX - boxWidth - 20.f, upgradeY + 10.f });
+            window.draw(pageText);
+
+            sf::Vector2f prevPos = { startX - boxWidth - 20.f, upgradeY + 40.f };
+            sf::Vector2f nextPos = { startX - boxWidth + 80.f, upgradeY + 40.f };
+            sf::Vector2f buttonSize = { 80.f, 30.f };
+
+            sf::RectangleShape prevButton(buttonSize);
+            prevButton.setPosition(prevPos);
+            prevButton.setFillColor(itemPage > 0 ? sf::Color(180, 180, 180) : sf::Color(100, 100, 100));
+            window.draw(prevButton);
+
+            sf::Text prevText(font);
+            prevText.setCharacterSize(14);
+            prevText.setString("Prev");
+            prevText.setFillColor(sf::Color::Black);
+            prevText.setPosition(prevPos + sf::Vector2f(10.f, 5.f));
+            window.draw(prevText);
+
+            sf::RectangleShape nextButton(buttonSize);
+            nextButton.setPosition(nextPos);
+            nextButton.setFillColor((itemPage + 1) < totalPages ? sf::Color(180, 180, 180) : sf::Color(100, 100, 100));
+            window.draw(nextButton);
+
+            sf::Text nextText(font);
+            nextText.setCharacterSize(14);
+            nextText.setString("Next");
+            nextText.setFillColor(sf::Color::Black);
+            nextText.setPosition(nextPos + sf::Vector2f(10.f, 5.f));
+            window.draw(nextText);
         }
 
 		// Tab positions and rendering

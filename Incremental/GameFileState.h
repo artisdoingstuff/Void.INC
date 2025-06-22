@@ -17,7 +17,7 @@ void saveFileToJson(
     long double baseBubblesPerClick,
     long double clickMultiplier,
     long double bubblesPerSecond,
-    const vector<UpgradeItem>& upgrades
+    vector<UpgradeItem>& upgrades
 )
 {
     json saveData;
@@ -39,6 +39,7 @@ void saveFileToJson(
     saveData["upgrades"] = upgrades;
 
     ofstream file("save_file.json");
+
     if (file.is_open())
     {
         file << setw(4) << saveData << endl;
@@ -90,7 +91,36 @@ void loadFileFromJson(
     else
         totalUpgradeCount = 0;
 
-    upgrades = saveData["upgrades"].get<vector<UpgradeItem>>();
+    vector<UpgradeItem> savedUpgrades = saveData["upgrades"].get<vector<UpgradeItem>>();
+
+    for (const auto& saved : savedUpgrades)
+    {
+        auto it = find_if(upgrades.begin(), upgrades.end(), [&](UpgradeItem& u) {
+            return u.name == saved.name;
+            });
+
+        if (it != upgrades.end())
+        {
+            it->count = saved.count;
+            it->baseCost = saved.baseCost;
+            it->currentCost = saved.currentCost;
+            it->baseProduction = saved.baseProduction;
+            it->unlockThreshold = saved.unlockThreshold;
+
+            it->isMilestone = saved.isMilestone;
+            it->unlockedByMilestone = saved.unlockedByMilestone;
+            it->milestoneTriggerValue = saved.milestoneTriggerValue;
+
+            it->isItemUpgrade = saved.isItemUpgrade;
+            it->isOtherUpgrade = saved.isOtherUpgrade;
+            it->isClickUpgrade = saved.isClickUpgrade;
+            it->isDurationUpgrade = saved.isDurationUpgrade;
+            it->isMinorUpgrade = saved.isMinorUpgrade;
+            it->isMajorUpgrade = saved.isMajorUpgrade;
+
+            it->updateCost(); // in case inflation changed
+        }
+    }
 
     for (auto& upgrade : upgrades)
     {

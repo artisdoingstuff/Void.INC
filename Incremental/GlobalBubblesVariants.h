@@ -50,7 +50,7 @@ inline vector<globalBubbleBuffVariant> globalBubbleVariants = {
         & globalBubbleTexture
     },
     {
-        0.4f, 12.0f,
+        0.6f, 14.0f,
         sf::Color::Blue,
         1.0f,
         buffVariantType::globalBubbleBuff,
@@ -58,7 +58,7 @@ inline vector<globalBubbleBuffVariant> globalBubbleVariants = {
         & globalBubbleTexture
     },
     {
-        1.5f, 25.0f,
+        1.5f, 20.0f,
         sf::Color::Blue,
         6.0f,
         buffVariantType::globalBubbleBuff,
@@ -66,7 +66,7 @@ inline vector<globalBubbleBuffVariant> globalBubbleVariants = {
         & globalBubbleTexture
     },
     {
-        0.7f, 20.0f,
+        0.9f, 20.0f,
         sf::Color::Blue,
         3.0f,
         buffVariantType::globalBubbleBuff,
