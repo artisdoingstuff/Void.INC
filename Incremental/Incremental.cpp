@@ -530,7 +530,7 @@ int main()
                 vector<UpgradeItem*> visibleItems;
                 for (auto& upgrade : upgrades)
                 {
-                    if (!upgrade.isItemUpgrade || !upgrade.isUnlocked(allTimeBubbles, upgrades))
+                    if (!upgrade.isItemUpgrade || upgrade.isMilestone || !upgrade.isUnlocked(allTimeBubbles, upgrades))
                         continue;
                     visibleItems.push_back(&upgrade);
                 }
@@ -860,7 +860,7 @@ int main()
             vector<UpgradeItem*> visibleItems;
             for (auto& upgrade : upgrades)
             {
-                if (!upgrade.isItemUpgrade || !upgrade.isUnlocked(allTimeBubbles, upgrades))
+                if (!upgrade.isItemUpgrade || upgrade.isMilestone || !upgrade.isUnlocked(allTimeBubbles, upgrades))
                     continue;
                 visibleItems.push_back(&upgrade);
             }
