@@ -2,11 +2,12 @@
 
 #include "Includes.h"
 #include "Upgrades.h"
+#include "Achievements.h"
 
 extern long double totalUpgradeCount;
 extern string gameVersion;
 
-// Function to save the game state to a file
+// Save the game to a JSON file
 void saveFileToJson(
     string version,
     time_t timestamp,
@@ -17,7 +18,8 @@ void saveFileToJson(
     long double baseBubblesPerClick,
     long double clickMultiplier,
     long double bubblesPerSecond,
-    vector<UpgradeItem>& upgrades
+    vector<UpgradeItem>& upgrades,
+    vector<Achievement>& achievements
 )
 {
     json saveData;
@@ -37,6 +39,7 @@ void saveFileToJson(
     saveData["bubblesPerSecond"] = round2(bubblesPerSecond);
     saveData["totalUpgradeCount"] = round2(totalUpgradeCount);
     saveData["upgrades"] = upgrades;
+    saveData["achievements"] = achievements;
 
     ofstream file("save_file.json");
 
@@ -52,6 +55,7 @@ void saveFileToJson(
     }
 }
 
+// Load the game from a JSON file
 void loadFileFromJson(
     time_t& timestamp,
     long double& duckCounter,
@@ -62,10 +66,11 @@ void loadFileFromJson(
     long double& clickMultiplier,
     long double& bubblesPerSecond,
     vector<UpgradeItem>& upgrades,
-    const map<string, sf::Texture>& upgradeTextures
+    const map<string, sf::Texture>& upgradeTextures,
+    vector<Achievement>& achievements
 )
 {
-    ifstream file("save_file.json");
+    ifstream file("save_file.json", ios::in);
     if (!file.is_open())
     {
         cerr << "No save file found. Starting new game." << endl;
@@ -91,8 +96,8 @@ void loadFileFromJson(
     else
         totalUpgradeCount = 0;
 
+    // Load upgrades
     vector<UpgradeItem> savedUpgrades = saveData["upgrades"].get<vector<UpgradeItem>>();
-
     for (const auto& saved : savedUpgrades)
     {
         auto it = find_if(upgrades.begin(), upgrades.end(), [&](UpgradeItem& u) {
@@ -101,37 +106,35 @@ void loadFileFromJson(
 
         if (it != upgrades.end())
         {
-            it->count = saved.count;
-            it->baseCost = saved.baseCost;
-            it->currentCost = saved.currentCost;
-            it->baseProduction = saved.baseProduction;
-            it->unlockThreshold = saved.unlockThreshold;
-
-            it->isMilestone = saved.isMilestone;
-            it->unlockedByMilestone = saved.unlockedByMilestone;
-            it->milestoneTriggerValue = saved.milestoneTriggerValue;
-
-            it->isItemUpgrade = saved.isItemUpgrade;
-            it->isOtherUpgrade = saved.isOtherUpgrade;
-            it->isClickUpgrade = saved.isClickUpgrade;
-            it->isDurationUpgrade = saved.isDurationUpgrade;
-            it->isMinorUpgrade = saved.isMinorUpgrade;
-            it->isMajorUpgrade = saved.isMajorUpgrade;
-
-            it->updateCost(); // in case inflation changed
+            *it = saved;
+            it->updateCost(); // Apply inflation if needed
         }
     }
 
+    // Restore sprites
     for (auto& upgrade : upgrades)
     {
         auto it = upgradeTextures.find(upgrade.name);
         if (it != upgradeTextures.end())
-        {
             upgrade.spriteUpgrade = sf::Sprite(it->second);
-        }
         else
-        {
             upgrade.spriteUpgrade.reset();
+    }
+
+    // Load achievements
+    if (saveData.contains("achievements"))
+    {
+        vector<Achievement> loadedAchievements = saveData["achievements"].get<vector<Achievement>>();
+        for (const auto& saved : loadedAchievements)
+        {
+            auto it = find_if(achievements.begin(), achievements.end(), [&](Achievement& a) {
+                return a.name == saved.name;
+                });
+
+            if (it != achievements.end())
+            {
+                it->unlocked = saved.unlocked;
+            }
         }
     }
 

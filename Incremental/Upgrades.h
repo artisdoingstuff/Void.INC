@@ -86,6 +86,28 @@ struct UpgradeItem
         totalUpgradeCount += times;
         updateCost(inflation);
     }
+
+    void copyFromSave(const UpgradeItem& saved)
+    {
+        count = saved.count;
+        baseCost = saved.baseCost;
+        currentCost = saved.currentCost;
+        baseProduction = saved.baseProduction;
+        unlockThreshold = saved.unlockThreshold;
+
+        isMilestone = saved.isMilestone;
+        unlockedByMilestone = saved.unlockedByMilestone;
+        milestoneTriggerValue = saved.milestoneTriggerValue;
+
+        isItemUpgrade = saved.isItemUpgrade;
+        isOtherUpgrade = saved.isOtherUpgrade;
+        isClickUpgrade = saved.isClickUpgrade;
+        isDurationUpgrade = saved.isDurationUpgrade;
+        isMinorUpgrade = saved.isMinorUpgrade;
+        isMajorUpgrade = saved.isMajorUpgrade;
+
+        updateCost(); // Recalculate if inflation changes
+    }
 };
 
 inline void generateItemMilestoneUpgrades(

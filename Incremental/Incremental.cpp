@@ -1,4 +1,4 @@
-﻿// #include "Achievements.h"
+﻿#include "Achievements.h"
 #include "BubbleFrenzy.h"
 #include "BubbleChaos.h"
 #include "BubbleMayhem.h"
@@ -369,6 +369,12 @@ int main()
         }
     }
 
+    // Achievements
+    vector<Achievement> achievements = {
+        { "It Begins.", "Generate 1 bubble", AchievementType::TotalBubbles, 1 },
+        { "Bubble Beginner", "Generate 100 bubbles", AchievementType::TotalBubbles, 100 }
+    };
+
     // Loading game file (if it exists)
     loadFileFromJson(
         savedTimestamp,
@@ -380,7 +386,8 @@ int main()
         clickMultiplier,
         bubblesPerSecond,
         upgrades,
-        upgradeTextures
+        upgradeTextures,
+        achievements
     );
     displayBubbles = bubbles;
 
@@ -469,7 +476,8 @@ int main()
                     baseBubblesPerClick,
                     clickMultiplier,
                     bubblesPerSecond,
-                    upgrades
+                    upgrades,
+                    achievements
                 );
                 window.close();
             }
@@ -746,6 +754,19 @@ int main()
         {
             bubblesPerSecondStream << fixed << setprecision(0) << realBubblesPerSecond;
 		}
+
+        // Achievements logic here
+        for (auto& achievement : achievements)
+        {
+            if (!achievement.unlocked && achievement.checkUnlock(
+                allTimeBubbles,
+                allTimeBubblesPerClick,
+                upgrades
+            )) {
+                achievement.unlocked = true;
+                cout << "Achievement unlocked: " << achievement.name << endl;
+            }
+        }
 
         // Buff logic here
         bool globalBubbleBuffClicked = buffHandler(
@@ -1072,19 +1093,30 @@ int main()
                 }
 
                 long double finalItemBps = baseItemBps * totalMultiplier;
-
                 float percent = (realBubblesPerSecond > 0.0)
                     ? static_cast<float>((finalItemBps / realBubblesPerSecond) * 100.0f)
                     : 0.0f;
 
+                int buyAmount = 1;
+                switch (currentMultibuy)
+                {
+                case MultibuyMode::x1:   buyAmount = 1; break;
+                case MultibuyMode::x10:  buyAmount = 10; break;
+                case MultibuyMode::x100: buyAmount = 100; break;
+                case MultibuyMode::Max:  buyAmount = calculateMaxAffordable(*hoveredItem, bubbles); break;
+                }
+
+                long double costPreview = calculateTotalCost(*hoveredItem, buyAmount);
+
                 string tooltipStr =
                     hoveredItem->name + "\n" +
                     "BPS: " + formatDisplayBubbles(finalItemBps) + "\n" +
-                    "Contribution: " + to_string(percent).substr(0, 5) + "%";
+                    "Contribution: " + to_string(percent).substr(0, 5) + "%\n" +
+                    "Buy x" + to_string(buyAmount) + " Cost: " + formatDisplayBubbles(costPreview);
 
                 tooltipText.setString(tooltipStr);
-                sf::FloatRect bounds = tooltipText.getLocalBounds();
 
+                sf::FloatRect bounds = tooltipText.getLocalBounds();
                 sf::Vector2f padding = { 10.f, 6.f };
                 sf::Vector2f tipSize = bounds.size + padding * 2.f;
                 sf::Vector2f tipPos = mousePositionF + sf::Vector2f(12.f, 12.f);
