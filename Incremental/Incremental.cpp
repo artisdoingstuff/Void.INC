@@ -292,6 +292,25 @@ int main()
     upgrades.push_back({ "Carbonated Soda", 0, 2500000.0, 2500000.0, 650.0, 3000000.0, false, false, 0.0, true, false, false, false, true, true });
     upgrades.push_back({ "Bath Bombs", 0, 4000000.0, 4000000.0, 900.0, 5000000.0, false, false, 0.0, true, false, false, false, true, true });
 
+    // Item Upgrades
+    generateItemMilestoneUpgrades(upgrades, "Soap", 10.0);
+    generateItemMilestoneUpgrades(upgrades, "Hand Wash", 75.0);
+    generateItemMilestoneUpgrades(upgrades, "Shampoo", 250.0);
+    generateItemMilestoneUpgrades(upgrades, "Shaving Foam", 1000.0);
+    generateItemMilestoneUpgrades(upgrades, "Toothpaste", 3000.0);
+    generateItemMilestoneUpgrades(upgrades, "Loofah", 7000.0);
+    generateItemMilestoneUpgrades(upgrades, "Bubble Bath", 18000.0);
+    generateItemMilestoneUpgrades(upgrades, "Bathtub Jet", 40000.0);
+    generateItemMilestoneUpgrades(upgrades, "Luxury Spa", 100000.0);
+    generateItemMilestoneUpgrades(upgrades, "Foam Pit", 150000.0);
+    generateItemMilestoneUpgrades(upgrades, "Foam Party", 250000.0);
+    generateItemMilestoneUpgrades(upgrades, "Sudsy Soap", 400000.0);
+    generateItemMilestoneUpgrades(upgrades, "Bubble Machine", 750000.0);
+    generateItemMilestoneUpgrades(upgrades, "Bubbly Pool", 1200000.0);
+    generateItemMilestoneUpgrades(upgrades, "Sparkling Water", 1800000.0);
+    generateItemMilestoneUpgrades(upgrades, "Carbonated Soda", 2500000.0);
+    generateItemMilestoneUpgrades(upgrades, "Bath Bombs", 4000000.0);
+
     // Other Upgrades
     addOtherMilestoneUpgrade(
         upgrades,       // Upgrade Call
@@ -315,22 +334,6 @@ int main()
     addOtherMilestoneUpgrade(upgrades, "Hand Wash Refiller", 50000.0, 75000.0);
     addOtherMilestoneUpgrade(upgrades, "Fool's Bubble", 75000.0, 90000.0);
     addOtherMilestoneUpgrade(upgrades, "Misprint Bubble", 100000.0, 250000.0);
-
-    // Item Upgrades
-    generateItemMilestoneUpgrades(upgrades, "Soap", 10.0);
-    generateItemMilestoneUpgrades(upgrades, "Hand Wash", 75.0);
-    generateItemMilestoneUpgrades(upgrades, "Shampoo", 250.0);
-    generateItemMilestoneUpgrades(upgrades, "Shaving Foam", 1000.0);
-    generateItemMilestoneUpgrades(upgrades, "Toothpaste", 3000.0);
-    generateItemMilestoneUpgrades(upgrades, "Loofah", 7000.0);
-    generateItemMilestoneUpgrades(upgrades, "Bubble Bath", 18000.0);
-    generateItemMilestoneUpgrades(upgrades, "Bathtub Jet", 40000.0);
-    generateItemMilestoneUpgrades(upgrades, "Luxury Spa", 100000.0);
-    generateItemMilestoneUpgrades(upgrades, "Foam Pit", 150000.0);
-    generateItemMilestoneUpgrades(upgrades, "Foam Party", 250000.0);
-    generateItemMilestoneUpgrades(upgrades, "Sudsy Soap", 400000.0);
-    generateItemMilestoneUpgrades(upgrades, "Bubble Machine", 750000.0);
-    generateItemMilestoneUpgrades(upgrades, "Bubbly Pool", 1200000.0);
 
     for (auto& upgrade : upgrades)
     {
