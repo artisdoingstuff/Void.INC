@@ -170,7 +170,7 @@ inline long double getBuffedProduction(const UpgradeItem& u, const vector<Upgrad
 
     if (itemMilestoneCount > 0)
         if (u.isItemUpgrade)
-            production *= pow(1.75, itemMilestoneCount);
+            production *= pow(1.8, itemMilestoneCount);
 
     return production * u.count;
 }

@@ -57,7 +57,7 @@ static map<string, sf::Texture> upgradeTextures = loadUpgradeTextures();
 
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.1.0-beta";
+string gameVersion = "v1.1.2-beta";
 
 const long double shopInflationMultiplier = 1.15L;
 
@@ -253,9 +253,10 @@ int main()
 
     srand(static_cast<unsigned>(time(0)));
 
-	// Item Upgrade variables here
+	// Upgrade variables here
     vector<UpgradeItem> upgrades;
 
+    // Items
     upgrades.push_back(
         {
             "Soap",     // Reference Name
@@ -287,9 +288,35 @@ int main()
     upgrades.push_back({ "Sudsy Soap", 0, 400000.0, 400000.0, 130.0, 750000.0, false, false, 0.0, true, false, false, false, true, true });
     upgrades.push_back({ "Bubble Machine", 0, 750000.0, 750000.0, 200.0, 1000000.0, false, false, 0.0, true, false, false, false, true, true });
     upgrades.push_back({ "Bubbly Pool", 0, 1200000.0, 1200000.0, 300.0, 1500000.0, false, false, 0.0, true, false, false, false, true, true });
+    upgrades.push_back({ "Sparkling Water", 0, 1800000.0, 1800000.0, 450.0, 2200000.0, false, false, 0.0, true, false, false, false, true, true });
+    upgrades.push_back({ "Carbonated Soda", 0, 2500000.0, 2500000.0, 650.0, 3000000.0, false, false, 0.0, true, false, false, false, true, true });
+    upgrades.push_back({ "Bath Bombs", 0, 4000000.0, 4000000.0, 900.0, 5000000.0, false, false, 0.0, true, false, false, false, true, true });
 
-    //addOtherMilestoneUpgrade(upgrades, "Bubble Boost I", 100.0, 250.0);
+    // Other Upgrades
+    addOtherMilestoneUpgrade(
+        upgrades,       // Upgrade Call
+        "Red Bubble",   // Reference Name
+        100.0,          // Upgrade Unlock Threshold
+        250.0           // Upgrade Cost
+    );
+    addOtherMilestoneUpgrade(upgrades, "Green Bubble", 250.0, 500.0);
+    addOtherMilestoneUpgrade(upgrades, "Blue Bubble", 500.0, 750.0);
+    addOtherMilestoneUpgrade(upgrades, "Rubber Ducky", 750.0, 1000.0);
+    addOtherMilestoneUpgrade(upgrades, "Rainbow Bubble", 1000.0, 1500.0);
+    addOtherMilestoneUpgrade(upgrades, "Cyan Bubble", 1500.0, 2500.0);
+    addOtherMilestoneUpgrade(upgrades, "Indigo Bubble", 2500.0, 4000.0);
+    addOtherMilestoneUpgrade(upgrades, "Heart-Shaped Bubble", 5000.0, 7500.0);
+    addOtherMilestoneUpgrade(upgrades, "Soap Dispenser", 7500.0, 10000.0);
+    addOtherMilestoneUpgrade(upgrades, "Bath Bubbles", 10000.0, 15000.0);
+    addOtherMilestoneUpgrade(upgrades, "Detergent Bubbles", 15000.0, 20000.0);
+    addOtherMilestoneUpgrade(upgrades, "Duck?", 20000.0, 10000.0);
+    addOtherMilestoneUpgrade(upgrades, "Carbonation", 25000.0, 35000.0);
+    addOtherMilestoneUpgrade(upgrades, "Golden Bubble", 40000.0, 100000.0);
+    addOtherMilestoneUpgrade(upgrades, "Hand Wash Refiller", 50000.0, 75000.0);
+    addOtherMilestoneUpgrade(upgrades, "Fool's Bubble", 75000.0, 90000.0);
+    addOtherMilestoneUpgrade(upgrades, "Misprint Bubble", 100000.0, 250000.0);
 
+    // Item Upgrades
     generateItemMilestoneUpgrades(upgrades, "Soap", 10.0);
     generateItemMilestoneUpgrades(upgrades, "Hand Wash", 75.0);
     generateItemMilestoneUpgrades(upgrades, "Shampoo", 250.0);
@@ -437,9 +464,22 @@ int main()
 
         // More upgrade stuff
         map<string, function<void()>> upgradeEffects = {
-            { "Bubble Boost I", [&]() { realClickMultiplier *= 1.5; } },
-            { "Bubble Boost II", [&]() { realBubblesPerSecond *= 1.25; } },
-            { "Bubble Boost III", [&]() { realClickMultiplier *= 2.0; bubblesPerSecond *= 1.1; } }
+            { "Red Bubble", [&]() { bubblesPerSecond *= 1.01f; realBubblesPerSecond *= 1.01f; } },
+            { "Green Bubble", [&]() { bubblesPerSecond *= 1.01f; realBubblesPerSecond *= 1.01f; } },
+            { "Blue Bubble", [&]() { bubblesPerSecond *= 1.01f; realBubblesPerSecond *= 1.01f; } },
+            { "Rubber Ducky", [&]() { bubblesPerSecond *= 1.01f; realBubblesPerSecond *= 1.01f; } },
+            { "Rainbow Bubble", [&]() { bubblesPerSecond *= 1.02f; realBubblesPerSecond *= 1.02f; } },
+            { "Cyan Bubble", [&]() { bubblesPerSecond *= 1.01f; realBubblesPerSecond *= 1.01f; } },
+            { "Indigo Bubble", [&]() { bubblesPerSecond *= 1.01f; realBubblesPerSecond *= 1.01f; } },
+            { "Heart-Shaped Bubble", [&]() { bubblesPerSecond *= 1.02f; realBubblesPerSecond *= 1.02f; } },
+            { "Bath Bubbles", [&]() { bubblesPerSecond *= 1.02f; realBubblesPerSecond *= 1.02f; } },
+            { "Detergent Bubbles", [&]() { bubblesPerSecond *= 1.01f; realBubblesPerSecond *= 1.01f; } },
+            { "Duck?", [&]() { bubblesPerSecond *= 1.01f; realBubblesPerSecond *= 1.01f; } },
+            { "Carbonation", [&]() { bubblesPerSecond *= 1.02f; realBubblesPerSecond *= 1.02f; } },
+            { "Golden Bubble", [&]() { bubblesPerSecond *= 1.1f; realBubblesPerSecond *= 1.1f; } },
+            { "Fool's Bubble", [&]() { bubblesPerSecond *= 1.01f; realBubblesPerSecond *= 1.01f; } },
+            { "Misprint Bubble", [&]() { bubblesPerSecond *= 1.2f; realBubblesPerSecond *= 1.2f; } }
+            //{ "Yellow Bubble", [&]() { realClickMultiplier *= 2.0; bubblesPerSecond *= 1.1; } }
         };
 
         for (const auto& upgrade : upgrades)
