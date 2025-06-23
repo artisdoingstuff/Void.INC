@@ -79,6 +79,13 @@ struct UpgradeItem
         totalUpgradeCount++;
         updateCost(inflation);
     }
+
+    void purchaseRaw(int times = 1, const long double inflation = shopInflationMultiplier)
+    {
+        count += times;
+        totalUpgradeCount += times;
+        updateCost(inflation);
+    }
 };
 
 inline void generateItemMilestoneUpgrades(
@@ -189,6 +196,27 @@ inline long double getBuffedProduction(const UpgradeItem& u, const vector<Upgrad
             production *= pow(1.8, itemMilestoneCount);
 
     return production * u.count;
+}
+
+inline long double calculateTotalCost(const UpgradeItem& item, int amount)
+{
+    long double cost = item.currentCost;
+    long double rate = shopInflationMultiplier;
+
+    if (rate == 1.0) return cost * amount;
+
+    return cost * (1.0 - pow(rate, amount)) / (1.0 - rate);
+}
+
+inline int calculateMaxAffordable(const UpgradeItem& item, long double availableBubbles)
+{
+    long double cost = item.currentCost;
+    long double rate = shopInflationMultiplier;
+
+    if (rate == 1.0) return static_cast<int>(availableBubbles / cost);
+
+    double maxN = log(1 - (availableBubbles * (1 - rate) / cost)) / log(rate);
+    return max(0, static_cast<int>(floor(maxN)));
 }
 
 inline void to_json(json& j, const UpgradeItem& u)

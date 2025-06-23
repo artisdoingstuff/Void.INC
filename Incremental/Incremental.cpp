@@ -32,6 +32,14 @@ enum class UpgradeTab
 };
 
 UpgradeTab currentTab = UpgradeTab::Items;
+
+enum class MultibuyMode
+{
+    x1, x10, x100, Max
+};
+
+MultibuyMode currentMultibuy = MultibuyMode::x1;
+
 int itemPage = 0;
 constexpr int itemsPerPage = 9;
 
@@ -57,7 +65,7 @@ static map<string, sf::Texture> upgradeTextures = loadUpgradeTextures();
 
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.1.4-beta";
+string gameVersion = "v1.1.5-beta";
 
 const long double shopInflationMultiplier = 1.15L;
 
@@ -534,54 +542,64 @@ int main()
 
         if (justClicked)
         {
-            // Tab Switching
-            sf::Vector2f tabStartPos(
-                window.getSize().x - UIConstants::TabWidth - UIConstants::TabRightMargin,
-                UIConstants::TabTopOffset
-            );
+            bool clickHandled = false;
 
-            sf::FloatRect itemsTabRect(
-                { tabStartPos.x - UIConstants::TabWidth - UIConstants::TabSpacing, tabStartPos.y },
-                { UIConstants::TabWidth, UIConstants::TabHeight }
-            );
-
-            sf::FloatRect upgradesTabRect(
-                { tabStartPos.x, tabStartPos.y },
-                { UIConstants::TabWidth, UIConstants::TabHeight }
-            );
-
-            if (itemsTabRect.contains(mousePositionF))
-            {
-                currentTab = UpgradeTab::Items;
-            }
-            else if (upgradesTabRect.contains(mousePositionF))
-            {
-                currentTab = UpgradeTab::Milestones;
-            }
-
-            // Click Bubble
-            if (clickArea.contains(mousePositionF))
-            {
-                long double clickValue = (baseBubblesPerClick + (bubblesPerSecond * 0.05)) * realClickMultiplier;
-                addBubbles(clickValue, bubbles, allTimeBubbles, &allTimeBubblesPerClick, true);
-            }
-
-            // Buff Clicks
-            handleBubbleClick(activeChaosBubbles, mousePositionF, bubbles, realBubblesPerSecond, bubbleChaosBuffMultiplier, bubblePopping);
-            handleBubbleClick(activeFrenzyBubbles, mousePositionF, bubbles, realBubblesPerSecond, bubbleFrenzyBuffMultiplier, bubblePopping);
-            handleBubbleClick(activeMayhemBubbles, mousePositionF, bubbles, realBubblesPerSecond, bubbleMayhemBuffMultiplier, bubblePopping);
-
-            // Upgrade Purchases
             float startX = window.getSize().x - UIConstants::TabWidth - UIConstants::TabRightMargin;
             float startY = UIConstants::TabTopOffset + UIConstants::TabHeight + 20.0f;
 
-            if (currentTab == UpgradeTab::Items)
-            {
-                constexpr float boxWidth = 350.f;
-                constexpr float boxHeight = 60.f;
-                constexpr float boxSpacing = 70.f;
+            constexpr float boxWidth = 350.f;
+            constexpr float boxHeight = 60.f;
+            constexpr float boxSpacing = 70.f;
 
-                // Collect visible item upgrades
+            // Tab Switching
+            if (!clickHandled)
+            {
+                sf::Vector2f tabStartPos(
+                    window.getSize().x - UIConstants::TabWidth - UIConstants::TabRightMargin,
+                    UIConstants::TabTopOffset
+                );
+
+                sf::FloatRect itemsTabRect(
+                    { tabStartPos.x - UIConstants::TabWidth - UIConstants::TabSpacing, tabStartPos.y },
+                    { UIConstants::TabWidth, UIConstants::TabHeight }
+                );
+
+                sf::FloatRect upgradesTabRect(
+                    { tabStartPos.x, tabStartPos.y },
+                    { UIConstants::TabWidth, UIConstants::TabHeight }
+                );
+
+                if (itemsTabRect.contains(mousePositionF))
+                {
+                    currentTab = UpgradeTab::Items;
+                    clickHandled = true;
+                }
+                else if (upgradesTabRect.contains(mousePositionF))
+                {
+                    currentTab = UpgradeTab::Milestones;
+                    clickHandled = true;
+                }
+            }
+
+            // Click Bubble
+            if (!clickHandled && clickArea.contains(mousePositionF))
+            {
+                long double clickValue = (baseBubblesPerClick + (bubblesPerSecond * 0.05)) * realClickMultiplier;
+                addBubbles(clickValue, bubbles, allTimeBubbles, &allTimeBubblesPerClick, true);
+                clickHandled = true;
+            }
+
+            // Buffs
+            if (!clickHandled)
+            {
+                handleBubbleClick(activeChaosBubbles, mousePositionF, bubbles, realBubblesPerSecond, bubbleChaosBuffMultiplier, bubblePopping);
+                handleBubbleClick(activeFrenzyBubbles, mousePositionF, bubbles, realBubblesPerSecond, bubbleFrenzyBuffMultiplier, bubblePopping);
+                handleBubbleClick(activeMayhemBubbles, mousePositionF, bubbles, realBubblesPerSecond, bubbleMayhemBuffMultiplier, bubblePopping);
+            }
+
+            // Items
+            if (!clickHandled && currentTab == UpgradeTab::Items)
+            {
                 vector<UpgradeItem*> visibleItems;
                 for (auto& upgrade : upgrades)
                 {
@@ -591,45 +609,93 @@ int main()
                 }
 
                 int totalPages = (visibleItems.size() + itemsPerPage - 1) / itemsPerPage;
-                itemPage = clamp(itemPage, 0, std::max(0, totalPages - 1));
-
+                itemPage = clamp(itemPage, 0, max(0, totalPages - 1));
                 int startIdx = itemPage * itemsPerPage;
                 int endIdx = min<int>(startIdx + itemsPerPage, visibleItems.size());
 
-                float currentY = startY;
+                float upgradeY = startY;
 
-                // Item click detection
+                // Item clicks
                 for (int i = startIdx; i < endIdx; ++i)
                 {
                     UpgradeItem& upgrade = *visibleItems[i];
+                    sf::Vector2f boxPos = { startX - boxWidth - 20.f, upgradeY };
 
-                    sf::Vector2f boxPos = { startX - boxWidth - 20.f, currentY };
-                    sf::Vector2f boxSize = { boxWidth, boxHeight };
-
-                    if (sf::FloatRect(boxPos, boxSize).contains(mousePositionF))
+                    if (sf::FloatRect(boxPos, { boxWidth, boxHeight }).contains(mousePositionF))
                     {
-                        if (upgrade.canAfford(bubbles))
+                        int buyAmount = 1;
+                        switch (currentMultibuy)
                         {
-                            upgrade.purchase(bubbles);
+                        case MultibuyMode::x1:   buyAmount = 1; break;
+                        case MultibuyMode::x10:  buyAmount = 10; break;
+                        case MultibuyMode::x100: buyAmount = 100; break;
+                        case MultibuyMode::Max:  buyAmount = calculateMaxAffordable(upgrade, bubbles); break;
                         }
+
+                        long double totalCost = calculateTotalCost(upgrade, buyAmount);
+
+                        if (bubbles >= totalCost && buyAmount > 0)
+                        {
+                            bubbles -= totalCost;
+                            upgrade.purchaseRaw(buyAmount);
+                        }
+
+                        clickHandled = true;
+                        break;
                     }
 
-                    currentY += boxSpacing;
+                    upgradeY += boxSpacing;
                 }
 
-                // Pagination buttons
-                sf::Vector2f prevPos = { startX - boxWidth - 20.f, currentY + 40.f };
-                sf::Vector2f nextPos = { startX - boxWidth + 80.f, currentY + 40.f };
-                sf::Vector2f buttonSize = { 80.f, 30.f };
+                // Multibuy Buttons
+                if (!clickHandled)
+                {
+                    vector<pair<string, MultibuyMode>> multibuyOptions = {
+                        { "x1", MultibuyMode::x1 },
+                        { "x10", MultibuyMode::x10 },
+                        { "x100", MultibuyMode::x100 },
+                        { "Max", MultibuyMode::Max }
+                    };
 
-                if (sf::FloatRect(prevPos, buttonSize).contains(mousePositionF) && itemPage > 0)
-                    itemPage--;
+                    sf::Vector2f multibuyStart = { startX - boxWidth - 20.f, upgradeY + 40.f };
+                    sf::Vector2f multibuySize = { 60.f, 28.f };
 
-                if (sf::FloatRect(nextPos, buttonSize).contains(mousePositionF) && (itemPage + 1) < totalPages)
-                    itemPage++;
+                    for (int i = 0; i < multibuyOptions.size(); ++i)
+                    {
+                        sf::Vector2f pos = multibuyStart + sf::Vector2f(i * (multibuySize.x + 10.f), 0.f);
+
+                        if (sf::FloatRect(pos, multibuySize).contains(mousePositionF))
+                        {
+                            currentMultibuy = multibuyOptions[i].second;
+                            clickHandled = true;
+                            break;
+                        }
+                    }
+                }
+
+                // Pagination
+                if (!clickHandled)
+                {
+                    sf::Vector2f prevPos = { startX - boxWidth - 20.f, upgradeY + 85.f };
+                    sf::Vector2f nextPos = { startX - boxWidth + 80.f, upgradeY + 85.f };
+                    sf::Vector2f navSize = { 80.f, 30.f };
+
+                    if (sf::FloatRect(prevPos, navSize).contains(mousePositionF) && itemPage > 0)
+                    {
+                        itemPage--;
+                        clickHandled = true;
+                    }
+
+                    if (!clickHandled && sf::FloatRect(nextPos, navSize).contains(mousePositionF) && (itemPage + 1) < totalPages)
+                    {
+                        itemPage++;
+                        clickHandled = true;
+                    }
+                }
             }
 
-            else if (currentTab == UpgradeTab::Milestones)
+            // Milestones
+            if (!clickHandled && currentTab == UpgradeTab::Milestones)
             {
                 constexpr float milestoneSize = 80.f;
                 constexpr float spacingX = 50.f;
@@ -652,11 +718,10 @@ int main()
                         startY + row * (milestoneSize + spacingY)
                     };
 
-                    sf::FloatRect milestoneBoxRect(pos, { milestoneSize, milestoneSize });
-
-                    if (milestoneBoxRect.contains(mousePositionF) && upgrade.canAfford(bubbles))
+                    if (sf::FloatRect(pos, { milestoneSize, milestoneSize }).contains(mousePositionF) && upgrade.canAfford(bubbles))
                     {
                         upgrade.purchase(bubbles);
+                        break;
                     }
 
                     ++index;
@@ -929,24 +994,22 @@ int main()
 
             float upgradeY = startY;
 
+            // Items
             for (int i = startIdx; i < endIdx; ++i)
             {
                 UpgradeItem& upgrade = *visibleItems[i];
-
                 sf::Vector2f boxPos = { startX - boxWidth - 20.f, upgradeY };
 
                 sf::RectangleShape box({ boxWidth, boxHeight });
-                box.setPosition({ startX - boxWidth - 20.f, upgradeY });
+                box.setPosition(boxPos);
                 box.setFillColor(upgrade.canAfford(bubbles) ? sf::Color(220, 255, 220) : sf::Color(140, 140, 140));
                 window.draw(box);
 
                 if (sf::FloatRect(boxPos, { boxWidth, boxHeight }).contains(mousePositionF))
-                {
                     hoveredItem = &upgrade;
-                }
 
-                float iconOffsetX = box.getPosition().x + 10.f;
-                float iconOffsetY = box.getPosition().y + 20.f;
+                float iconOffsetX = boxPos.x + 10.f;
+                float iconOffsetY = boxPos.y + 20.f;
 
                 if (upgrade.spriteUpgrade.has_value())
                 {
@@ -963,13 +1026,13 @@ int main()
                 // Count
                 sf::Text countText(font);
                 countText.setCharacterSize(14);
-                countText.setString("x" + std::to_string(upgrade.count));
+                countText.setString("x" + to_string(upgrade.count));
                 auto bounds = countText.getLocalBounds();
                 sf::Vector2f center = bounds.position + bounds.size / 2.f;
                 countText.setOrigin({ center.x, 0.f });
                 countText.setPosition({
                     iconOffsetX + spriteSize / 2.f,
-                    box.getPosition().y + (upgrade.spriteUpgrade.has_value() ? 2.f : 32.f)
+                    boxPos.y + (upgrade.spriteUpgrade.has_value() ? 2.f : 32.f)
                     });
                 countText.setFillColor(sf::Color::Black);
                 window.draw(countText);
@@ -979,7 +1042,7 @@ int main()
                 sf::Text nameText(font);
                 nameText.setCharacterSize(16);
                 nameText.setString(upgrade.name);
-                nameText.setPosition({ nameOffsetX, box.getPosition().y + 10.f });
+                nameText.setPosition({ nameOffsetX, boxPos.y + 10.f });
                 nameText.setFillColor(sf::Color::Black);
                 window.draw(nameText);
 
@@ -987,14 +1050,14 @@ int main()
                 sf::Text costText(font);
                 costText.setCharacterSize(14);
                 costText.setString(formatDisplayBubbles(upgrade.currentCost) + " Bubbles");
-                costText.setPosition({ box.getPosition().x + boxWidth - 140.f, box.getPosition().y + 10.f });
+                costText.setPosition({ boxPos.x + boxWidth - 140.f, boxPos.y + 10.f });
                 costText.setFillColor(sf::Color::Black);
                 window.draw(costText);
 
                 upgradeY += boxSpacing;
             }
 
-            // Tool tips
+            // Tooltips
             if (hoveredItem)
             {
                 long double baseItemBps = getBuffedProduction(*hoveredItem, upgrades);
@@ -1003,7 +1066,6 @@ int main()
                 for (const auto& u : upgrades)
                 {
                     if (u.count < 1) continue;
-
                     auto it = globalUpgradeMultiplierValues.find(u.name);
                     if (it != globalUpgradeMultiplierValues.end())
                         totalMultiplier *= it->second;
@@ -1015,14 +1077,14 @@ int main()
                     ? static_cast<float>((finalItemBps / realBubblesPerSecond) * 100.0f)
                     : 0.0f;
 
-                std::string tooltipStr =
+                string tooltipStr =
                     hoveredItem->name + "\n" +
                     "BPS: " + formatDisplayBubbles(finalItemBps) + "\n" +
-                    "Contribution: " + std::to_string(percent).substr(0, 5) + "%";
+                    "Contribution: " + to_string(percent).substr(0, 5) + "%";
 
                 tooltipText.setString(tooltipStr);
-
                 sf::FloatRect bounds = tooltipText.getLocalBounds();
+
                 sf::Vector2f padding = { 10.f, 6.f };
                 sf::Vector2f tipSize = bounds.size + padding * 2.f;
                 sf::Vector2f tipPos = mousePositionF + sf::Vector2f(12.f, 12.f);
@@ -1034,12 +1096,11 @@ int main()
                 tipBg.setOutlineColor(sf::Color(90, 90, 90));
 
                 tooltipText.setPosition(tipPos + padding);
-
                 window.draw(tipBg);
                 window.draw(tooltipText);
             }
 
-            // Pages
+            // Pagination Label
             sf::Text pageText(font);
             pageText.setCharacterSize(14);
             pageText.setString("Page " + to_string(itemPage + 1) + " / " + to_string(max(1, totalPages)));
@@ -1047,11 +1108,46 @@ int main()
             pageText.setPosition({ startX - boxWidth - 20.f, upgradeY + 10.f });
             window.draw(pageText);
 
-            sf::Vector2f prevPos = { startX - boxWidth - 20.f, upgradeY + 40.f };
-            sf::Vector2f nextPos = { startX - boxWidth + 80.f, upgradeY + 40.f };
-            sf::Vector2f buttonSize = { 80.f, 30.f };
+            // Multibuy Buttons
+            vector<pair<string, MultibuyMode>> multibuyOptions = {
+                { "x1", MultibuyMode::x1 },
+                { "x10", MultibuyMode::x10 },
+                { "x100", MultibuyMode::x100 },
+                { "Max", MultibuyMode::Max }
+            };
 
-            sf::RectangleShape prevButton(buttonSize);
+            sf::Vector2f multibuyStart = { startX - boxWidth - 20.f, upgradeY + 40.f };
+            sf::Vector2f multibuySize = { 60.f, 28.f };
+
+            for (int i = 0; i < multibuyOptions.size(); ++i)
+            {
+                const auto& [label, mode] = multibuyOptions[i];
+                sf::Vector2f pos = multibuyStart + sf::Vector2f(i * (multibuySize.x + 10.f), 0.f);
+
+                sf::RectangleShape button(multibuySize);
+                button.setPosition(pos);
+                button.setFillColor(mode == currentMultibuy ? sf::Color(255, 255, 150) : sf::Color(160, 160, 160));
+                window.draw(button);
+
+                sf::Text text(font);
+                text.setCharacterSize(14);
+                text.setString(label);
+                text.setFillColor(sf::Color::Black);
+                text.setPosition(pos + sf::Vector2f(12.f, 4.f));
+                window.draw(text);
+
+                if (justClicked && sf::FloatRect(pos, multibuySize).contains(mousePositionF))
+                {
+                    currentMultibuy = mode;
+                }
+            }
+
+            // Prev/Next Buttons (Rest of Pagination)
+            sf::Vector2f prevPos = { startX - boxWidth - 20.f, upgradeY + 85.f };
+            sf::Vector2f nextPos = { startX - boxWidth + 80.f, upgradeY + 85.f };
+            sf::Vector2f navButtonSize = { 80.f, 30.f };
+
+            sf::RectangleShape prevButton(navButtonSize);
             prevButton.setPosition(prevPos);
             prevButton.setFillColor(itemPage > 0 ? sf::Color(180, 180, 180) : sf::Color(100, 100, 100));
             window.draw(prevButton);
@@ -1063,7 +1159,7 @@ int main()
             prevText.setPosition(prevPos + sf::Vector2f(10.f, 5.f));
             window.draw(prevText);
 
-            sf::RectangleShape nextButton(buttonSize);
+            sf::RectangleShape nextButton(navButtonSize);
             nextButton.setPosition(nextPos);
             nextButton.setFillColor((itemPage + 1) < totalPages ? sf::Color(180, 180, 180) : sf::Color(100, 100, 100));
             window.draw(nextButton);
