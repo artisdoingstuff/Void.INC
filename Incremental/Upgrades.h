@@ -143,23 +143,25 @@ inline void addOtherMilestoneUpgrade(
     long double cost
 )
 {
-    upgrades.push_back({
-        name,
-        0,
-        cost,
-        cost,
-        0.0,              // No base production
-        unlockAt,         // Unlock condition (based on allTimeBubbles)
-        false,
-        false,
-        0.0,
-        false,
-        true,
-        false,
-        false,
-        false,
-        false
-        });
+    upgrades.push_back(
+        {
+            name,
+            0,
+            cost,
+            cost,
+            0.0,                // No base production
+            unlockAt,           // Unlock condition (based on allTimeBubbles)
+            false,
+            false,
+            0.0,
+            false,
+            true,               // isOtherUpgrade True
+            false,
+            false,
+            false,
+            false
+        }
+    );
 }
 
 inline long double getBuffedProduction(const UpgradeItem& u, const vector<UpgradeItem>& upgrades)
