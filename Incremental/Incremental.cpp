@@ -57,7 +57,7 @@ static map<string, sf::Texture> upgradeTextures = loadUpgradeTextures();
 
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.1.3-beta";
+string gameVersion = "v1.1.4-beta";
 
 const long double shopInflationMultiplier = 1.15L;
 
@@ -420,6 +420,10 @@ int main()
 	bubbleComboText.setCharacterSize(24);
 	bubbleComboText.setFillColor(sf::Color::Black);
 
+    sf::Text tooltipText(font);
+    tooltipText.setCharacterSize(14);
+    tooltipText.setFillColor(sf::Color::White);
+
     // Objects for buffs
 	sf::RectangleShape globalBubbleBuffHitbox;
     globalBubbleBuffHitbox.setSize(sf::Vector2f(100, 100));
@@ -466,42 +470,32 @@ int main()
         // Bubbles per second buff not showing on display fix
         bubblesPerSecond = 0.0L;
         baseBubblesPerClick = 1.0L;
-        for (const auto& u : upgrades)
-        {
-            bubblesPerSecond += getBuffedProduction(u, upgrades);
-        }
 
         long double realBubblesPerSecond = bubblesPerSecond;
         long double realClickMultiplier = clickMultiplier;
         long double realBubbles = bubbles;
 
+        for (const auto& u : upgrades)
+        {
+            bubblesPerSecond += getBuffedProduction(u, upgrades);
+        }
+
         // More upgrade stuff
         map<string, function<void()>> upgradeEffects = {
-            { "Red Bubble", [&]() { bubblesPerSecond *= 1.01f; realBubblesPerSecond *= 1.01f; } },
-            { "Green Bubble", [&]() { bubblesPerSecond *= 1.01f; realBubblesPerSecond *= 1.01f; } },
-            { "Blue Bubble", [&]() { bubblesPerSecond *= 1.01f; realBubblesPerSecond *= 1.01f; } },
-            { "Rubber Ducky", [&]() { bubblesPerSecond *= 1.01f; realBubblesPerSecond *= 1.01f; } },
-            { "Rainbow Bubble", [&]() { bubblesPerSecond *= 1.02f; realBubblesPerSecond *= 1.02f; } },
-            { "Cyan Bubble", [&]() { bubblesPerSecond *= 1.01f; realBubblesPerSecond *= 1.01f; } },
-            { "Indigo Bubble", [&]() { bubblesPerSecond *= 1.01f; realBubblesPerSecond *= 1.01f; } },
-            { "Heart-Shaped Bubble", [&]() { bubblesPerSecond *= 1.02f; realBubblesPerSecond *= 1.02f; } },
-            { "Bath Bubbles", [&]() { bubblesPerSecond *= 1.02f; realBubblesPerSecond *= 1.02f; } },
-            { "Detergent Bubbles", [&]() { bubblesPerSecond *= 1.02f; realBubblesPerSecond *= 1.02f; } },
-            { "Duck?", [&]() { bubblesPerSecond *= 1.01f; realBubblesPerSecond *= 1.01f; } },
-            { "Carbonation", [&]() { bubblesPerSecond *= 1.02f; realBubblesPerSecond *= 1.02f; } },
-            { "Golden Bubble", [&]() { bubblesPerSecond *= 1.1f; realBubblesPerSecond *= 1.1f; } },
-            { "Fool's Bubble", [&]() { bubblesPerSecond *= 1.01f; realBubblesPerSecond *= 1.01f; } },
-            { "Misprint Bubble", [&]() { bubblesPerSecond *= 1.2f; realBubblesPerSecond *= 1.2f; } },
-            { "Spring Bubble", [&]() { bubblesPerSecond *= 1.02f; realBubblesPerSecond *= 1.02f; } },
-            { "Cherry Bubble", [&]() { bubblesPerSecond *= 1.02f; realBubblesPerSecond *= 1.02f; } },
-            { "Blossoming Bubble", [&]() { bubblesPerSecond *= 1.02f; realBubblesPerSecond *= 1.02f; } },
-            { "Rose Bubble", [&]() { bubblesPerSecond *= 1.02f; realBubblesPerSecond *= 1.02f; } },
-            { "Dandelion Bubble", [&]() { bubblesPerSecond *= 1.02f; realBubblesPerSecond *= 1.02f; } },
-            { "Charming Bubble", [&]() { bubblesPerSecond *= 1.02f; realBubblesPerSecond *= 1.02f; } },
-            { "Lucky Bubble", [&]() { bubblesPerSecond *= 1.07f; realBubblesPerSecond *= 1.07f; } },
-            { "Sudsy Water Balloon", [&]() { bubblesPerSecond *= 1.02f; realBubblesPerSecond *= 1.02f; } }
             //{ "Secret (Placeholder) Bubble", [&]() { realClickMultiplier *= 2.0; bubblesPerSecond *= 1.1; } }
         };
+
+        long double totalMultiplier = 1.0;
+        for (const auto& u : upgrades)
+        {
+            if (u.count < 1) continue;
+
+            auto it = globalUpgradeMultiplierValues.find(u.name);
+            if (it != globalUpgradeMultiplierValues.end())
+                totalMultiplier *= it->second;
+        }
+
+        realBubblesPerSecond = bubblesPerSecond * totalMultiplier;
 
         for (const auto& upgrade : upgrades)
         {
@@ -597,10 +591,10 @@ int main()
                 }
 
                 int totalPages = (visibleItems.size() + itemsPerPage - 1) / itemsPerPage;
-                itemPage = std::clamp(itemPage, 0, std::max(0, totalPages - 1));
+                itemPage = clamp(itemPage, 0, std::max(0, totalPages - 1));
 
                 int startIdx = itemPage * itemsPerPage;
-                int endIdx = std::min<int>(startIdx + itemsPerPage, visibleItems.size());
+                int endIdx = min<int>(startIdx + itemsPerPage, visibleItems.size());
 
                 float currentY = startY;
 
@@ -926,8 +920,10 @@ int main()
                 visibleItems.push_back(&upgrade);
             }
 
+            UpgradeItem* hoveredItem = nullptr;
+
             int totalPages = (visibleItems.size() + itemsPerPage - 1) / itemsPerPage;
-            itemPage = std::clamp(itemPage, 0, max(0, totalPages - 1));
+            itemPage = clamp(itemPage, 0, max(0, totalPages - 1));
             int startIdx = itemPage * itemsPerPage;
             int endIdx = min<int>(startIdx + itemsPerPage, visibleItems.size());
 
@@ -937,10 +933,17 @@ int main()
             {
                 UpgradeItem& upgrade = *visibleItems[i];
 
+                sf::Vector2f boxPos = { startX - boxWidth - 20.f, upgradeY };
+
                 sf::RectangleShape box({ boxWidth, boxHeight });
                 box.setPosition({ startX - boxWidth - 20.f, upgradeY });
                 box.setFillColor(upgrade.canAfford(bubbles) ? sf::Color(220, 255, 220) : sf::Color(140, 140, 140));
                 window.draw(box);
+
+                if (sf::FloatRect(boxPos, { boxWidth, boxHeight }).contains(mousePositionF))
+                {
+                    hoveredItem = &upgrade;
+                }
 
                 float iconOffsetX = box.getPosition().x + 10.f;
                 float iconOffsetY = box.getPosition().y + 20.f;
@@ -989,6 +992,51 @@ int main()
                 window.draw(costText);
 
                 upgradeY += boxSpacing;
+            }
+
+            // Tool tips
+            if (hoveredItem)
+            {
+                long double baseItemBps = getBuffedProduction(*hoveredItem, upgrades);
+
+                long double totalMultiplier = 1.0;
+                for (const auto& u : upgrades)
+                {
+                    if (u.count < 1) continue;
+
+                    auto it = globalUpgradeMultiplierValues.find(u.name);
+                    if (it != globalUpgradeMultiplierValues.end())
+                        totalMultiplier *= it->second;
+                }
+
+                long double finalItemBps = baseItemBps * totalMultiplier;
+
+                float percent = (realBubblesPerSecond > 0.0)
+                    ? static_cast<float>((finalItemBps / realBubblesPerSecond) * 100.0f)
+                    : 0.0f;
+
+                std::string tooltipStr =
+                    hoveredItem->name + "\n" +
+                    "BPS: " + formatDisplayBubbles(finalItemBps) + "\n" +
+                    "Contribution: " + std::to_string(percent).substr(0, 5) + "%";
+
+                tooltipText.setString(tooltipStr);
+
+                sf::FloatRect bounds = tooltipText.getLocalBounds();
+                sf::Vector2f padding = { 10.f, 6.f };
+                sf::Vector2f tipSize = bounds.size + padding * 2.f;
+                sf::Vector2f tipPos = mousePositionF + sf::Vector2f(12.f, 12.f);
+
+                sf::RectangleShape tipBg(tipSize);
+                tipBg.setPosition(tipPos);
+                tipBg.setFillColor(sf::Color(30, 30, 30, 220));
+                tipBg.setOutlineThickness(1.f);
+                tipBg.setOutlineColor(sf::Color(90, 90, 90));
+
+                tooltipText.setPosition(tipPos + padding);
+
+                window.draw(tipBg);
+                window.draw(tooltipText);
             }
 
             // Pages

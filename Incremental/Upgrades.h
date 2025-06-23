@@ -164,6 +164,20 @@ inline void addOtherMilestoneUpgrade(
     );
 }
 
+inline const unordered_map<string, long double> globalUpgradeMultiplierValues = {
+        { "Red Bubble", 1.01 }, { "Green Bubble", 1.01 }, { "Blue Bubble", 1.01 },
+        { "Rubber Ducky", 1.01 }, { "Rainbow Bubble", 1.02 },
+        { "Cyan Bubble", 1.01 }, { "Indigo Bubble", 1.01 },
+        { "Heart-Shaped Bubble", 1.02 }, { "Bath Bubbles", 1.02 },
+        { "Detergent Bubbles", 1.02 }, { "Duck?", 1.01 },
+        { "Carbonation", 1.02 }, { "Golden Bubble", 1.10 },
+        { "Fool's Bubble", 1.01 }, { "Misprint Bubble", 1.20 },
+        { "Spring Bubble", 1.02 }, { "Cherry Bubble", 1.02 },
+        { "Blossoming Bubble", 1.02 }, { "Rose Bubble", 1.02 },
+        { "Dandelion Bubble", 1.02 }, { "Charming Bubble", 1.02 },
+        { "Lucky Bubble", 1.07 }, { "Sudsy Water Balloon", 1.02 }
+};
+
 inline long double getBuffedProduction(const UpgradeItem& u, const vector<UpgradeItem>& upgrades)
 {
     long double production = u.baseProduction;

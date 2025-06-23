@@ -5,7 +5,7 @@
 // Handles the formatting for bubbles display
 string formatDisplayBubbles(long double bubbles, bool forceDecimals = false)
 {
-    if (bubbles < 1000000.0f)
+    if (bubbles < 1000.0f)
     {
         if (forceDecimals)
         {
@@ -21,7 +21,7 @@ string formatDisplayBubbles(long double bubbles, bool forceDecimals = false)
     }
 
     const string bubblesSuffixes[] = {
-        "", "", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc",
+        "", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc",
         "Ud", "Dd", "Td", "Qad", "Qid", "Sxd", "Spd", "Ocd", "Nvd", "Vg",
         "Uvg", "Dvg", "Tvg", "Qavg", "Qivg", "Sxvg", "Spvg", "Ocvg", "Nvvg", "Tg",
         "Utg", "Dtg", "Ttg", "Qattg", "Qitg", "Sxtg", "Sptg", "Octg", "Nvtg", "Qg"
