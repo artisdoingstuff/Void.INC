@@ -1,5 +1,9 @@
 **__Credit__**
 
-"Glimpse of Eternity" by Meydän\n
-Source: Free Music Archive\n
+**Music**
+
+"Glimpse of Eternity" by Meydän
+
+Source: Free Music Archive
+
 _License under Creative Commons Attribution 4.0 International_
