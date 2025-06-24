@@ -1,9 +1,7 @@
-**__Credit__**
+## Credit
 
-**Music**
+### Music
 
-"Glimpse of Eternity" by Meydän
-
-Source: Free Music Archive
-
-_License under Creative Commons Attribution 4.0 International_
+**"Glimpse of Eternity"** by **Meydän**  
+Source: [Free Music Archive](https://freemusicarchive.org/music/Meydan/Havor/1-_Glimpse_of_Eternity_1635/)
+Licensed under [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/)
