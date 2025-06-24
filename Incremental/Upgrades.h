@@ -12,7 +12,20 @@ inline unordered_map<string, long double> perUpgradeMultipliers = {
     { "Hand Wash", 1.0 },
     { "Shampoo", 1.0 },
     { "Shaving Foam", 1.0 },
-    { "Toothpaste", 1.0 }
+    { "Toothpaste", 1.0 },
+    { "Loofah", 1.0 },
+    { "Bubble Bath", 1.0 },
+    { "Bathtub Jet", 1.0 },
+    { "Luxury Spa", 1.0 },
+    { "Foam Pit", 1.0 },
+    { "Foam Party", 1.0 },
+    { "Sudsy Soap", 1.0 },
+    { "Bubble Machine", 1.0 },
+    { "Bubbly Pool", 1.0 },
+    { "Sparkling Water", 1.0 },
+    { "Carbonated Soda", 1.0 },
+    { "Bath Bombs", 1.0 },
+    { "Bubble Wand", 1.0 }
 };
 
 struct UpgradeItem
