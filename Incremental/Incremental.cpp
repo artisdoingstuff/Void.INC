@@ -65,7 +65,7 @@ static map<string, sf::Texture> upgradeTextures = loadUpgradeTextures();
 
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.1.5-beta";
+string gameVersion = "v1.1.7-beta";
 
 const long double shopInflationMultiplier = 1.15L;
 
@@ -351,7 +351,27 @@ int main()
     addOtherMilestoneUpgrade(upgrades, "Dandelion Bubble", 350000.0, 450000.0);
     addOtherMilestoneUpgrade(upgrades, "Charming Bubble", 400000.0, 650000.0);
     addOtherMilestoneUpgrade(upgrades, "Lucky Bubble", 450000.0, 777777.0);
-    addOtherMilestoneUpgrade(upgrades, "Sudsy Water Balloon", 500000.0, 850000.0);
+    addOtherMilestoneUpgrade(upgrades, "Lavender Shampoo", 500000.0, 850000.0);
+    addOtherMilestoneUpgrade(upgrades, "Sudsy Water Balloon", 600000.0, 900000.0);
+    addOtherMilestoneUpgrade(upgrades, "Heated Bubble", 750000.0, 1000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Boiling Bubble", 850000.0, 1100000.0);
+    addOtherMilestoneUpgrade(upgrades, "Leafy Bubble", 1000000.0, 1200000.0);
+    addOtherMilestoneUpgrade(upgrades, "Autumn Bubble", 1250000.0, 1500000.0);
+    addOtherMilestoneUpgrade(upgrades, "Sunflower Bubble", 1500000.0, 1800000.0);
+    addOtherMilestoneUpgrade(upgrades, "Daisy Bubble", 1800000.0, 2000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Florescent Bubble", 2100000.0, 2400000.0);
+    addOtherMilestoneUpgrade(upgrades, "Green Shaving Foam", 2500000.0, 3000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Chilly Bubble", 3000000.0, 4000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Frosty Bubble", 3500000.0, 4750000.0);
+    addOtherMilestoneUpgrade(upgrades, "Cryogenic Bubble", 4000000.0, 5500000.0);
+    addOtherMilestoneUpgrade(upgrades, "Inflatable Ducky", 4500000.0, 6000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Glistening Bubble", 5000000.0, 6500000.0);
+    addOtherMilestoneUpgrade(upgrades, "Sparkling Bubble", 5500000.0, 7000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Gleaming Bubble", 6000000.0, 7500000.0);
+    addOtherMilestoneUpgrade(upgrades, "Lucky Golden Bubble", 6500000.0, 7777777.0);
+    addOtherMilestoneUpgrade(upgrades, "Fusion Bubble", 7500000.0, 8000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Fragmented Bubble", 8500000.0, 10000000.0);
+    addOtherMilestoneUpgrade(upgrades, "More Toothpaste!", 10000000.0, 12000000.0);
 
     for (auto& upgrade : upgrades)
     {
@@ -371,8 +391,14 @@ int main()
 
     // Achievements
     vector<Achievement> achievements = {
-        { "It Begins.", "Generate 1 bubble", AchievementType::TotalBubbles, 1 },
-        { "Bubble Beginner", "Generate 100 bubbles", AchievementType::TotalBubbles, 100 }
+        {
+            "It Begins.",                   // Reference Name
+            "Generate 1 bubble",            // Reference Description
+            AchievementType::TotalBubbles,  // Achievement Type
+            1                               // Unlock Requirement
+        },
+        { "Bubble Beginner", "Generate 100 bubbles", AchievementType::TotalBubbles, 100 },
+        { "Bubble Novice", "Generate 1k Bubbles", AchievementType::TotalBubbles, 1000 }
     };
 
     // Loading game file (if it exists)
@@ -520,6 +546,19 @@ int main()
                 auto it = upgradeEffects.find(upgrade.name);
                 if (it != upgradeEffects.end())
                     it->second();
+            }
+        }
+
+        // Achievements logic here
+        for (auto& achievement : achievements)
+        {
+            if (!achievement.unlocked && achievement.checkUnlock(
+                allTimeBubbles,
+                allTimeBubblesPerClick,
+                upgrades
+            )) {
+                achievement.unlocked = true;
+                cout << "Achievement unlocked: " << achievement.name << endl;
             }
         }
 
@@ -753,19 +792,6 @@ int main()
         else
         {
             bubblesPerSecondStream << fixed << setprecision(0) << realBubblesPerSecond;
-		}
-
-        // Achievements logic here
-        for (auto& achievement : achievements)
-        {
-            if (!achievement.unlocked && achievement.checkUnlock(
-                allTimeBubbles,
-                allTimeBubblesPerClick,
-                upgrades
-            )) {
-                achievement.unlocked = true;
-                cout << "Achievement unlocked: " << achievement.name << endl;
-            }
         }
 
         // Buff logic here
