@@ -28,6 +28,7 @@
 #include <iomanip>
 #include <iostream>
 #include <optional>
+#include <queue>
 #include <random>
 #include <sstream>
 #include <string>

@@ -13,6 +13,13 @@ enum class AchievementType
     BuffTriggered
 };
 
+struct AchievementPopup {
+    string title;
+    float elapsed = 0.f;
+    float duration = 2.5f;
+    bool active = true;
+};
+
 struct Achievement
 {
     string name;

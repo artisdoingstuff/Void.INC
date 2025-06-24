@@ -66,7 +66,7 @@ static map<string, sf::Texture> upgradeTextures = loadUpgradeTextures();
 
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.1.11-beta";
+string gameVersion = "v1.1.12-beta";
 
 const long double shopInflationMultiplier = 1.15L;
 
@@ -80,6 +80,9 @@ long double baseBubblesPerClick = 1.0L;
 long double clickMultiplier = 1.0L;
 
 long double totalUpgradeCount = 0.0L;
+
+queue<AchievementPopup> popupQueue;
+optional<AchievementPopup> currentPopup;
 
 // Bubble combo variables
 bool isBubbleComboActive = false;
@@ -429,6 +432,8 @@ int main()
 
     sf::Clock shopClock;
 
+    sf::Clock popupTimer;
+
     sf::Clock bubbleChaosClock;
     sf::Clock bubbleChaosSpawnIntervalClock;
 
@@ -589,11 +594,15 @@ int main()
         for (auto& achievement : achievements)
         {
             if (!achievement.unlocked && achievement.checkUnlock(
-                allTimeBubbles,
-                allTimeBubblesPerClick,
-                upgrades
-            )) {
+                    allTimeBubbles,
+                    allTimeBubblesPerClick,
+                    upgrades
+                )
+            )
+            {
                 achievement.unlocked = true;
+
+                popupQueue.push({ "Achievement Unlocked: " + achievement.name });
                 cout << "Achievement unlocked: " << achievement.name << endl;
             }
         }
@@ -1243,7 +1252,7 @@ int main()
 
                     float lerpSpeed = 8.0f * deltaTime;
                     currentScale += (targetScale - currentScale) * lerpSpeed;
-                    currentScale = std::clamp(currentScale, 1.0f, 1.1f);
+                    currentScale = clamp(currentScale, 1.0f, 1.1f);
 
                     box.setOrigin(boxSize * 0.5f);
                     box.setPosition(boxPos + boxSize * 0.5f);
@@ -1498,6 +1507,68 @@ int main()
         updateAndDrawBubbles(activeChaosBubbles, window);
         updateAndDrawBubbles(activeFrenzyBubbles, window);
         updateAndDrawBubbles(activeMayhemBubbles, window);
+
+        // Achievements
+        if (currentPopup.has_value())
+        {
+            currentPopup->elapsed += deltaTime;
+
+            if (currentPopup->elapsed >= currentPopup->duration)
+            {
+                currentPopup.reset();
+            }
+        }
+        else if (!popupQueue.empty())
+        {
+            currentPopup = popupQueue.front();
+            popupQueue.pop();
+            popupTimer.restart();
+        }
+
+        if (currentPopup.has_value())
+        {
+            AchievementPopup& popup = currentPopup.value();
+
+            const float slideDuration = 0.4f;
+            const float maxOffsetX = 380.f;
+
+            float windowHeight = window.getSize().y;
+            float baseY = windowHeight - 80.f;
+
+            float xOffset = 0.f;
+            if (popup.elapsed < slideDuration)
+            {
+                float t = popup.elapsed / slideDuration;
+                xOffset = maxOffsetX * (1.f - pow(1.f - t, 3));
+            }
+            else if (popup.elapsed > popup.duration - slideDuration)
+            {
+                float t = (popup.elapsed - (popup.duration - slideDuration)) / slideDuration;
+                xOffset = maxOffsetX * (1.f - pow(t, 3));
+            }
+            else
+            {
+                xOffset = maxOffsetX;
+            }
+
+            sf::Vector2f popupPos = { -maxOffsetX + xOffset + 20.f, baseY };
+
+            sf::Vector2f popupSize = { 360.f, 50.f };
+            sf::RectangleShape popupBg(popupSize);
+            popupBg.setPosition(popupPos);
+            popupBg.setFillColor(sf::Color(30, 30, 30, 230));
+            popupBg.setOutlineThickness(2.f);
+            popupBg.setOutlineColor(sf::Color(255, 215, 100));
+
+            sf::Text popupText(font);
+            popupText.setString(popup.title);
+            popupText.setCharacterSize(14);
+            popupText.setFillColor(sf::Color::White);
+            popupText.setPosition(popupPos + sf::Vector2f(10.f, 6.f));
+
+            window.draw(popupBg);
+            window.draw(popupText);
+        }
 
         if (isBubbleComboActive && currentBubbleCombo > 1)
         {
