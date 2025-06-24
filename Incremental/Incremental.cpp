@@ -41,6 +41,7 @@ enum class MultibuyMode
 MultibuyMode currentMultibuy = MultibuyMode::x1;
 
 int itemPage = 0;
+int milestonePage = 0;
 constexpr int itemsPerPage = 9;
 
 // Global Textures
@@ -65,7 +66,7 @@ static map<string, sf::Texture> upgradeTextures = loadUpgradeTextures();
 
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.1.9-beta";
+string gameVersion = "v1.1.11-beta";
 
 const long double shopInflationMultiplier = 1.15L;
 
@@ -786,33 +787,78 @@ int main()
                 constexpr float spacingX = 50.f;
                 constexpr float spacingY = 50.f;
                 constexpr int itemsPerRow = 4;
+                constexpr int itemsPerPage = 20;
 
                 float milestoneStartX = startX - 350.f;
 
-                int index = 0;
+                vector<UpgradeItem*> visibleMilestones;
                 for (auto& upgrade : upgrades)
                 {
                     if ((upgrade.isItemUpgrade && !upgrade.isMilestone) || !upgrade.isUnlocked(allTimeBubbles, upgrades) || upgrade.count >= 1)
                         continue;
 
-                    int row = index / itemsPerRow;
-                    int col = index % itemsPerRow;
+                    visibleMilestones.push_back(&upgrade);
+                }
+
+                int totalPages = (visibleMilestones.size() + itemsPerPage - 1) / itemsPerPage;
+                milestonePage = clamp(milestonePage, 0, max(0, totalPages - 1));
+                int startIdx = milestonePage * itemsPerPage;
+                int endIdx = min<int>(startIdx + itemsPerPage, visibleMilestones.size());
+
+                for (int i = startIdx; i < endIdx; ++i)
+                {
+                    int localIndex = i - startIdx;
+                    int row = localIndex / itemsPerRow;
+                    int col = localIndex % itemsPerRow;
 
                     sf::Vector2f pos = {
                         milestoneStartX + col * (milestoneSize + spacingX),
                         startY + row * (milestoneSize + spacingY)
                     };
 
-                    if (sf::FloatRect(pos, { milestoneSize, milestoneSize }).contains(mousePositionF) && upgrade.canAfford(bubbles))
+                    if (sf::FloatRect(pos, { milestoneSize, milestoneSize }).contains(mousePositionF) && visibleMilestones[i]->canAfford(bubbles))
                     {
-                        upgrade.purchase(bubbles);
+                        visibleMilestones[i]->purchase(bubbles);
+                        clickHandled = true;
                         break;
                     }
+                }
 
-                    ++index;
+                // Milestone Pagination
+                if (!clickHandled)
+                {
+                    int rowsPerPage = (itemsPerPage + itemsPerRow - 1) / itemsPerRow;
+                    float navY = startY + rowsPerPage * (milestoneSize + spacingY) + 20.f;
+
+                    sf::Vector2f navSize = { 80.f, 30.f };
+                    sf::Vector2f prevPos = { startX - boxWidth - 20.f, navY };
+                    sf::Vector2f nextPos = { startX - boxWidth + 80.f, navY };
+                    sf::Vector2f buyAllPos = { startX - boxWidth + 200.f, navY };
+
+                    if (sf::FloatRect(prevPos, navSize).contains(mousePositionF) && milestonePage > 0)
+                    {
+                        milestonePage--;
+                        clickHandled = true;
+                    }
+
+                    else if (sf::FloatRect(nextPos, navSize).contains(mousePositionF) && (milestonePage + 1) < totalPages)
+                    {
+                        milestonePage++;
+                        clickHandled = true;
+                    }
+
+                    else if (sf::FloatRect(buyAllPos, navSize).contains(mousePositionF))
+                    {
+                        for (int i = startIdx; i < endIdx; ++i)
+                        {
+                            if (visibleMilestones[i]->canAfford(bubbles))
+                                visibleMilestones[i]->purchase(bubbles);
+                        }
+                        clickHandled = true;
+                    }
                 }
             }
-        }
+        };
 
         stringstream displayBubblesStream;
         stringstream bubblesPerSecondStream;
@@ -999,33 +1045,71 @@ int main()
         // Milestone Upgrades
         if (currentTab == UpgradeTab::Milestones)
         {
-            float milestoneStartX = startX - 350.f;
             constexpr float milestoneSize = 80.f;
             constexpr float spacingX = 50.f;
             constexpr float spacingY = 50.f;
             constexpr int itemsPerRow = 4;
+            constexpr int itemsPerPage = 20;
 
-            int index = 0;
+            float milestoneStartX = startX - 350.f;
+
+            // Collect visible milestone upgrades
+            vector<UpgradeItem*> visibleMilestones;
             for (auto& upgrade : upgrades)
             {
                 if ((upgrade.isItemUpgrade && !upgrade.isMilestone) || !upgrade.isUnlocked(allTimeBubbles, upgrades) || upgrade.count >= 1)
                     continue;
 
-                int row = index / itemsPerRow;
-                int col = index % itemsPerRow;
+                visibleMilestones.push_back(&upgrade);
+            }
+
+            int totalPages = (visibleMilestones.size() + itemsPerPage - 1) / itemsPerPage;
+            milestonePage = clamp(milestonePage, 0, max(0, totalPages - 1));
+
+            int startIdx = milestonePage * itemsPerPage;
+            int endIdx = min<int>(startIdx + itemsPerPage, visibleMilestones.size());
+
+            for (int i = startIdx; i < endIdx; ++i)
+            {
+                int localIndex = i - startIdx;
+                int row = localIndex / itemsPerRow;
+                int col = localIndex % itemsPerRow;
 
                 sf::Vector2f pos = {
                     milestoneStartX + col * (milestoneSize + spacingX),
                     startY + row * (milestoneSize + spacingY)
                 };
 
-                // Milestone box
+                UpgradeItem& upgrade = *visibleMilestones[i];
+
+                // Hover effect
+                bool isHovered = sf::FloatRect(pos, { milestoneSize, milestoneSize }).contains(mousePositionF);
+                float targetScale = isHovered ? 1.05f : 1.0f;
+                float& currentScale = hoverScales[upgrade.name];
+                float lerpSpeed = 8.0f * deltaTime;
+                currentScale += (targetScale - currentScale) * lerpSpeed;
+                currentScale = clamp(currentScale, 1.0f, 1.1f);
+
+                // Draw milestone box
                 sf::RectangleShape box({ milestoneSize, milestoneSize });
-                box.setPosition(pos);
+                box.setOrigin({ box.getSize().x / 2.f, box.getSize().y / 2.f });
+                box.setPosition({ pos.x + box.getSize().x / 2.f, pos.y + box.getSize().y / 2.f });
+                box.setScale({ currentScale, currentScale });
                 box.setFillColor(upgrade.canAfford(bubbles) ? sf::Color(255, 255, 200) : sf::Color(120, 120, 120));
+
+                if (isHovered)
+                {
+                    box.setOutlineThickness(2.f);
+                    box.setOutlineColor(sf::Color(255, 230, 120));
+                }
+                else
+                {
+                    box.setOutlineThickness(0.f);
+                }
+
                 window.draw(box);
 
-                // Sprite
+                // Draw sprite
                 if (upgrade.spriteUpgrade.has_value())
                 {
                     sf::Sprite icon = *upgrade.spriteUpgrade;
@@ -1038,7 +1122,7 @@ int main()
                     }
                 }
 
-                // Cost
+                // Draw cost
                 sf::Text costText(font);
                 costText.setCharacterSize(10);
                 costText.setString(formatDisplayBubbles(upgrade.currentCost));
@@ -1046,7 +1130,7 @@ int main()
                 costText.setPosition({ pos.x + 4.f, pos.y + 4.f });
                 window.draw(costText);
 
-                // Name
+                // Draw name
                 sf::Text nameText(font);
                 nameText.setCharacterSize(12);
                 nameText.setString(upgrade.name);
@@ -1055,9 +1139,54 @@ int main()
                 nameText.setOrigin({ bounds.position.x + bounds.size.x / 2.f, 0.f });
                 nameText.setPosition({ pos.x + milestoneSize / 2.f, pos.y + milestoneSize + 4.f });
                 window.draw(nameText);
-
-                ++index;
             }
+
+            // Draw pagination
+            int rowsPerPage = (itemsPerPage + itemsPerRow - 1) / itemsPerRow;
+            float navY = startY + rowsPerPage * (milestoneSize + spacingY) + 20.f;
+            sf::Vector2f prevPos = { startX - boxWidth - 20.f, navY };
+            sf::Vector2f nextPos = { startX - boxWidth + 80.f, navY };
+            sf::Vector2f buyAllPos = { startX - boxWidth + 200.f, navY };
+            sf::Vector2f navButtonSize = { 80.f, 30.f };
+
+            // Prev Button
+            sf::RectangleShape prevButton(navButtonSize);
+            prevButton.setPosition(prevPos);
+            prevButton.setFillColor(milestonePage > 0 ? sf::Color(180, 180, 180) : sf::Color(100, 100, 100));
+            window.draw(prevButton);
+
+            sf::Text prevText(font);
+            prevText.setCharacterSize(14);
+            prevText.setString("Prev");
+            prevText.setFillColor(sf::Color::Black);
+            prevText.setPosition(prevPos + sf::Vector2f(10.f, 5.f));
+            window.draw(prevText);
+
+            // Next Button
+            sf::RectangleShape nextButton(navButtonSize);
+            nextButton.setPosition(nextPos);
+            nextButton.setFillColor((milestonePage + 1) < totalPages ? sf::Color(180, 180, 180) : sf::Color(100, 100, 100));
+            window.draw(nextButton);
+
+            sf::Text nextText(font);
+            nextText.setCharacterSize(14);
+            nextText.setString("Next");
+            nextText.setFillColor(sf::Color::Black);
+            nextText.setPosition(nextPos + sf::Vector2f(10.f, 5.f));
+            window.draw(nextText);
+
+            // Buy All Button
+            sf::RectangleShape buyAllButton(navButtonSize);
+            buyAllButton.setPosition(buyAllPos);
+            buyAllButton.setFillColor(sf::Color(190, 240, 190));
+            window.draw(buyAllButton);
+
+            sf::Text buyAllText(font);
+            buyAllText.setCharacterSize(14);
+            buyAllText.setString("Buy All");
+            buyAllText.setFillColor(sf::Color::Black);
+            buyAllText.setPosition(buyAllPos + sf::Vector2f(6.f, 5.f));
+            window.draw(buyAllText);
         }
 
         else if (currentTab == UpgradeTab::Items)
