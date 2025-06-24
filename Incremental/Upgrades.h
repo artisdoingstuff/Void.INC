@@ -6,6 +6,15 @@ extern const long double shopInflationMultiplier;
 extern long double totalUpgradeCount;
 extern long double bubblesPerSecond;
 
+inline unordered_set<string> appliedUpgradeEffects;
+inline unordered_map<string, long double> perUpgradeMultipliers = {
+    { "Soap", 1.0 },
+    { "Hand Wash", 1.0 },
+    { "Shampoo", 1.0 },
+    { "Shaving Foam", 1.0 },
+    { "Toothpaste", 1.0 }
+};
+
 struct UpgradeItem
 {
     string name;
@@ -218,7 +227,7 @@ inline const unordered_map<string, long double> globalUpgradeMultiplierValues = 
 
 inline long double getBuffedProduction(const UpgradeItem& u, const vector<UpgradeItem>& upgrades)
 {
-    long double production = u.baseProduction;
+    long double production = u.baseProduction * perUpgradeMultipliers[u.name];
 
     int itemMilestoneCount = getUpgradeItemMilestoneCount(u.name, upgrades);
 

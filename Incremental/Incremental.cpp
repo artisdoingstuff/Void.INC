@@ -65,7 +65,7 @@ static map<string, sf::Texture> upgradeTextures = loadUpgradeTextures();
 
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.1.7-beta";
+string gameVersion = "v1.1.8-beta";
 
 const long double shopInflationMultiplier = 1.15L;
 
@@ -432,10 +432,6 @@ int main()
     sf::Clock bubbleMayhemClock;
     sf::Clock bubbleMayhemSpawnIntervalClock;
 
-    sf::Clock bubbleBuffClock;
-    sf::Clock bubbleBuffSpawnIntervalClock;
-    sf::Clock bubbleBuffLifetimeClock;
-
 	sf::Clock globalBubbleBuffClock;
 	sf::Clock globalBubbleBuffSpawnIntervalClock;
     sf::Clock globalBubbleBuffLifetimeClock;
@@ -524,7 +520,41 @@ int main()
 
         // More upgrade stuff
         map<string, function<void()>> upgradeEffects = {
-            //{ "Secret (Placeholder) Bubble", [&]() { realClickMultiplier *= 2.0; bubblesPerSecond *= 1.1; } }
+            { "Soap Dispenser", [&]() { 
+                if (appliedUpgradeEffects.find("Soap Dispenser") == appliedUpgradeEffects.end()) {
+                    perUpgradeMultipliers["Soap"] *= 2.0;
+                    appliedUpgradeEffects.insert("Soap Dispenser");
+                }
+            }
+        },
+            { "Hand Wash Refiller", [&]() { 
+                if (appliedUpgradeEffects.find("Hand Wash Refiller") == appliedUpgradeEffects.end()) {
+                    perUpgradeMultipliers["Hand Wash"] *= 2.0;
+                    appliedUpgradeEffects.insert("Hand Wash Refiller");
+                }
+            }
+        },
+            { "Lavender Shampoo", [&]() { 
+                if (appliedUpgradeEffects.find("Lavender Shampoo") == appliedUpgradeEffects.end()) {
+                    perUpgradeMultipliers["Shampoo"] *= 2.0;
+                    appliedUpgradeEffects.insert("Lavender Shampoo");
+                }
+            }
+        },
+            { "Green Shaving Foam", [&]() {
+                if (appliedUpgradeEffects.find("Green Shaving Foam") == appliedUpgradeEffects.end()) {
+                    perUpgradeMultipliers["Shaving Foam"] *= 2.0;
+                    appliedUpgradeEffects.insert("Green Shaving Foam");
+                }
+            }
+        },
+            { "More Toothpaste!", [&]() {
+                if (appliedUpgradeEffects.find("More Toothpaste!") == appliedUpgradeEffects.end()) {
+                    perUpgradeMultipliers["Toothpaste"] *= 2.0;
+                    appliedUpgradeEffects.insert("More Toothpaste!");
+                }
+            }
+        }
         };
 
         long double totalMultiplier = 1.0;
