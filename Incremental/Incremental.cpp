@@ -65,7 +65,7 @@ static map<string, sf::Texture> upgradeTextures = loadUpgradeTextures();
 
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.1.8-beta";
+string gameVersion = "v1.1.9-beta";
 
 const long double shopInflationMultiplier = 1.15L;
 
@@ -401,6 +401,9 @@ int main()
         { "Bubble Novice", "Generate 1k Bubbles", AchievementType::TotalBubbles, 1000 }
     };
 
+    // Other Variables
+    unordered_map<string, float> hoverScales;
+
     // Loading game file (if it exists)
     loadFileFromJson(
         savedTimestamp,
@@ -422,6 +425,8 @@ int main()
 	// Initialize clocks for timing
 	sf::Clock secondClock;
 	sf::Clock deltaClock;
+
+    sf::Clock shopClock;
 
     sf::Clock bubbleChaosClock;
     sf::Clock bubbleChaosSpawnIntervalClock;
@@ -611,7 +616,7 @@ int main()
 
         // Display bubbles and bubbles per second, along with other time logic
         float deltaTime = deltaClock.restart().asSeconds();
-        float  smoothingFactor = 1.0f;
+        float smoothingFactor = 1.0f;
 
 		// Get the mouse position relative to the window
         sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
@@ -713,6 +718,9 @@ int main()
 
                         if (bubbles >= totalCost && buyAmount > 0)
                         {
+                            if (bubbles < totalCost || buyAmount <= 0)
+                                continue;
+
                             bubbles -= totalCost;
                             upgrade.purchaseRaw(buyAmount);
                         }
@@ -1075,11 +1083,58 @@ int main()
             for (int i = startIdx; i < endIdx; ++i)
             {
                 UpgradeItem& upgrade = *visibleItems[i];
-                sf::Vector2f boxPos = { startX - boxWidth - 20.f, upgradeY };
 
-                sf::RectangleShape box({ boxWidth, boxHeight });
+                int buyAmount = 1;
+                switch (currentMultibuy)
+                {
+                case MultibuyMode::x1:   buyAmount = 1; break;
+                case MultibuyMode::x10:  buyAmount = 10; break;
+                case MultibuyMode::x100: buyAmount = 100; break;
+                case MultibuyMode::Max:  buyAmount = calculateMaxAffordable(upgrade, bubbles); break;
+                }
+
+                long double totalCost = calculateTotalCost(upgrade, buyAmount);
+                bool isAffordable = bubbles >= calculateTotalCost(upgrade, buyAmount);
+
+                sf::Vector2f boxSize = { boxWidth, boxHeight };
+                sf::Vector2f boxPos = { startX - boxWidth - 20.f, upgradeY };
+                sf::Color baseColor = isAffordable ? sf::Color(200, 255, 200) : sf::Color(140, 140, 140);
+                sf::RectangleShape box(boxSize);
+                box.setFillColor(baseColor);
                 box.setPosition(boxPos);
-                box.setFillColor(upgrade.canAfford(bubbles) ? sf::Color(220, 255, 220) : sf::Color(140, 140, 140));
+
+                bool isHovered = sf::FloatRect(boxPos, boxSize).contains(mousePositionF);
+
+                if (isHovered)
+                {
+                    hoveredItem = &upgrade;
+
+                    float& currentScale = hoverScales[upgrade.name];
+                    float targetScale = 1.05f;
+
+                    float lerpSpeed = 8.0f * deltaTime;
+                    currentScale += (targetScale - currentScale) * lerpSpeed;
+                    currentScale = std::clamp(currentScale, 1.0f, 1.1f);
+
+                    box.setOrigin(boxSize * 0.5f);
+                    box.setPosition(boxPos + boxSize * 0.5f);
+                    box.setScale({ currentScale, currentScale });
+                    box.setOutlineThickness(2.f);
+                    box.setOutlineColor(sf::Color(255, 230, 120));
+                }
+
+                else
+                {
+                    float& currentScale = hoverScales[upgrade.name];
+                    float lerpSpeed = 8.0f * deltaTime;
+                    currentScale += (1.0f - currentScale) * lerpSpeed;
+
+                    box.setOrigin(boxSize * 0.5f);
+                    box.setPosition(boxPos + boxSize * 0.5f);
+                    box.setScale({ currentScale, currentScale });
+                    box.setOutlineThickness(0.f);
+                }
+
                 window.draw(box);
 
                 if (sf::FloatRect(boxPos, { boxWidth, boxHeight }).contains(mousePositionF))
@@ -1126,7 +1181,7 @@ int main()
                 // Cost
                 sf::Text costText(font);
                 costText.setCharacterSize(14);
-                costText.setString(formatDisplayBubbles(upgrade.currentCost) + " Bubbles");
+                costText.setString(formatDisplayBubbles(totalCost) + " Bubbles");
                 costText.setPosition({ boxPos.x + boxWidth - 140.f, boxPos.y + 10.f });
                 costText.setFillColor(sf::Color::Black);
                 window.draw(costText);
