@@ -2,10 +2,10 @@ import re;
 
 def format_bubbles(value):
     units = [
-        (1_000_000_000_000, 't'),
-        (1_000_000_000, 'b'),
-        (1_000_000, 'm'),
-        (1_000, 'k')
+        (10**12, 'T'),
+        (10**9, 'B'),
+        (10**6, 'M'),
+        (10**3, 'K')
     ];
 
     for threshold, suffix in units:
@@ -28,7 +28,7 @@ def format_patch_note(line):
 
     return f"+ {name} | {unlock_str} Bubble Unlock\n> {current_str} Bubbles";
 
-lines = [   # Input goes here
+lines = [   # Input goes here (ie. '"Blue Soap Bar", 12000000.0, 14000000.0')
     ''
 ];
 

@@ -1,6 +1,7 @@
 milestones = [
     1, 10, 25, 50, 75, 100, 150, 200, 250,
-    #300, 400, 500, 600, 700, 800, 900, 1000
+    300, 400, 500, 600, 700, 800, 900, 1000,
+    1500, 2000, 2500, 3000, 4000, 5000
 ];
 
 item = [
@@ -17,7 +18,7 @@ counter = 0;
 for i in item:
     print(f"\n// {item[item_counter]} Achievements");
     for j in milestones:
-        print('achievements.push_back({ "", ' + f'"Purchase {milestones[counter]} {item[item_counter]}", AchievementType::SpecificUpgrade, {milestones[counter]}, "{item[item_counter]}"' +  '});');
+        print('achievements.push_back({ 'f'"{item[item_counter]} Placeholder {counter}", ' + f'"Purchase {milestones[counter]} {item[item_counter]}", AchievementType::SpecificUpgrade, {milestones[counter]}, "{item[item_counter]}"' +  '});');
         counter += 1;
     item_counter += 1;
     counter -= counter;
