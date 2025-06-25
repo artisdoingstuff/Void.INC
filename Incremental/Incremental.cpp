@@ -281,6 +281,10 @@ int main()
 
     // Upgrade Variables
     upgradesList();
+    bool isItemAnimating = false;
+    float itemSlideProgress = 1.0f;
+
+    bool isMilestonesAnimating = false;
 
     // Achievements Variables
     achievementsList();
@@ -316,6 +320,8 @@ int main()
 
     sf::Clock popupTimer;
     sf::Clock achievementsSlideClock;
+    sf::Clock itemsSlideClock;
+    sf::Clock milestonesSlideClock;
 
     sf::Clock bubbleChaosClock;
     sf::Clock bubbleChaosSpawnIntervalClock;
@@ -589,6 +595,10 @@ int main()
                 {
                     previousTab = currentTab;
                     currentTab = GameTabs::Items;
+
+                    isItemAnimating = true;
+                    itemsSlideClock.restart();
+
                     clickHandled = true;
                 }
                 // Milestones Tab
@@ -596,6 +606,10 @@ int main()
                 {
                     previousTab = currentTab;
                     currentTab = GameTabs::Milestones;
+
+                    isMilestonesAnimating = true;
+                    milestonesSlideClock.restart();
+
                     clickHandled = true;
                 }
                 // Achievements Tab
@@ -1029,13 +1043,26 @@ int main()
         // Milestone Upgrades
         if (currentTab == GameTabs::Milestones)
         {
+            float milestonesSlideOffset = 0.f;
+            if (isMilestonesAnimating)
+            {
+                float elapsed = milestonesSlideClock.getElapsedTime().asSeconds();
+                float duration = 0.5f;
+                float t = min(elapsed / duration, 1.f);
+                t = 1.f - pow(1.f - t, 3);
+                milestonesSlideOffset = 500.f * (1.f - t);
+
+                if (t >= 1.f)
+                    isMilestonesAnimating = false;
+            }
+
             constexpr float milestoneSize = 80.f;
             constexpr float spacingX = 50.f;
             constexpr float spacingY = 50.f;
             constexpr int itemsPerRow = 4;
             constexpr int itemsPerPage = 20;
 
-            float milestoneStartX = startX - 350.f;
+            float milestoneStartX = startX - 350.f + milestonesSlideOffset;
 
             // Collect visible milestone upgrades
             vector<UpgradeItem*> visibleMilestones;
@@ -1128,53 +1155,72 @@ int main()
             // Draw pagination
             int rowsPerPage = (itemsPerPage + itemsPerRow - 1) / itemsPerRow;
             float navY = startY + rowsPerPage * (milestoneSize + spacingY) + 20.f;
-            sf::Vector2f prevPos = { startX - boxWidth - 20.f, navY };
-            sf::Vector2f nextPos = { startX - boxWidth + 80.f, navY };
-            sf::Vector2f buyAllPos = { startX - boxWidth + 200.f, navY };
+            sf::Vector2f prevPos = { startX - boxWidth - 20.f + milestonesSlideOffset, navY };
+            sf::Vector2f nextPos = { startX - boxWidth + 80.f + milestonesSlideOffset, navY };
+            sf::Vector2f buyAllPos = { startX - boxWidth + 200.f + milestonesSlideOffset, navY };
             sf::Vector2f navButtonSize = { 80.f, 30.f };
 
-            // Prev Button
-            sf::RectangleShape prevButton(navButtonSize);
-            prevButton.setPosition(prevPos);
-            prevButton.setFillColor(milestonePage > 0 ? sf::Color(180, 180, 180) : sf::Color(100, 100, 100));
-            window.draw(prevButton);
+            if (startIdx < endIdx)
+            {
+                // Buy All Button
+                sf::RectangleShape buyAllButton(navButtonSize);
+                buyAllButton.setPosition(buyAllPos);
+                buyAllButton.setFillColor(sf::Color(190, 240, 190));
+                window.draw(buyAllButton);
 
-            sf::Text prevText(font);
-            prevText.setCharacterSize(14);
-            prevText.setString("Prev");
-            prevText.setFillColor(sf::Color::Black);
-            prevText.setPosition(prevPos + sf::Vector2f(10.f, 5.f));
-            window.draw(prevText);
+                sf::Text buyAllText(font);
+                buyAllText.setCharacterSize(14);
+                buyAllText.setString("Buy All");
+                buyAllText.setFillColor(sf::Color::Black);
+                buyAllText.setPosition(buyAllPos + sf::Vector2f(6.f, 5.f));
+                window.draw(buyAllText);
+            }
+            
+            if (totalPages > 1)
+            {
+                // Prev Button
+                sf::RectangleShape prevButton(navButtonSize);
+                prevButton.setPosition(prevPos);
+                prevButton.setFillColor(milestonePage > 0 ? sf::Color(180, 180, 180) : sf::Color(100, 100, 100));
+                window.draw(prevButton);
 
-            // Next Button
-            sf::RectangleShape nextButton(navButtonSize);
-            nextButton.setPosition(nextPos);
-            nextButton.setFillColor((milestonePage + 1) < totalPages ? sf::Color(180, 180, 180) : sf::Color(100, 100, 100));
-            window.draw(nextButton);
+                sf::Text prevText(font);
+                prevText.setCharacterSize(14);
+                prevText.setString("Prev");
+                prevText.setFillColor(sf::Color::Black);
+                prevText.setPosition(prevPos + sf::Vector2f(10.f, 5.f));
+                window.draw(prevText);
 
-            sf::Text nextText(font);
-            nextText.setCharacterSize(14);
-            nextText.setString("Next");
-            nextText.setFillColor(sf::Color::Black);
-            nextText.setPosition(nextPos + sf::Vector2f(10.f, 5.f));
-            window.draw(nextText);
+                // Next Button
+                sf::RectangleShape nextButton(navButtonSize);
+                nextButton.setPosition(nextPos);
+                nextButton.setFillColor((milestonePage + 1) < totalPages ? sf::Color(180, 180, 180) : sf::Color(100, 100, 100));
+                window.draw(nextButton);
 
-            // Buy All Button
-            sf::RectangleShape buyAllButton(navButtonSize);
-            buyAllButton.setPosition(buyAllPos);
-            buyAllButton.setFillColor(sf::Color(190, 240, 190));
-            window.draw(buyAllButton);
-
-            sf::Text buyAllText(font);
-            buyAllText.setCharacterSize(14);
-            buyAllText.setString("Buy All");
-            buyAllText.setFillColor(sf::Color::Black);
-            buyAllText.setPosition(buyAllPos + sf::Vector2f(6.f, 5.f));
-            window.draw(buyAllText);
+                sf::Text nextText(font);
+                nextText.setCharacterSize(14);
+                nextText.setString("Next");
+                nextText.setFillColor(sf::Color::Black);
+                nextText.setPosition(nextPos + sf::Vector2f(10.f, 5.f));
+                window.draw(nextText);
+            }
         }
 
         else if (currentTab == GameTabs::Items)
         {
+            float itemsSlideOffset = 0.f;
+            if (isItemAnimating)
+            {
+                float elapsed = itemsSlideClock.getElapsedTime().asSeconds();
+                float duration = 0.5f;
+                float t = std::min(elapsed / duration, 1.f);
+                t = 1.f - pow(1.f - t, 3);
+
+                itemsSlideOffset = 500.f * (1.f - t);
+                if (t >= 1.f)
+                    isItemAnimating = false;
+            }
+
             vector<UpgradeItem*> visibleItems;
             for (auto& upgrade : upgrades)
             {
@@ -1210,7 +1256,7 @@ int main()
                 bool isAffordable = bubbles >= calculateTotalCost(upgrade, buyAmount);
 
                 sf::Vector2f boxSize = { boxWidth, boxHeight };
-                sf::Vector2f boxPos = { startX - boxWidth - 20.f, upgradeY };
+                sf::Vector2f boxPos = { startX - boxWidth - 20.f + itemsSlideOffset, upgradeY };
                 sf::Color baseColor = isAffordable ? sf::Color(200, 255, 200) : sf::Color(140, 140, 140);
                 sf::RectangleShape box(boxSize);
                 box.setFillColor(baseColor);
@@ -1356,76 +1402,74 @@ int main()
                 window.draw(tooltipText);
             }
 
-            // Pagination Label
-            sf::Text pageText(font);
-            pageText.setCharacterSize(14);
-            pageText.setString("Page " + to_string(itemPage + 1) + " / " + to_string(max(1, totalPages)));
-            pageText.setFillColor(sf::Color::White);
-            pageText.setPosition({ startX - boxWidth - 20.f, upgradeY + 10.f });
-            window.draw(pageText);
-
-            // Multibuy Buttons
-            vector<pair<string, MultibuyMode>> multibuyOptions = {
-                { "x1", MultibuyMode::x1 },
-                { "x10", MultibuyMode::x10 },
-                { "x100", MultibuyMode::x100 },
-                { "Max", MultibuyMode::Max }
-            };
-
-            sf::Vector2f multibuyStart = { startX - boxWidth - 20.f, upgradeY + 40.f };
-            sf::Vector2f multibuySize = { 60.f, 28.f };
-
-            for (int i = 0; i < multibuyOptions.size(); ++i)
+            if (!visibleItems.empty())
             {
-                const auto& [label, mode] = multibuyOptions[i];
-                sf::Vector2f pos = multibuyStart + sf::Vector2f(i * (multibuySize.x + 10.f), 0.f);
+                // Multibuy Buttons
+                vector<pair<string, MultibuyMode>> multibuyOptions = {
+                    { "x1", MultibuyMode::x1 },
+                    { "x10", MultibuyMode::x10 },
+                    { "x100", MultibuyMode::x100 },
+                    { "Max", MultibuyMode::Max }
+                };
 
-                sf::RectangleShape button(multibuySize);
-                button.setPosition(pos);
-                button.setFillColor(mode == currentMultibuy ? sf::Color(255, 255, 150) : sf::Color(160, 160, 160));
-                window.draw(button);
+                sf::Vector2f multibuyStart = { startX - boxWidth - 20.f + itemsSlideOffset, upgradeY + 40.f };
+                sf::Vector2f multibuySize = { 60.f, 28.f };
 
-                sf::Text text(font);
-                text.setCharacterSize(14);
-                text.setString(label);
-                text.setFillColor(sf::Color::Black);
-                text.setPosition(pos + sf::Vector2f(12.f, 4.f));
-                window.draw(text);
-
-                if (justClicked && sf::FloatRect(pos, multibuySize).contains(mousePositionF))
+                for (int i = 0; i < multibuyOptions.size(); ++i)
                 {
-                    currentMultibuy = mode;
+                    const auto& [label, mode] = multibuyOptions[i];
+                    sf::Vector2f pos = multibuyStart + sf::Vector2f(i * (multibuySize.x + 10.f), 0.f);
+
+                    sf::RectangleShape button(multibuySize);
+                    button.setPosition(pos);
+                    button.setFillColor(mode == currentMultibuy ? sf::Color(255, 255, 150) : sf::Color(160, 160, 160));
+                    window.draw(button);
+
+                    sf::Text text(font);
+                    text.setCharacterSize(14);
+                    text.setString(label);
+                    text.setFillColor(sf::Color::Black);
+                    text.setPosition(pos + sf::Vector2f(12.f, 4.f));
+                    window.draw(text);
+
+                    if (justClicked && sf::FloatRect(pos, multibuySize).contains(mousePositionF))
+                    {
+                        currentMultibuy = mode;
+                    }
                 }
             }
 
-            // Prev/Next Buttons (Rest of Pagination)
-            sf::Vector2f prevPos = { startX - boxWidth - 20.f, upgradeY + 85.f };
-            sf::Vector2f nextPos = { startX - boxWidth + 80.f, upgradeY + 85.f };
-            sf::Vector2f navButtonSize = { 80.f, 30.f };
+            if (itemPage > 1)
+            {
+                // Prev/Next Buttons (Rest of Pagination)
+                sf::Vector2f prevPos = { startX - boxWidth - 20.f + itemsSlideOffset, upgradeY + 85.f };
+                sf::Vector2f nextPos = { startX - boxWidth + 80.f + itemsSlideOffset, upgradeY + 85.f };
+                sf::Vector2f navButtonSize = { 80.f, 30.f };
 
-            sf::RectangleShape prevButton(navButtonSize);
-            prevButton.setPosition(prevPos);
-            prevButton.setFillColor(itemPage > 0 ? sf::Color(180, 180, 180) : sf::Color(100, 100, 100));
-            window.draw(prevButton);
+                sf::RectangleShape prevButton(navButtonSize);
+                prevButton.setPosition(prevPos);
+                prevButton.setFillColor(itemPage > 0 ? sf::Color(180, 180, 180) : sf::Color(100, 100, 100));
+                window.draw(prevButton);
 
-            sf::Text prevText(font);
-            prevText.setCharacterSize(14);
-            prevText.setString("Prev");
-            prevText.setFillColor(sf::Color::Black);
-            prevText.setPosition(prevPos + sf::Vector2f(10.f, 5.f));
-            window.draw(prevText);
+                sf::Text prevText(font);
+                prevText.setCharacterSize(14);
+                prevText.setString("Prev");
+                prevText.setFillColor(sf::Color::Black);
+                prevText.setPosition(prevPos + sf::Vector2f(10.f, 5.f));
+                window.draw(prevText);
 
-            sf::RectangleShape nextButton(navButtonSize);
-            nextButton.setPosition(nextPos);
-            nextButton.setFillColor((itemPage + 1) < totalPages ? sf::Color(180, 180, 180) : sf::Color(100, 100, 100));
-            window.draw(nextButton);
+                sf::RectangleShape nextButton(navButtonSize);
+                nextButton.setPosition(nextPos);
+                nextButton.setFillColor((itemPage + 1) < totalPages ? sf::Color(180, 180, 180) : sf::Color(100, 100, 100));
+                window.draw(nextButton);
 
-            sf::Text nextText(font);
-            nextText.setCharacterSize(14);
-            nextText.setString("Next");
-            nextText.setFillColor(sf::Color::Black);
-            nextText.setPosition(nextPos + sf::Vector2f(10.f, 5.f));
-            window.draw(nextText);
+                sf::Text nextText(font);
+                nextText.setCharacterSize(14);
+                nextText.setString("Next");
+                nextText.setFillColor(sf::Color::Black);
+                nextText.setPosition(nextPos + sf::Vector2f(10.f, 5.f));
+                window.draw(nextText);
+            }
         }
 
         else if (currentTab == GameTabs::Achievements)
