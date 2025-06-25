@@ -6,5 +6,5 @@ enum class buffVariantType
 {
 	none,
 	globalBubbleBuff,
-	rubberDuckBuff // this is the duck
+	rubberDuckBuff
 };

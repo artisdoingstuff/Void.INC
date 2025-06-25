@@ -39,7 +39,7 @@ void saveFileToJson(
     saveData["bubblesPerSecond"] = round2(bubblesPerSecond);
     saveData["totalUpgradeCount"] = round2(totalUpgradeCount);
     saveData["upgrades"] = upgrades;
-    saveData["achievements"] = achievements;
+    saveData["gameAchievements"] = achievements;
 
     ofstream file("save_file.json");
 
@@ -122,9 +122,9 @@ void loadFileFromJson(
     }
 
     // Load achievements
-    if (saveData.contains("achievements"))
+    if (saveData.contains("gameAchievements"))
     {
-        vector<Achievement> loadedAchievements = saveData["achievements"].get<vector<Achievement>>();
+        vector<Achievement> loadedAchievements = saveData["gameAchievements"].get<vector<Achievement>>();
         for (const auto& saved : loadedAchievements)
         {
             auto it = find_if(achievements.begin(), achievements.end(), [&](Achievement& a) {
@@ -133,7 +133,7 @@ void loadFileFromJson(
 
             if (it != achievements.end())
             {
-                it->unlocked = saved.unlocked;
+                it->isUnlocked = saved.isUnlocked;
             }
         }
     }

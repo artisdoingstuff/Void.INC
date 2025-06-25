@@ -215,29 +215,6 @@ inline void addOtherMilestoneUpgrade(
     );
 }
 
-inline const unordered_map<string, long double> globalUpgradeMultiplierValues = {
-    { "Red Bubble", 1.01 }, { "Green Bubble", 1.01 },
-    { "Blue Bubble", 1.01 }, { "Rubber Ducky", 1.01 },
-    { "Rainbow Bubble", 1.02 }, { "Cyan Bubble", 1.01 },
-    { "Indigo Bubble", 1.01 }, { "Heart-Shaped Bubble", 1.02 },
-    { "Bath Bubbles", 1.02 }, { "Detergent Bubbles", 1.02 },
-    { "Duck?", 1.01 }, { "Carbonation", 1.02 },
-    { "Golden Bubble", 1.10 }, { "Fool's Bubble", 1.01 },
-    { "Misprint Bubble", 1.125 }, { "Spring Bubble", 1.02 },
-    { "Cherry Bubble", 1.02 }, { "Blossoming Bubble", 1.02 },
-    { "Rose Bubble", 1.02 }, { "Dandelion Bubble", 1.02 },
-    { "Charming Bubble", 1.02 }, { "Lucky Bubble", 1.07 },
-    { "Sudsy Water Balloon", 1.02 }, { "Heated Bubble", 1.02 },
-    { "Boiling Bubble", 1.02 }, { "Leafy Bubble", 1.02 },
-    { "Autumn Bubble", 1.02 }, { "Sunflower Bubble", 1.02 },
-    { "Daisy Bubble", 1.02 }, { "Florescent Bubble", 1.05 },
-    { "Chilly Bubble", 1.02 }, { "Frosty Bubble", 1.02 },
-    { "Cryogenic Bubble", 1.02 }, { "Inflatable Ducky", 1.02 },
-    { "Glistening Bubble", 1.05 }, { "Sparkling Bubble", 1.05 },
-    { "Gleaming Bubble", 1.05 }, { "Lucky Golden Bubble", 1.07 },
-    { "Fusion Bubble", 1.03 }, { "Fragmented Bubble", 1.03 }
-};
-
 inline long double getBuffedProduction(const UpgradeItem& u, const vector<UpgradeItem>& upgrades)
 {
     long double production = u.baseProduction * perUpgradeMultipliers[u.name];

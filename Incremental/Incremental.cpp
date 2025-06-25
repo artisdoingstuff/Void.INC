@@ -1,4 +1,5 @@
 ﻿#include "Achievements.h"
+#include "AchievementsList.h"
 #include "BubbleFrenzy.h"
 #include "BubbleChaos.h"
 #include "BubbleMayhem.h"
@@ -9,6 +10,7 @@
 #include "GameFileState.h"
 #include "GlobalBubblesVariants.h"
 #include "Upgrades.h"
+#include "UpgradesList.h"
 #include "OfflineBubbles.h"
 
 // Upgrade shop variables
@@ -64,9 +66,12 @@ sf::Texture globalBubbleTexture;
 // Global Variables if needed
 static map<string, sf::Texture> upgradeTextures = loadUpgradeTextures();
 
+vector<Achievement> achievements;
+vector<UpgradeItem> upgrades;
+
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.1.12-beta";
+string gameVersion = "v1.1.13-beta";
 
 const long double shopInflationMultiplier = 1.15L;
 
@@ -265,145 +270,8 @@ int main()
 
     srand(static_cast<unsigned>(time(0)));
 
-	// Upgrade variables here
-    vector<UpgradeItem> upgrades;
-
-    // Items
-    upgrades.push_back(
-        {
-            "Soap",     // Reference Name
-            0,          // Item count
-            10.0, 10.0, // Item base/current cost
-            0.15,        // Item production (bubbles per second)
-            10.0,       // Unlock threshold
-            false,      // isMilestone
-            false,      // unlockedByMilestone
-            0.0,        // milestoneTriggerValue
-            true,       // isitemUpgrade <-- This is what matters for Items
-            false,      // isOtherUpgrade <-- ONLY for non-item upgrades (such as Bubble Milestones)
-            true,       // isClickUpgrade <-- True only for Soap
-            false,      // isDurationUpgrade <-- Doesn't affect buff duration
-            true,       // isMinorUpgrade <-- Will have Minor Upgrades (small buffs)
-            true        // isMajorUpgrade <-- Will have Major Upgrades (big buffs)
-        }
-    );
-    upgrades.push_back({ "Hand Wash", 0, 75.0, 75.0, 0.5, 100.0, false, false, 0.0, true, false, false, false, true, true });
-    upgrades.push_back({ "Shampoo", 0, 250.0, 250.0, 1.0, 350.0, false, false, 0.0, true, false, false, false, true, true });
-    upgrades.push_back({ "Shaving Foam", 0, 1000.0, 1000.0, 2.5, 1200.0, false, false, 0.0, true, false, false, false, true, true });
-    upgrades.push_back({ "Toothpaste", 0, 3000.0, 3000.0, 5.0, 3500.0, false, false, 0.0, true, false, false, false, true, true });
-    upgrades.push_back({ "Loofah", 0, 7000.0, 7000.0, 8.0, 7500.0, false, false, 0.0, true, false, false, false, true, true });
-    upgrades.push_back({ "Bubble Bath", 0, 18000.0, 18000.0, 15.0, 20000.0, false, false, 0.0, true, false, false, false, true, true });
-    upgrades.push_back({ "Bathtub Jet", 0, 40000.0, 40000.0, 22.0, 50000.0, false, false, 0.0, true, false, false, false, true, true });
-    upgrades.push_back({ "Luxury Spa", 0, 100000.0, 100000.0, 35.0, 150000.0, false, false, 0.0, true, false, false, false, true, true });
-    upgrades.push_back({ "Foam Pit", 0, 150000.0, 150000.0, 50.0, 200000.0, false, false, 0.0, true, false, false, false, true, true });
-    upgrades.push_back({ "Foam Party", 0, 250000.0, 250000.0, 75.0, 500000.0, false, false, 0.0, true, false, false, false, true, true });
-    upgrades.push_back({ "Sudsy Soap", 0, 400000.0, 400000.0, 130.0, 750000.0, false, false, 0.0, true, false, false, false, true, true });
-    upgrades.push_back({ "Bubble Machine", 0, 750000.0, 750000.0, 200.0, 1000000.0, false, false, 0.0, true, false, false, false, true, true });
-    upgrades.push_back({ "Bubbly Pool", 0, 1200000.0, 1200000.0, 300.0, 1500000.0, false, false, 0.0, true, false, false, false, true, true });
-    upgrades.push_back({ "Sparkling Water", 0, 1800000.0, 1800000.0, 450.0, 2200000.0, false, false, 0.0, true, false, false, false, true, true });
-    upgrades.push_back({ "Carbonated Soda", 0, 2500000.0, 2500000.0, 650.0, 3000000.0, false, false, 0.0, true, false, false, false, true, true });
-    upgrades.push_back({ "Bath Bombs", 0, 4000000.0, 4000000.0, 900.0, 5000000.0, false, false, 0.0, true, false, false, false, true, true });
-    upgrades.push_back({ "Bubble Wand", 0, 6000000.0, 6000000.0, 1200.0, 7500000.0, false, false, 0.0, true, false, false, false, true, true });
-
-    // Item Upgrades
-    generateItemMilestoneUpgrades(upgrades, "Soap", 10.0);
-    generateItemMilestoneUpgrades(upgrades, "Hand Wash", 75.0);
-    generateItemMilestoneUpgrades(upgrades, "Shampoo", 250.0);
-    generateItemMilestoneUpgrades(upgrades, "Shaving Foam", 1000.0);
-    generateItemMilestoneUpgrades(upgrades, "Toothpaste", 3000.0);
-    generateItemMilestoneUpgrades(upgrades, "Loofah", 7000.0);
-    generateItemMilestoneUpgrades(upgrades, "Bubble Bath", 18000.0);
-    generateItemMilestoneUpgrades(upgrades, "Bathtub Jet", 40000.0);
-    generateItemMilestoneUpgrades(upgrades, "Luxury Spa", 100000.0);
-    generateItemMilestoneUpgrades(upgrades, "Foam Pit", 150000.0);
-    generateItemMilestoneUpgrades(upgrades, "Foam Party", 250000.0);
-    generateItemMilestoneUpgrades(upgrades, "Sudsy Soap", 400000.0);
-    generateItemMilestoneUpgrades(upgrades, "Bubble Machine", 750000.0);
-    generateItemMilestoneUpgrades(upgrades, "Bubbly Pool", 1200000.0);
-    generateItemMilestoneUpgrades(upgrades, "Sparkling Water", 1800000.0);
-    generateItemMilestoneUpgrades(upgrades, "Carbonated Soda", 2500000.0);
-    generateItemMilestoneUpgrades(upgrades, "Bath Bombs", 4000000.0);
-    generateItemMilestoneUpgrades(upgrades, "Bubble Wand", 6000000.0);
-
-    // Other Upgrades
-    addOtherMilestoneUpgrade(
-        upgrades,       // Upgrade Call
-        "Red Bubble",   // Reference Name
-        100.0,          // Upgrade Unlock Threshold
-        250.0           // Upgrade Cost
-    );
-    addOtherMilestoneUpgrade(upgrades, "Green Bubble", 250.0, 500.0);
-    addOtherMilestoneUpgrade(upgrades, "Blue Bubble", 500.0, 750.0);
-    addOtherMilestoneUpgrade(upgrades, "Rubber Ducky", 750.0, 1000.0);
-    addOtherMilestoneUpgrade(upgrades, "Rainbow Bubble", 1000.0, 1500.0);
-    addOtherMilestoneUpgrade(upgrades, "Cyan Bubble", 1500.0, 2500.0);
-    addOtherMilestoneUpgrade(upgrades, "Indigo Bubble", 2500.0, 4000.0);
-    addOtherMilestoneUpgrade(upgrades, "Heart-Shaped Bubble", 5000.0, 7500.0);
-    addOtherMilestoneUpgrade(upgrades, "Soap Dispenser", 7500.0, 10000.0);
-    addOtherMilestoneUpgrade(upgrades, "Bath Bubbles", 10000.0, 15000.0);
-    addOtherMilestoneUpgrade(upgrades, "Detergent Bubbles", 15000.0, 20000.0);
-    addOtherMilestoneUpgrade(upgrades, "Duck?", 20000.0, 10000.0);
-    addOtherMilestoneUpgrade(upgrades, "Carbonation", 25000.0, 35000.0);
-    addOtherMilestoneUpgrade(upgrades, "Golden Bubble", 40000.0, 100000.0);
-    addOtherMilestoneUpgrade(upgrades, "Hand Wash Refiller", 50000.0, 75000.0);
-    addOtherMilestoneUpgrade(upgrades, "Fool's Bubble", 75000.0, 90000.0);
-    addOtherMilestoneUpgrade(upgrades, "Misprint Bubble", 100000.0, 250000.0);
-    addOtherMilestoneUpgrade(upgrades, "Spring Bubble", 150000.0, 250000.0);
-    addOtherMilestoneUpgrade(upgrades, "Cherry Bubble", 200000.0, 300000.0);
-    addOtherMilestoneUpgrade(upgrades, "Blossoming Bubble", 250000.0, 350000.0);
-    addOtherMilestoneUpgrade(upgrades, "Rose Bubble", 300000.0, 400000.0);
-    addOtherMilestoneUpgrade(upgrades, "Dandelion Bubble", 350000.0, 450000.0);
-    addOtherMilestoneUpgrade(upgrades, "Charming Bubble", 400000.0, 650000.0);
-    addOtherMilestoneUpgrade(upgrades, "Lucky Bubble", 450000.0, 777777.0);
-    addOtherMilestoneUpgrade(upgrades, "Lavender Shampoo", 500000.0, 850000.0);
-    addOtherMilestoneUpgrade(upgrades, "Sudsy Water Balloon", 600000.0, 900000.0);
-    addOtherMilestoneUpgrade(upgrades, "Heated Bubble", 750000.0, 1000000.0);
-    addOtherMilestoneUpgrade(upgrades, "Boiling Bubble", 850000.0, 1100000.0);
-    addOtherMilestoneUpgrade(upgrades, "Leafy Bubble", 1000000.0, 1200000.0);
-    addOtherMilestoneUpgrade(upgrades, "Autumn Bubble", 1250000.0, 1500000.0);
-    addOtherMilestoneUpgrade(upgrades, "Sunflower Bubble", 1500000.0, 1800000.0);
-    addOtherMilestoneUpgrade(upgrades, "Daisy Bubble", 1800000.0, 2000000.0);
-    addOtherMilestoneUpgrade(upgrades, "Florescent Bubble", 2100000.0, 2400000.0);
-    addOtherMilestoneUpgrade(upgrades, "Green Shaving Foam", 2500000.0, 3000000.0);
-    addOtherMilestoneUpgrade(upgrades, "Chilly Bubble", 3000000.0, 4000000.0);
-    addOtherMilestoneUpgrade(upgrades, "Frosty Bubble", 3500000.0, 4750000.0);
-    addOtherMilestoneUpgrade(upgrades, "Cryogenic Bubble", 4000000.0, 5500000.0);
-    addOtherMilestoneUpgrade(upgrades, "Inflatable Ducky", 4500000.0, 6000000.0);
-    addOtherMilestoneUpgrade(upgrades, "Glistening Bubble", 5000000.0, 6500000.0);
-    addOtherMilestoneUpgrade(upgrades, "Sparkling Bubble", 5500000.0, 7000000.0);
-    addOtherMilestoneUpgrade(upgrades, "Gleaming Bubble", 6000000.0, 7500000.0);
-    addOtherMilestoneUpgrade(upgrades, "Lucky Golden Bubble", 6500000.0, 7777777.0);
-    addOtherMilestoneUpgrade(upgrades, "Fusion Bubble", 7500000.0, 8000000.0);
-    addOtherMilestoneUpgrade(upgrades, "Fragmented Bubble", 8500000.0, 10000000.0);
-    addOtherMilestoneUpgrade(upgrades, "More Toothpaste!", 10000000.0, 12000000.0);
-
-    for (auto& upgrade : upgrades)
-    {
-        auto it = upgradeTextures.find(upgrade.name);
-        if (it != upgradeTextures.end())
-        {
-            upgrade.spriteUpgrade.emplace(it->second);
-
-            if (upgrade.spriteUpgrade.has_value())
-                cout << upgrade.name << " has sprite." << endl;
-        }
-        else
-        {
-            cerr << "No texture found for " << upgrade.name << endl;
-        }
-    }
-
-    // Achievements
-    vector<Achievement> achievements = {
-        {
-            "It Begins.",                   // Reference Name
-            "Generate 1 bubble",            // Reference Description
-            AchievementType::TotalBubbles,  // Achievement Type
-            1                               // Unlock Requirement
-        },
-        { "Bubble Beginner", "Generate 100 bubbles", AchievementType::TotalBubbles, 100 },
-        { "Bubble Novice", "Generate 1k Bubbles", AchievementType::TotalBubbles, 1000 }
-    };
+    upgradesList();
+    achievementsList();
 
     // Other Variables
     unordered_map<string, float> hoverScales;
@@ -494,31 +362,10 @@ int main()
 
     while (window.isOpen())
     {
-        while (const optional event = window.pollEvent())
-        {
-            if (event->is<sf::Event::Closed>())
-            {
-                time_t currentTimestamp = time(nullptr);
-                saveFileToJson(
-                    gameVersion,
-                    currentTimestamp,
-                    duckCounter,
-                    bubbles,
-                    allTimeBubbles,
-                    allTimeBubblesPerClick,
-                    baseBubblesPerClick,
-                    clickMultiplier,
-                    bubblesPerSecond,
-                    upgrades,
-                    achievements
-                );
-                window.close();
-            }
-        }
-
         // Bubbles per second buff not showing on display fix
         bubblesPerSecond = 0.0L;
         baseBubblesPerClick = 1.0L;
+        clickMultiplier = 1.0L;
 
         long double realBubblesPerSecond = bubblesPerSecond;
         long double realClickMultiplier = clickMultiplier;
@@ -531,41 +378,54 @@ int main()
 
         // More upgrade stuff
         map<string, function<void()>> upgradeEffects = {
-            { "Soap Dispenser", [&]() { 
-                if (appliedUpgradeEffects.find("Soap Dispenser") == appliedUpgradeEffects.end()) {
-                    perUpgradeMultipliers["Soap"] *= 2.0;
-                    appliedUpgradeEffects.insert("Soap Dispenser");
+            {
+                "Soap Dispenser", [&]() { 
+                    if (appliedUpgradeEffects.find("Soap Dispenser") == appliedUpgradeEffects.end()) {
+                        perUpgradeMultipliers["Soap"] *= 2.0;
+                        appliedUpgradeEffects.insert("Soap Dispenser");
+                    }
+                }
+            },
+            {
+                "Hand Wash Refiller", [&]() { 
+                    if (appliedUpgradeEffects.find("Hand Wash Refiller") == appliedUpgradeEffects.end()) {
+                        perUpgradeMultipliers["Hand Wash"] *= 2.0;
+                        appliedUpgradeEffects.insert("Hand Wash Refiller");
+                    }
+                }
+            },
+            {
+                "Lavender Shampoo", [&]() { 
+                    if (appliedUpgradeEffects.find("Lavender Shampoo") == appliedUpgradeEffects.end()) {
+                        perUpgradeMultipliers["Shampoo"] *= 2.0;
+                        appliedUpgradeEffects.insert("Lavender Shampoo");
+                    }
+                }
+            },
+            {
+                "Green Shaving Foam", [&]() {
+                    if (appliedUpgradeEffects.find("Green Shaving Foam") == appliedUpgradeEffects.end()) {
+                        perUpgradeMultipliers["Shaving Foam"] *= 2.0;
+                        appliedUpgradeEffects.insert("Green Shaving Foam");
+                    }
+                }
+            },
+            {
+                "More Toothpaste!", [&]() {
+                    if (appliedUpgradeEffects.find("More Toothpaste!") == appliedUpgradeEffects.end()) {
+                        perUpgradeMultipliers["Toothpaste"] *= 2.0;
+                        appliedUpgradeEffects.insert("More Toothpaste!");
+                    }
+                }
+            },
+            {
+                "Blue Soap Bar", [&]() {
+                    if (appliedUpgradeEffects.find("Blue Soap Bar") == appliedUpgradeEffects.end()) {
+                        perUpgradeMultipliers["Soap"] *= 2.0;
+                        appliedUpgradeEffects.insert("Blue Soap Bar");
+                    }
                 }
             }
-        },
-            { "Hand Wash Refiller", [&]() { 
-                if (appliedUpgradeEffects.find("Hand Wash Refiller") == appliedUpgradeEffects.end()) {
-                    perUpgradeMultipliers["Hand Wash"] *= 2.0;
-                    appliedUpgradeEffects.insert("Hand Wash Refiller");
-                }
-            }
-        },
-            { "Lavender Shampoo", [&]() { 
-                if (appliedUpgradeEffects.find("Lavender Shampoo") == appliedUpgradeEffects.end()) {
-                    perUpgradeMultipliers["Shampoo"] *= 2.0;
-                    appliedUpgradeEffects.insert("Lavender Shampoo");
-                }
-            }
-        },
-            { "Green Shaving Foam", [&]() {
-                if (appliedUpgradeEffects.find("Green Shaving Foam") == appliedUpgradeEffects.end()) {
-                    perUpgradeMultipliers["Shaving Foam"] *= 2.0;
-                    appliedUpgradeEffects.insert("Green Shaving Foam");
-                }
-            }
-        },
-            { "More Toothpaste!", [&]() {
-                if (appliedUpgradeEffects.find("More Toothpaste!") == appliedUpgradeEffects.end()) {
-                    perUpgradeMultipliers["Toothpaste"] *= 2.0;
-                    appliedUpgradeEffects.insert("More Toothpaste!");
-                }
-            }
-        }
         };
 
         long double totalMultiplier = 1.0;
@@ -593,16 +453,16 @@ int main()
         // Achievements logic here
         for (auto& achievement : achievements)
         {
-            if (!achievement.unlocked && achievement.checkUnlock(
+            if (!achievement.isUnlocked && achievement.checkUnlock(
                     allTimeBubbles,
                     allTimeBubblesPerClick,
                     upgrades
                 )
             )
             {
-                achievement.unlocked = true;
+                achievement.isUnlocked = true;
 
-                popupQueue.push({ "Achievement Unlocked: " + achievement.name });
+                popupQueue.push({ "Achievement Unlocked: " + achievement.name + "\n> " + achievement.description });
                 cout << "Achievement unlocked: " << achievement.name << endl;
             }
         }
@@ -1605,5 +1465,27 @@ int main()
         }
 
         window.display();
+
+        while (const optional event = window.pollEvent())
+        {
+            if (event->is<sf::Event::Closed>())
+            {
+                time_t currentTimestamp = time(nullptr);
+                saveFileToJson(
+                    gameVersion,
+                    currentTimestamp,
+                    duckCounter,
+                    bubbles,
+                    allTimeBubbles,
+                    allTimeBubblesPerClick,
+                    baseBubblesPerClick,
+                    realClickMultiplier,
+                    realBubblesPerSecond,
+                    upgrades,
+                    achievements
+                );
+                window.close();
+            }
+        }
     }
 }
