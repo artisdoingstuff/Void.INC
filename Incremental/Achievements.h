@@ -31,6 +31,8 @@ struct Achievement
 
     bool isUnlocked = false;
 
+    long double progressValue = 0.0;
+
     optional<sf::Sprite> spriteIcon;
 
     bool checkUnlock(
@@ -96,7 +98,8 @@ inline void to_json(json& j, const Achievement& a)
         {"achievementType", static_cast<int>(a.achievementType)},
         {"unlockThreshold", a.unlockThreshold},
         {"targetUpgrade", a.targetUpgrade},
-        {"isUnlocked", a.isUnlocked}
+        {"isUnlocked", a.isUnlocked},
+        {"progressValue", a.progressValue}
     };
 }
 
@@ -106,8 +109,13 @@ inline void from_json(const json& j, Achievement& a)
     j.at("description").get_to(a.description);
     a.achievementType = static_cast<AchievementType>(j.at("achievementType").get<int>());
     j.at("unlockThreshold").get_to(a.unlockThreshold);
+
     if (j.contains("targetUpgrade"))
         j.at("targetUpgrade").get_to(a.targetUpgrade);
     if (j.contains("isUnlocked"))
         j.at("isUnlocked").get_to(a.isUnlocked);
+    if (j.contains("progressValue"))
+        j.at("progressValue").get_to(a.progressValue);
+    else
+        a.progressValue = 0.0;
 }

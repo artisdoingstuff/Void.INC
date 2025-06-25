@@ -9,9 +9,9 @@
 // #include "DuckVariants.h"
 #include "GameFileState.h"
 #include "GlobalBubblesVariants.h"
+#include "OfflineBubbles.h"
 #include "Upgrades.h"
 #include "UpgradesList.h"
-#include "OfflineBubbles.h"
 
 // Upgrade shop variables
 namespace UIConstants
@@ -27,13 +27,15 @@ namespace UIConstants
 
 float scrollOffset = 0.0f;
 
-enum class UpgradeTab
+enum class GameTabs
 {
     Items,
-    Milestones
+    Milestones,
+    Achievements
 };
 
-UpgradeTab currentTab = UpgradeTab::Items;
+GameTabs currentTab = GameTabs::Items;
+GameTabs previousTab = GameTabs::Items;
 
 enum class MultibuyMode
 {
@@ -44,6 +46,7 @@ MultibuyMode currentMultibuy = MultibuyMode::x1;
 
 int itemPage = 0;
 int milestonePage = 0;
+int achievementPage = 0;
 constexpr int itemsPerPage = 9;
 
 // Global Textures
@@ -71,7 +74,7 @@ vector<UpgradeItem> upgrades;
 
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.1.13-beta";
+string gameVersion = "v1.1.14-beta";
 
 const long double shopInflationMultiplier = 1.15L;
 
@@ -228,6 +231,12 @@ int main()
 	bubblePoppingBuffer.loadFromFile("Assets/Audio/bubblePopping.wav");
 	sf::Sound bubblePopping(bubblePoppingBuffer);
 
+    sf::Music bgm;
+    bgm.openFromFile("Assets/Audio/GlimpseofEternity_bgm.ogg");
+    bgm.setLooping(true);
+    bgm.setVolume(50.f);
+    bgm.play();
+
 	// Bubbles variables here
     long double displayBubbles = 0.0L;
 
@@ -270,8 +279,13 @@ int main()
 
     srand(static_cast<unsigned>(time(0)));
 
+    // Upgrade Variables
     upgradesList();
+
+    // Achievements Variables
     achievementsList();
+    bool isAchievementsAnimating = false;
+    float achievementsSlideOffset = -2000.f;
 
     // Other Variables
     unordered_map<string, float> hoverScales;
@@ -301,6 +315,7 @@ int main()
     sf::Clock shopClock;
 
     sf::Clock popupTimer;
+    sf::Clock achievementsSlideClock;
 
     sf::Clock bubbleChaosClock;
     sf::Clock bubbleChaosSpawnIntervalClock;
@@ -359,6 +374,8 @@ int main()
     clickAreaShape.setOutlineColor(sf::Color::Red);
     clickAreaShape.setOutlineThickness(5);
     clickAreaShape.setPosition(sf::Vector2f({ 300, 350 }));
+
+    constexpr float iconTabSize = UIConstants::TabHeight;
 
     while (window.isOpen())
     {
@@ -453,12 +470,52 @@ int main()
         // Achievements logic here
         for (auto& achievement : achievements)
         {
-            if (!achievement.isUnlocked && achievement.checkUnlock(
-                    allTimeBubbles,
-                    allTimeBubblesPerClick,
-                    upgrades
-                )
-            )
+            // Update progressValue based on type
+            switch (achievement.achievementType)
+            {
+            case AchievementType::TotalBubbles:
+                achievement.progressValue = min(allTimeBubbles / achievement.unlockThreshold, 1.0L);
+                break;
+
+            case AchievementType::Clicks:
+                achievement.progressValue = min(allTimeBubblesPerClick / achievement.unlockThreshold, 1.0L);
+                break;
+
+            case AchievementType::UpgradeCount:
+            {
+                long double totalCount = 0.0;
+                for (const auto& u : upgrades)
+                    totalCount += u.count;
+                achievement.progressValue = min(totalCount / achievement.unlockThreshold, 1.0L);
+                break;
+            }
+
+            case AchievementType::SpecificUpgrade:
+            {
+                auto it = find_if(upgrades.begin(), upgrades.end(), [&](const UpgradeItem& u) {
+                    return u.name == achievement.targetUpgrade;
+                    });
+                if (it != upgrades.end())
+                    achievement.progressValue = min(it->count / achievement.unlockThreshold, 1.0L);
+                break;
+            }
+
+            case AchievementType::MilestoneReached:
+            {
+                int milestoneCount = 0;
+                for (const auto& u : upgrades)
+                    if (u.isMilestone && u.count > 0)
+                        ++milestoneCount;
+                achievement.progressValue = min((long double)milestoneCount / achievement.unlockThreshold, 1.0L);
+                break;
+            }
+
+            default:
+                achievement.progressValue = 0.0;
+                break;
+            }
+
+            if (!achievement.isUnlocked && achievement.progressValue >= 1.0)
             {
                 achievement.isUnlocked = true;
 
@@ -521,14 +578,72 @@ int main()
                     { UIConstants::TabWidth, UIConstants::TabHeight }
                 );
 
-                if (itemsTabRect.contains(mousePositionF))
+                sf::Vector2f achievementsTabPos = {
+                    tabStartPos.x - UIConstants::TabWidth - UIConstants::TabSpacing - iconTabSize - 10.f,
+                    tabStartPos.y
+                };
+                sf::FloatRect achievementsTabRect(achievementsTabPos, { iconTabSize, iconTabSize });
+
+                // Items Tab
+                if (itemsTabRect.contains(mousePositionF) && currentTab != GameTabs::Items)
                 {
-                    currentTab = UpgradeTab::Items;
+                    previousTab = currentTab;
+                    currentTab = GameTabs::Items;
                     clickHandled = true;
                 }
-                else if (upgradesTabRect.contains(mousePositionF))
+                // Milestones Tab
+                else if (upgradesTabRect.contains(mousePositionF) && currentTab != GameTabs::Milestones)
                 {
-                    currentTab = UpgradeTab::Milestones;
+                    previousTab = currentTab;
+                    currentTab = GameTabs::Milestones;
+                    clickHandled = true;
+                }
+                // Achievements Tab
+                else if (achievementsTabRect.contains(mousePositionF) && currentTab != GameTabs::Achievements)
+                {
+                    previousTab = currentTab;
+                    currentTab = GameTabs::Achievements;
+
+                    achievementsSlideOffset = -500.f;
+                    isAchievementsAnimating = true;
+                    achievementsSlideClock.restart();
+                    
+                    clickHandled = true;
+                }
+            }
+
+            // Achievements tab pagination
+            if (!clickHandled && currentTab == GameTabs::Achievements)
+            {
+                constexpr int achievementsPerPage = 30;
+                constexpr int columns = 6;
+                constexpr int rows = achievementsPerPage / columns;
+                constexpr float boxWidth = 180.f;
+                constexpr float boxHeight = 64.f;
+                constexpr float spacingX = 24.f;
+                constexpr float spacingY = 16.f;
+
+                float gridStartX = startX - boxWidth * columns - spacingX * (columns - 1);
+                float gridStartY = startY;
+                float navY = gridStartY + rows * (boxHeight + spacingY) + 10.f;
+
+                sf::Vector2f navSize = { 80.f, 30.f };
+                sf::Vector2f prevPos = { gridStartX, navY };
+                sf::Vector2f nextPos = { gridStartX + 100.f, navY };
+
+                if (sf::FloatRect(prevPos, navSize).contains(mousePositionF) && achievementPage > 0)
+                {
+                    achievementPage--;
+                    clickHandled = true;
+                }
+                else if (sf::FloatRect(nextPos, navSize).contains(mousePositionF) &&
+                    (achievementPage + 1) * achievementsPerPage < achievements.size())
+                {
+                    achievementPage++;
+                    clickHandled = true;
+                }
+                else
+                {
                     clickHandled = true;
                 }
             }
@@ -550,7 +665,7 @@ int main()
             }
 
             // Items
-            if (!clickHandled && currentTab == UpgradeTab::Items)
+            if (!clickHandled && currentTab == GameTabs::Items)
             {
                 vector<UpgradeItem*> visibleItems;
                 for (auto& upgrade : upgrades)
@@ -650,7 +765,7 @@ int main()
             }
 
             // Milestones
-            if (!clickHandled && currentTab == UpgradeTab::Milestones)
+            if (!clickHandled && currentTab == GameTabs::Milestones)
             {
                 constexpr float milestoneSize = 80.f;
                 constexpr float spacingX = 50.f;
@@ -875,9 +990,9 @@ int main()
         for (auto& upgrade : upgrades)
         {
             // Skip if not part of active tab
-            if (currentTab == UpgradeTab::Items && upgrade.isMilestone)
+            if (currentTab == GameTabs::Items && upgrade.isMilestone)
                 continue;
-            if (currentTab == UpgradeTab::Milestones && (!upgrade.isMilestone || !upgrade.isUnlocked(allTimeBubbles, upgrades)))
+            if (currentTab == GameTabs::Milestones && (!upgrade.isMilestone || !upgrade.isUnlocked(allTimeBubbles, upgrades)))
                 continue;
             if (!upgrade.isUnlocked(allTimeBubbles, upgrades))
                 continue;
@@ -912,7 +1027,7 @@ int main()
         constexpr float spriteSize = 36.f;
 
         // Milestone Upgrades
-        if (currentTab == UpgradeTab::Milestones)
+        if (currentTab == GameTabs::Milestones)
         {
             constexpr float milestoneSize = 80.f;
             constexpr float spacingX = 50.f;
@@ -1058,7 +1173,7 @@ int main()
             window.draw(buyAllText);
         }
 
-        else if (currentTab == UpgradeTab::Items)
+        else if (currentTab == GameTabs::Items)
         {
             vector<UpgradeItem*> visibleItems;
             for (auto& upgrade : upgrades)
@@ -1313,6 +1428,141 @@ int main()
             window.draw(nextText);
         }
 
+        else if (currentTab == GameTabs::Achievements)
+        {
+            float achievementsSlideOffset = 0.f;
+            if (isAchievementsAnimating)
+            {
+                float elapsed = achievementsSlideClock.getElapsedTime().asSeconds();
+                float duration = 0.5f;
+                float t = min(elapsed / duration, 1.f);
+                t = 1.f - pow(1.f - t, 3);
+                achievementsSlideOffset = -2000.f * (1.f - t);
+
+                if (t >= 1.f)
+                    isAchievementsAnimating = false;
+            }
+
+            sf::Vector2f bgSize(1215.f, 400.f);
+            sf::Vector2f bgPos(
+                (window.getSize().x - bgSize.x) / 2.f + 10.f + achievementsSlideOffset,
+                (window.getSize().y - bgSize.y) / 2.f - 147.5f
+            );
+
+            sf::RectangleShape bg;
+            bg.setSize(bgSize);
+            bg.setPosition(bgPos);
+            bg.setFillColor(sf::Color(30, 30, 30, 230));
+            bg.setOutlineThickness(2.f);
+            bg.setOutlineColor(sf::Color(255, 215, 100));
+            window.draw(bg);
+
+            constexpr int achievementsPerPage = 30;
+            constexpr int columns = 6;
+            constexpr int rows = achievementsPerPage / columns;
+            constexpr float boxWidth = 180.f;
+            constexpr float boxHeight = 64.f;
+            constexpr float spacingX = 24.f;
+            constexpr float spacingY = 16.f;
+
+            float gridStartX = startX - boxWidth * columns - spacingX * (columns - 1) + achievementsSlideOffset;
+            float gridStartY = startY;
+
+            int totalPages = (achievements.size() + achievementsPerPage - 1) / achievementsPerPage;
+            achievementPage = clamp(achievementPage, 0, max(0, totalPages - 1));
+            int startIdx = achievementPage * achievementsPerPage;
+            int endIdx = min<int>(startIdx + achievementsPerPage, achievements.size());
+
+            for (int i = startIdx; i < endIdx; ++i)
+            {
+                Achievement& a = achievements[i];
+                int localIndex = i - startIdx;
+                int row = localIndex / columns;
+                int col = localIndex % columns;
+
+                sf::Vector2f pos = {
+                    gridStartX + col * (boxWidth + spacingX),
+                    gridStartY + row * (boxHeight + spacingY)
+                };
+
+                sf::RectangleShape box({ boxWidth, boxHeight });
+                box.setPosition(pos);
+                box.setFillColor(a.isUnlocked ? sf::Color(230, 255, 230) : sf::Color(90, 90, 90));
+                window.draw(box);
+
+                if (a.spriteIcon.has_value())
+                {
+                    sf::Sprite icon = *a.spriteIcon;
+                    auto texSize = icon.getTexture().getSize();
+                    if (texSize.x > 0 && texSize.y > 0)
+                    {
+                        icon.setScale({ 32.f / texSize.x, 32.f / texSize.y });
+                        icon.setPosition({ pos.x + 8.f, pos.y + 8.f });
+                        if (!a.isUnlocked)
+                            icon.setColor(sf::Color(80, 80, 80));
+                        window.draw(icon);
+                    }
+                }
+
+                sf::Text nameText(font);
+                nameText.setCharacterSize(12);
+                nameText.setString(a.name);
+                nameText.setFillColor(sf::Color::Black);
+                nameText.setPosition({ pos.x + 6.f, pos.y + 6.f });
+                window.draw(nameText);
+
+                sf::Text descText(font);
+                descText.setCharacterSize(10);
+                descText.setString(a.description);
+                descText.setFillColor(sf::Color(30, 30, 30));
+                descText.setPosition({ pos.x + 6.f, pos.y + 26.f });
+                window.draw(descText);
+
+                if (!a.isUnlocked)
+                {
+                    sf::Text progressText(font);
+                    progressText.setCharacterSize(10);
+
+                    float percent = static_cast<float>(a.progressValue * 100.0);
+
+                    progressText.setString(to_string(static_cast<int>(percent)) + "%");
+                    progressText.setFillColor(sf::Color::White);
+                    progressText.setPosition({ pos.x + boxWidth - 25.f, pos.y + 6.f });
+                    window.draw(progressText);
+                }
+            }
+
+            // Pagination Buttons
+            float navY = gridStartY + rows * (boxHeight + spacingY) + 10.f;
+            sf::Vector2f navSize = { 80.f, 30.f };
+            sf::Vector2f prevPos = { gridStartX, navY };
+            sf::Vector2f nextPos = { gridStartX + 100.f, navY };
+
+            sf::RectangleShape prevButton(navSize);
+            prevButton.setPosition(prevPos);
+            prevButton.setFillColor(achievementPage > 0 ? sf::Color(180, 180, 180) : sf::Color(100, 100, 100));
+            window.draw(prevButton);
+
+            sf::Text prevText(font);
+            prevText.setCharacterSize(14);
+            prevText.setString("Prev");
+            prevText.setFillColor(sf::Color::Black);
+            prevText.setPosition(prevPos + sf::Vector2f(10.f, 5.f));
+            window.draw(prevText);
+
+            sf::RectangleShape nextButton(navSize);
+            nextButton.setPosition(nextPos);
+            nextButton.setFillColor((achievementPage + 1) < totalPages ? sf::Color(180, 180, 180) : sf::Color(100, 100, 100));
+            window.draw(nextButton);
+
+            sf::Text nextText(font);
+            nextText.setCharacterSize(14);
+            nextText.setString("Next");
+            nextText.setFillColor(sf::Color::Black);
+            nextText.setPosition(nextPos + sf::Vector2f(10.f, 5.f));
+            window.draw(nextText);
+        }
+
 		// Tab positions and rendering
         sf::Vector2f tabStartPos(
             window.getSize().x - UIConstants::TabWidth - UIConstants::TabRightMargin,
@@ -1325,7 +1575,7 @@ int main()
             tabStartPos.x - UIConstants::TabWidth - UIConstants::TabSpacing,
             tabStartPos.y
             });
-        itemsTab.setFillColor(currentTab == UpgradeTab::Items ? sf::Color::White : sf::Color(150, 150, 150));
+        itemsTab.setFillColor(currentTab == GameTabs::Items ? sf::Color::White : sf::Color(150, 150, 150));
         window.draw(itemsTab);
 
         sf::Text itemsText(font);
@@ -1346,7 +1596,7 @@ int main()
         // Milestones Tab
         sf::RectangleShape milestonesTab(sf::Vector2f(UIConstants::TabWidth, UIConstants::TabHeight));
         milestonesTab.setPosition(tabStartPos);
-        milestonesTab.setFillColor(currentTab == UpgradeTab::Milestones ? sf::Color::White : sf::Color(150, 150, 150));
+        milestonesTab.setFillColor(currentTab == GameTabs::Milestones ? sf::Color::White : sf::Color(150, 150, 150));
         window.draw(milestonesTab);
 
         sf::Text milestonesText(font);
@@ -1364,9 +1614,34 @@ int main()
         milestonesText.setFillColor(sf::Color::Black);
         window.draw(milestonesText);
 
-        updateAndDrawBubbles(activeChaosBubbles, window);
-        updateAndDrawBubbles(activeFrenzyBubbles, window);
-        updateAndDrawBubbles(activeMayhemBubbles, window);
+        // Achievements Tab (icon-only)
+        sf::Vector2f achievementsTabPos = {
+            tabStartPos.x - UIConstants::TabWidth - UIConstants::TabSpacing - iconTabSize - 10.f,
+            tabStartPos.y
+        };
+
+        sf::RectangleShape achievementsTab({ iconTabSize, iconTabSize });
+        achievementsTab.setPosition(achievementsTabPos);
+        achievementsTab.setFillColor(currentTab == GameTabs::Achievements ? sf::Color::White : sf::Color(150, 150, 150));
+        window.draw(achievementsTab);
+
+        sf::Sprite achievementsIcon(globalBubbleTexture);
+
+        sf::Vector2u texSize = globalBubbleTexture.getSize();
+        if (texSize.x > 0 && texSize.y > 0)
+        {
+            float targetSize = iconTabSize * 0.6f;
+            float scaleX = targetSize / texSize.x;
+            float scaleY = targetSize / texSize.y;
+            achievementsIcon.setScale({ scaleX, scaleY });
+
+            achievementsIcon.setPosition({
+                achievementsTabPos.x + (iconTabSize - texSize.x * scaleX) / 2.f,
+                achievementsTabPos.y + (iconTabSize - texSize.y * scaleY) / 2.f
+                });
+
+            window.draw(achievementsIcon);
+        }
 
         // Achievements
         if (currentPopup.has_value())
