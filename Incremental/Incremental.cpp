@@ -50,31 +50,25 @@ int achievementPage = 0;
 constexpr int itemsPerPage = 9;
 
 // Global Textures
-map<string, sf::Texture> loadUpgradeTextures()
+void loadUpgradeTextures(map<string, sf::Texture>& upgradeTextures)
 {
-    map<string, sf::Texture> upgradeTextures;
-
     upgradeTextures["Soap"].loadFromFile("Assets/soap_upgrade.png");
     upgradeTextures["Hand Wash"].loadFromFile("Assets/handwash_upgrade.png");
     upgradeTextures["Shampoo"].loadFromFile("Assets/shampoo_upgrade.png");
     upgradeTextures["Shaving Foam"].loadFromFile("Assets/shaving_foam_upgrade.png");
     upgradeTextures["Toothpaste"].loadFromFile("Assets/toothpaste_upgrade.png");
     upgradeTextures["Loofah"].loadFromFile("Assets/loofah_upgrade.png");
-    return upgradeTextures;
 }
 
 sf::Texture bubbleTexture;
 sf::Texture globalBubbleTexture;
-
-// Global Variables if needed
-static map<string, sf::Texture> upgradeTextures = loadUpgradeTextures();
 
 vector<Achievement> achievements;
 vector<UpgradeItem> upgrades;
 
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.1.14-beta";
+string gameVersion = "v1.1.16-beta";
 
 const long double shopInflationMultiplier = 1.15L;
 
@@ -285,6 +279,16 @@ int main()
     float itemSlideProgress = 1.0f;
 
     bool isMilestonesAnimating = false;
+
+    map<string, sf::Texture> upgradeTextures;
+    loadUpgradeTextures(upgradeTextures);
+
+    for (auto& u : upgrades)
+    {
+        auto it = upgradeTextures.find(u.name);
+        if (it != upgradeTextures.end())
+            u.spriteUpgrade = sf::Sprite(it->second);
+    }
 
     // Achievements Variables
     achievementsList();
@@ -1309,7 +1313,12 @@ int main()
                     if (texSize.x > 0 && texSize.y > 0)
                     {
                         icon.setScale({ spriteSize / texSize.x, spriteSize / texSize.y });
-                        icon.setPosition({ iconOffsetX, iconOffsetY });
+
+                        icon.setPosition({
+                            iconOffsetX,
+                            iconOffsetY
+                            });
+
                         window.draw(icon);
                     }
                 }
