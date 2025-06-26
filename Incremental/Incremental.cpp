@@ -5,10 +5,9 @@
 #include "BubbleMayhem.h"
 #include "Bubbles.h"
 #include "BubblesFormat.h"
-#include "Buffs.h"
-// #include "DuckVariants.h"
+#include "Combo.h"
 #include "GameFileState.h"
-#include "GlobalBubblesVariants.h"
+#include "GlobalBuffHandler.h"
 #include "OfflineBubbles.h"
 #include "Upgrades.h"
 #include "UpgradesList.h"
@@ -61,14 +60,17 @@ void loadUpgradeTextures(map<string, sf::Texture>& upgradeTextures)
 }
 
 sf::Texture bubbleTexture;
-sf::Texture globalBubbleTexture;
+sf::Texture goldenBubbleTexture;
 
+// Global variables
 vector<Achievement> achievements;
 vector<UpgradeItem> upgrades;
 
+ComboSystem comboSystem;
+
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.1.17-beta";
+string gameVersion = "v1.2.0-beta";
 
 const long double shopInflationMultiplier = 1.15L;
 
@@ -94,6 +96,13 @@ int highestBubbleCombo = 0;
 sf::Clock bubbleComboTimer;
 
 // Global functions
+sf::Vector2f getGlobalBuffSpawnPosition()
+{
+    float x = static_cast<float>(rand() % 1400 + 100);
+    float y = static_cast<float>(rand() % 600 + 100);
+    return { x, y };
+}
+
 template <typename ActiveBubbleType>
 void handleBubbleClick(
     vector<ActiveBubbleType>& bubbleList, const sf::Vector2f& mousePositionF,
@@ -159,6 +168,7 @@ void updateBubbleBuff(
         float x = static_cast<float>(rand() % maxX);
         float y = static_cast<float>(rand() % maxY);
         activeBubbleList.emplace_back(sf::Vector2f(x, y));
+        cout << "spawned";
         spawnClock.restart();
     }
 
@@ -199,11 +209,10 @@ void updateAndDrawBubbles(vector<DrawBubbleEventBubbles>& bubbleList, sf::Render
 
 int main()
 {
-    globalBubbleBuffVariant currentGlobalBubbleType{};
-    duckBuffVariant currentDuckType{};
-
     sf::RenderWindow window(sf::VideoMode({ 1600, 900 }), "Bubble Incremental | " + gameVersion);
 	window.setFramerateLimit(60);
+
+    comboSystem.initializeUI(window.getSize());
     
     bool isButtonPressed = false;
 
@@ -213,8 +222,8 @@ int main()
 	bubbleTexture.loadFromFile("Assets/bubble.png");
     bubbleTexture.setSmooth(true);
 
-	globalBubbleTexture.loadFromFile("Assets/golden_bubble.png");
-    globalBubbleTexture.setSmooth(true);
+    goldenBubbleTexture.loadFromFile("Assets/golden_bubble.png");
+    goldenBubbleTexture.setSmooth(true);
 
     // All sounds here
     sf::SoundBuffer rubberDuckQuackBuffer;
@@ -237,39 +246,37 @@ int main()
     long double duckCounter = 0.0L;
 
     // Buffs variables here
+    queueGlobalBuffs(1);
     bool canPressGlobalBubbleBuff = false;
 
     vector<BubbleChaos> activeChaosBubbles;
     bool isBubbleChaosActive = false;
-    float bubbleChaosDuration = 20.0f;
-    float bubbleChaosBuffMultiplier = 0.4f;
+    float bubbleChaosDuration = 14.0f;
+    float bubbleChaosBuffMultiplier = 0.6f;
     float bubbleChaosSpawnInterval = 0.001f;
 
     vector<BubbleFrenzy> activeFrenzyBubbles;
     bool isBubbleFrenzyActive = false;
-    float bubbleFrenzyDuration = 30.0f;
-    float bubbleFrenzyBuffMultiplier = 3.0f;
+    float bubbleFrenzyDuration = 20.0f;
+    float bubbleFrenzyBuffMultiplier = 1.5f;
     float bubbleFrenzySpawnInterval = 0.5f;
 
     vector<BubbleMayhem> activeMayhemBubbles;
     bool isBubbleMayhemActive = false;
     float bubbleMayhemDuration = 20.0f;
-    float bubbleMayhemBuffMultiplier = 1.5f;
+    float bubbleMayhemBuffMultiplier = 0.9f;
     float bubbleMayhemSpawnInterval = 0.125f;
 
-    sf::Sprite currentGlobalBubbleSprite(globalBubbleTexture);
-    bool isGlobalBubbleBuffActive = false;
-    bool doesGlobalBubbleBuffExist = false;
-    bool showGlobalBubbleBuffHitbox = false;
-    float globalBubbleBuffDuration = 0.0f;
-    float globalBubbleBuffMultiplier = 1.0f;
-    float globalBubbleBuffSpawnInterval = 120.0f;
+    bool isMutatedBubbleActive = false;
+    float mutatedBubbleDuration = 0.0f;
 
-    bool isRubberDuckBuffActive = false;
-    bool showRubberDuckBuffHitbox = false;
-    float rubberDuckBuffDuration = 0.0f;
-    float rubberDuckBuffMultiplier = 1.0f;
-    float rubberDuckBuffSpawnInterval = 160.0f;
+    bool isNormalBuffActive = false;
+    float normalBuffDuration = 0.0f;
+    float normalBuffMultiplier = 2.0f;
+
+    bool isMultiplicativeBuffActive = false;
+    float multiplicativeBuffDuration = 0.0f;
+    float multiplicativeBuffMultiplier = 3.0f;
 
     srand(static_cast<unsigned>(time(0)));
 
@@ -336,14 +343,10 @@ int main()
     sf::Clock bubbleMayhemClock;
     sf::Clock bubbleMayhemSpawnIntervalClock;
 
-	sf::Clock globalBubbleBuffClock;
-	sf::Clock globalBubbleBuffSpawnIntervalClock;
-    sf::Clock globalBubbleBuffLifetimeClock;
-    sf::Clock globalBubblePulseClock;
+    sf::Clock normalBuffClock;
+    sf::Clock multiplicativeBuffClock;
 
-    sf::Clock rubberDuckBuffClock;
-	sf::Clock rubberDuckBuffSpawnIntervalClock;
-    sf::Clock rubberDuckBuffLifetimeClock;
+    sf::Clock mutatedBubbleClock;
 
 	// Initialize text objects for displaying bubbles and bubbles per second
 	sf::Text bubblesText(font);
@@ -366,15 +369,15 @@ int main()
     tooltipText.setFillColor(sf::Color::White);
 
     // Objects for buffs
-	sf::RectangleShape globalBubbleBuffHitbox;
-    globalBubbleBuffHitbox.setSize(sf::Vector2f(100, 100));
-    globalBubbleBuffHitbox.setFillColor(sf::Color::Magenta);
-	globalBubbleBuffHitbox.setPosition({ 100, 100 });
+    sf::RectangleShape comboBarBackground;
+    comboBarBackground.setSize({ 200.0f, 20.0f });
+    comboBarBackground.setPosition({ 20.0f, window.getSize().y - 50.0f });
+    comboBarBackground.setFillColor(sf::Color(50, 50, 50));
 
-    sf::RectangleShape rubberDuckBuffHitbox;
-    rubberDuckBuffHitbox.setSize(sf::Vector2f(100, 100));
-    rubberDuckBuffHitbox.setFillColor(sf::Color::Red);
-	rubberDuckBuffHitbox.setPosition({ -100, -100 });
+    sf::RectangleShape comboBarFill;
+    comboBarFill.setSize({ 0.0f, 20.0f });
+    comboBarFill.setPosition(comboBarBackground.getPosition());
+    comboBarFill.setFillColor(sf::Color(100, 200, 255));
 
 	// Objects for clicking
     sf::FloatRect clickArea({ 300, 350 }, { 200, 150 });
@@ -534,19 +537,6 @@ int main()
             }
         }
 
-        if (isGlobalBubbleBuffActive)
-            realBubblesPerSecond *= globalBubbleBuffMultiplier;
-
-        if (isRubberDuckBuffActive)
-            realBubblesPerSecond *= rubberDuckBuffMultiplier;
-
-        // Clicking buffs
-        if (isGlobalBubbleBuffActive)
-            realClickMultiplier *= globalBubbleBuffMultiplier;
-
-        if (isRubberDuckBuffActive)
-            realClickMultiplier *= rubberDuckBuffMultiplier;
-
         // Clicking stuff
         bool isCurrentlyPressed = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
         bool justClicked = isCurrentlyPressed && !isButtonPressed;
@@ -670,7 +660,18 @@ int main()
             if (!clickHandled && clickArea.contains(mousePositionF))
             {
                 long double clickValue = (baseBubblesPerClick + (bubblesPerSecond * 0.05)) * realClickMultiplier;
-                addBubbles(clickValue, bubbles, allTimeBubbles, &allTimeBubblesPerClick, true);
+
+                comboSystem.onClick(
+                    sf::Mouse::getPosition(window).x,
+                    sf::Mouse::getPosition(window).y,
+                    font,
+                    static_cast<float>(clickValue),
+                    bubbles,
+                    allTimeBubbles,
+                    &allTimeBubblesPerClick,
+                    true
+                );
+
                 clickHandled = true;
             }
 
@@ -881,93 +882,129 @@ int main()
         }
 
         // Buff logic here
-        bool globalBubbleBuffClicked = buffHandler(
-            mousePositionF,
-            window,
-
-            globalBubbleBuffHitbox,
-
-            globalBubbleBuffClock,
-            globalBubbleBuffSpawnIntervalClock,
-            globalBubbleBuffLifetimeClock,
-
-            isGlobalBubbleBuffActive,
-            showGlobalBubbleBuffHitbox,
-
-            globalBubbleBuffSpawnInterval,
-			globalBubbleBuffMultiplier,
-            globalBubbleBuffDuration,
-            120.0f, 180.0f,
-
-            isCurrentlyPressed,
-            isButtonPressed,
-
-            true,
-
-            [&](sf::RectangleShape& buffHitbox, float& buffMultiplier, float& buffDuration)
-            {
-                selectGlobalBubbleVariant(
-                    currentGlobalBubbleType,
-                    buffHitbox,
-                    buffMultiplier,
-                    buffDuration,
-                    currentGlobalBubbleSprite
-                );
-                doesGlobalBubbleBuffExist = true;
-                canPressGlobalBubbleBuff = true;
-            },
-            [&]()
-            {
-                if (currentGlobalBubbleType.globalBubbleType == globalBubbleVariantType::Normal)
-                {
-                    doesGlobalBubbleBuffExist = false;
-                }
-
-                if (currentGlobalBubbleType.globalBubbleType == globalBubbleVariantType::Multiplicative)
-                {
-                    doesGlobalBubbleBuffExist = false;
-                }
-
-                if (currentGlobalBubbleType.globalBubbleType == globalBubbleVariantType::Additive)
-                {
-                    float randomValue = 1.0f + static_cast<float>(rand()) / RAND_MAX * 4.0f;
-                    bubbles += (1 + pow(10, (floor(log10(realBubbles)) - 2))) * randomValue;
-                    doesGlobalBubbleBuffExist = false;
-                }
-
-                if (currentGlobalBubbleType.globalBubbleType == globalBubbleVariantType::BubbleChaos)
-                {
-                    isBubbleChaosActive = true;
-                    bubbleChaosClock.restart();
-                    bubbleChaosSpawnIntervalClock.restart();
-                    doesGlobalBubbleBuffExist = false;
-                }
-
-                if (currentGlobalBubbleType.globalBubbleType == globalBubbleVariantType::BubbleFrenzy)
-                {
-                    isBubbleFrenzyActive = true;
-                    bubbleFrenzyClock.restart();
-                    bubbleFrenzySpawnIntervalClock.restart();
-                    doesGlobalBubbleBuffExist = false;
-                }
-
-                if (currentGlobalBubbleType.globalBubbleType == globalBubbleVariantType::BubbleMayhem)
-                {
-                    isBubbleMayhemActive = true;
-                    bubbleMayhemClock.restart();
-                    bubbleMayhemSpawnIntervalClock.restart();
-                    doesGlobalBubbleBuffExist = false;
-                }
-            },
-            &currentGlobalBubbleSprite,
-            true
-		);
-
-        if (globalBubbleBuffClicked && canPressGlobalBubbleBuff)
+        for (auto& queued : globalBuffQueue)
         {
-            bubblePopping.play();
-            canPressGlobalBubbleBuff = false;
+            queued.delayRemaining -= deltaTime;
         }
+
+        if (shouldSpawnGlobalBuff())
+        {
+            sf::Vector2f position = getGlobalBuffSpawnPosition();
+            sf::Vector2f size = { 100.0f, 100.0f };
+
+            auto result = selectGlobalBuffVariant(position, size);
+            if (result.has_value())
+            {
+                auto& [variant, sprite] = result.value();
+                spawnGlobalBuff(sprite, static_cast<int>(variant.effectType));
+            }
+
+            queueGlobalBuffs(1);
+        }
+
+        if (globalBuffQueue.empty())
+        {
+            queueGlobalBuffs(1);
+        }
+
+        updateGlobalBuffs(deltaTime);
+
+        if (justClicked)
+        {
+            handleGlobalBuffClicks(static_cast<sf::Vector2f>(sf::Mouse::getPosition(window)),
+                [&](const GlobalBuffVariant& variant)
+                {
+                    if (variant.variantType == buffVariantType::globalBubbleBuff)
+                        bubblePopping.play();
+
+                    switch (variant.effectType)
+                    {
+                    case GlobalBuffType::Normal:
+                        isNormalBuffActive = true;
+                        normalBuffDuration = variant.duration;
+                        normalBuffClock.restart();
+                        break;
+
+                    case GlobalBuffType::Multiplicative:
+                        isMultiplicativeBuffActive = true;
+                        multiplicativeBuffDuration = variant.duration;
+                        multiplicativeBuffClock.restart();
+                        break;
+
+                    case GlobalBuffType::Additive:
+                    {
+                        float randomValue = 1.0f + static_cast<float>(rand()) / RAND_MAX * 4.0f;
+                        bubbles += (1 + pow(10, (floor(log10(realBubbles)) - 2))) * randomValue;
+                        break;
+                    }
+
+                    case GlobalBuffType::Chaos:
+                        isBubbleChaosActive = true;
+                        bubbleChaosClock.restart();
+                        bubbleChaosSpawnIntervalClock.restart();
+                        break;
+
+                    case GlobalBuffType::Frenzy:
+                        isBubbleFrenzyActive = true;
+                        bubbleFrenzyClock.restart();
+                        bubbleFrenzySpawnIntervalClock.restart();
+                        break;
+
+                    case GlobalBuffType::Mayhem:
+                        isBubbleMayhemActive = true;
+                        bubbleMayhemClock.restart();
+                        bubbleMayhemSpawnIntervalClock.restart();
+                        break;
+
+                    case GlobalBuffType::Mutated:
+                        isMutatedBubbleActive = true;
+                        mutatedBubbleDuration = variant.duration;
+                        mutatedBubbleClock.restart();
+                        break;
+                    }
+                }
+            );
+        }
+
+        if (isNormalBuffActive)
+        {
+            if (normalBuffClock.getElapsedTime().asSeconds() >= normalBuffDuration)
+                isNormalBuffActive = false;
+            else
+            {
+                realBubblesPerSecond *= normalBuffMultiplier;
+                realClickMultiplier *= normalBuffMultiplier;
+            }
+        }
+
+        if (isMultiplicativeBuffActive)
+        {
+            if (multiplicativeBuffClock.getElapsedTime().asSeconds() >= multiplicativeBuffDuration)
+                isMultiplicativeBuffActive = false;
+            else
+            {
+                realBubblesPerSecond *= multiplicativeBuffMultiplier;
+                realClickMultiplier *= multiplicativeBuffMultiplier;
+            }
+        }
+
+        if (isBubbleChaosActive)
+            if (bubbleChaosClock.getElapsedTime().asSeconds() >= bubbleChaosDuration)
+                isBubbleChaosActive = false;
+            else
+                realBubblesPerSecond *= bubbleChaosBuffMultiplier;
+
+        if (isBubbleFrenzyActive)
+            if (bubbleFrenzyClock.getElapsedTime().asSeconds() >= bubbleFrenzyDuration)
+                isBubbleFrenzyActive = false;
+			else
+                realBubblesPerSecond *= bubbleFrenzyBuffMultiplier;
+
+        if (isBubbleMayhemActive)
+            if (bubbleMayhemClock.getElapsedTime().asSeconds() >= bubbleMayhemDuration)
+				isBubbleMayhemActive = false;
+			else
+                realBubblesPerSecond *= bubbleMayhemBuffMultiplier;
 
         // Rubber ducks removed for now, will be added back during release
 
@@ -999,6 +1036,7 @@ int main()
         }
 
         displayBubbles += (bubbles - displayBubbles) * smoothingFactor * deltaTime;
+        comboSystem.update(deltaTime);
 
         // Shop/Upgrade logic here
         float startX = window.getSize().x - UIConstants::TabWidth - UIConstants::TabRightMargin;
@@ -1678,9 +1716,9 @@ int main()
         achievementsTab.setFillColor(currentTab == GameTabs::Achievements ? sf::Color::White : sf::Color(150, 150, 150));
         window.draw(achievementsTab);
 
-        sf::Sprite achievementsIcon(globalBubbleTexture);
+        sf::Sprite achievementsIcon(goldenBubbleTexture);
 
-        sf::Vector2u texSize = globalBubbleTexture.getSize();
+        sf::Vector2u texSize = goldenBubbleTexture.getSize();
         if (texSize.x > 0 && texSize.y > 0)
         {
             float targetSize = iconTabSize * 0.6f;
@@ -1764,33 +1802,13 @@ int main()
             window.draw(bubbleComboText);
         }
 
-        if (showGlobalBubbleBuffHitbox)
-        {
-            if (!isGlobalBubbleBuffActive)
-            {
-                float t = globalBubblePulseClock.getElapsedTime().asMilliseconds();
-                float pulse = 1.0f + 0.02f * sinf(t * 0.003f);
+        drawGlobalBuffs(window);
 
-                currentGlobalBubbleSprite.setScale(sf::Vector2f(pulse * 0.8f, pulse * 0.8f));
+        updateAndDrawBubbles(activeChaosBubbles, window);
+        updateAndDrawBubbles(activeFrenzyBubbles, window);
+        updateAndDrawBubbles(activeMayhemBubbles, window);
 
-                sf::Vector2u textureSize = currentGlobalBubbleSprite.getTexture().getSize();
-                currentGlobalBubbleSprite.setOrigin(sf::Vector2f(textureSize.x / 2.0f, textureSize.y / 2.0f));
-
-                sf::Vector2f hitboxCenter = {
-                    globalBubbleBuffHitbox.getPosition().x + globalBubbleBuffHitbox.getSize().x / 2.0f,
-                    globalBubbleBuffHitbox.getPosition().y + globalBubbleBuffHitbox.getSize().y / 2.0f
-                };
-
-                currentGlobalBubbleSprite.setPosition(hitboxCenter);
-            }
-
-            window.draw(currentGlobalBubbleSprite);
-        }
-
-        if (showRubberDuckBuffHitbox)
-        {
-            window.draw(rubberDuckBuffHitbox);
-        }
+        comboSystem.draw(window);
 
         window.display();
 
