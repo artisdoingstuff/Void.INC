@@ -68,7 +68,7 @@ vector<UpgradeItem> upgrades;
 
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.1.16-beta";
+string gameVersion = "v1.1.17-beta";
 
 const long double shopInflationMultiplier = 1.15L;
 
@@ -1448,7 +1448,7 @@ int main()
                 }
             }
 
-            if (itemPage > 1)
+            if (totalPages > 1)
             {
                 // Prev/Next Buttons (Rest of Pagination)
                 sf::Vector2f prevPos = { startX - boxWidth - 20.f + itemsSlideOffset, upgradeY + 85.f };
