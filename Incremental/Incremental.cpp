@@ -9,6 +9,7 @@
 #include "GameFileState.h"
 #include "GlobalBuffHandler.h"
 #include "OfflineBubbles.h"
+#include "ShootingStarBubble.h"
 #include "Upgrades.h"
 #include "UpgradesList.h"
 
@@ -70,7 +71,7 @@ ComboSystem comboSystem;
 
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.2.0-beta";
+string gameVersion = "v1.2.1-beta";
 
 const long double shopInflationMultiplier = 1.15L;
 
@@ -168,7 +169,6 @@ void updateBubbleBuff(
         float x = static_cast<float>(rand() % maxX);
         float y = static_cast<float>(rand() % maxY);
         activeBubbleList.emplace_back(sf::Vector2f(x, y));
-        cout << "spawned";
         spawnClock.restart();
     }
 
@@ -248,6 +248,11 @@ int main()
     // Buffs variables here
     queueGlobalBuffs(1);
     bool canPressGlobalBubbleBuff = false;
+
+    vector<ShootingStar> activeShootingStars;
+	bool isShootingStarActive = false;
+	float shootingStarDuration = 0.0f;
+	float shootingStarBuffMultiplier = 5.0f;
 
     vector<BubbleChaos> activeChaosBubbles;
     bool isBubbleChaosActive = false;
@@ -345,6 +350,7 @@ int main()
 
     sf::Clock normalBuffClock;
     sf::Clock multiplicativeBuffClock;
+	sf::Clock shootingStarClock;
 
     sf::Clock mutatedBubbleClock;
 
@@ -662,8 +668,8 @@ int main()
                 long double clickValue = (baseBubblesPerClick + (bubblesPerSecond * 0.05)) * realClickMultiplier;
 
                 comboSystem.onClick(
-                    sf::Mouse::getPosition(window).x,
-                    sf::Mouse::getPosition(window).y,
+                    mousePosition.x,
+                    mousePosition.y,
                     font,
                     static_cast<float>(clickValue),
                     bubbles,
@@ -681,6 +687,20 @@ int main()
                 handleBubbleClick(activeChaosBubbles, mousePositionF, bubbles, realBubblesPerSecond, bubbleChaosBuffMultiplier, bubblePopping);
                 handleBubbleClick(activeFrenzyBubbles, mousePositionF, bubbles, realBubblesPerSecond, bubbleFrenzyBuffMultiplier, bubblePopping);
                 handleBubbleClick(activeMayhemBubbles, mousePositionF, bubbles, realBubblesPerSecond, bubbleMayhemBuffMultiplier, bubblePopping);
+                
+                for (auto& star : activeShootingStars)
+                {
+                    if (!star.collected && star.isClicked(mousePositionF))
+                    {
+                        star.collected = true;
+                        clickHandled = true;
+
+                        bubbles += (realBubblesPerSecond * 5) * 30;
+
+                        bubblePopping.play();
+                        break;
+                    }
+                }
             }
 
             // Items
@@ -961,6 +981,20 @@ int main()
                         mutatedBubbleDuration = variant.duration;
                         mutatedBubbleClock.restart();
                         break;
+
+                    case GlobalBuffType::ShootingStar:
+                    {
+						isShootingStarActive = true;
+                        shootingStarDuration = variant.duration;
+                        shootingStarClock.restart();
+
+                        sf::Vector2f start = { 0.0f, 200.0f };
+                        sf::Vector2f end = { 1600.0f, 600.0f };
+                        float arcHeight = 300.0f;
+
+                        activeShootingStars.emplace_back(goldenBubbleTexture, start, end, arcHeight, 3.0f);
+                        break;
+                    }
                     }
                 }
             );
@@ -988,6 +1022,12 @@ int main()
             }
         }
 
+        if (isShootingStarActive)
+            if (shootingStarClock.getElapsedTime().asSeconds() >= shootingStarDuration)
+                isShootingStarActive = false;
+            else
+				realBubblesPerSecond *= shootingStarBuffMultiplier;
+
         if (isBubbleChaosActive)
             if (bubbleChaosClock.getElapsedTime().asSeconds() >= bubbleChaosDuration)
                 isBubbleChaosActive = false;
@@ -1005,6 +1045,14 @@ int main()
 				isBubbleMayhemActive = false;
 			else
                 realBubblesPerSecond *= bubbleMayhemBuffMultiplier;
+
+        for (auto& star : activeShootingStars)
+            star.update();
+
+        activeShootingStars.erase(
+            remove_if(activeShootingStars.begin(), activeShootingStars.end(),
+                [](const ShootingStar& s) { return s.isExpired(); }),
+            activeShootingStars.end());
 
         // Rubber ducks removed for now, will be added back during release
 
@@ -1807,8 +1855,13 @@ int main()
         updateAndDrawBubbles(activeChaosBubbles, window);
         updateAndDrawBubbles(activeFrenzyBubbles, window);
         updateAndDrawBubbles(activeMayhemBubbles, window);
-
         comboSystem.draw(window);
+
+        for (auto& star : activeShootingStars)
+        {
+            if (star.sprite.has_value())
+                window.draw(star.sprite.value());
+        }
 
         window.display();
 

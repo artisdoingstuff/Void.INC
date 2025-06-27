@@ -4,7 +4,6 @@
 
 enum class buffVariantType {
     globalBubbleBuff,
-    goldenBubbleBuff,
     rubberDuckBuff,
     mutationBuff
 };
@@ -16,7 +15,8 @@ enum class GlobalBuffType {
     Chaos,
     Frenzy,
     Mayhem,
-    Mutated
+    Mutated,
+    ShootingStar
 };
 
 struct GlobalBuffVariant {
@@ -36,9 +36,10 @@ inline vector<GlobalBuffVariant> globalBuffVariants = {
     { GlobalBuffType::Multiplicative, 3.0f, 20.0f, 22.0f, &goldenBubbleTexture, buffVariantType::globalBubbleBuff },
     { GlobalBuffType::Additive,       1.0f,  0.0f,  8.0f, &goldenBubbleTexture, buffVariantType::globalBubbleBuff },
     { GlobalBuffType::Chaos,          0.6f, 14.0f,  1.0f, &goldenBubbleTexture, buffVariantType::globalBubbleBuff },
-    { GlobalBuffType::Frenzy,         1.5f, 20.0f,  6.0f, &goldenBubbleTexture, buffVariantType::globalBubbleBuff },
-    { GlobalBuffType::Mayhem,         0.9f, 20.0f,  3.0f, &goldenBubbleTexture, buffVariantType::globalBubbleBuff },
-    { GlobalBuffType::Mutated,        1.0f, 25.0f,  0.0f, &goldenBubbleTexture,buffVariantType::mutationBuff },
+    { GlobalBuffType::Frenzy,         1.5f, 20.0f,  5.0f, &goldenBubbleTexture, buffVariantType::globalBubbleBuff },
+    { GlobalBuffType::Mayhem,         0.9f, 20.0f,  2.0f, &goldenBubbleTexture, buffVariantType::globalBubbleBuff },
+    { GlobalBuffType::Mutated,        1.0f, 25.0f,  0.0f, &goldenBubbleTexture, buffVariantType::mutationBuff },
+    { GlobalBuffType::ShootingStar,   5.0f, 10.0f,  2.0f, &goldenBubbleTexture, buffVariantType::globalBubbleBuff },
     
 };
 
@@ -146,9 +147,10 @@ inline void updateGlobalBuffs(float dt)
 
         float t = buff.pulseClock.getElapsedTime().asMilliseconds();
         float pulse = 1.0f + 0.02f * sinf(t * 0.003f);
-        sf::FloatRect bounds = buff.sprite.getLocalBounds();
-        buff.sprite.setOrigin({ bounds.position.x / 2.f, bounds.position.y / 2.f });
-        buff.sprite.setScale({ pulse, pulse });
+        buff.sprite.setScale({ pulse * 0.8f, pulse * 0.8f });
+
+		sf::Vector2u textureSize = buff.sprite.getTexture().getSize();
+        buff.sprite.setOrigin({ textureSize.x / 2.0f, textureSize.y / 2.0f });
     }
 
     activeGlobalBuffs.erase(remove_if(activeGlobalBuffs.begin(), activeGlobalBuffs.end(),

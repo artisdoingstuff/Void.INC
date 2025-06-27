@@ -36,11 +36,11 @@ inline void achievementsList()
     achievements.push_back({ "Mythical Bubbler", "Generate 750M Bubbles", AchievementType::TotalBubbles, 750000000.0 });
     achievements.push_back({ "Supreme Bubbler", "Generate 1B Bubbles", AchievementType::TotalBubbles, 1000000000.0 });
     achievements.push_back({ "Divine Bubbler", "Generate 10B Bubbles", AchievementType::TotalBubbles, 10000000000.0 });
-    achievements.push_back({ "Mythos", "Generate 25B Bubbles", AchievementType::TotalBubbles, 2500000000.0 });
-    achievements.push_back({ "Aether", "Generate 50B Bubbles", AchievementType::TotalBubbles, 5000000000.0 });
-    achievements.push_back({ "Bubble Legend", "Generate 75B Bubbles", AchievementType::TotalBubbles, 7500000000.0 });
-    achievements.push_back({ "It only gets harder from here.", "Generate 100B Bubbles", AchievementType::TotalBubbles, 1000000000.0 });
-    achievements.push_back({ "Here already? It gets harder.", "Generate 1T Bubbles", AchievementType::TotalBubbles, 10000000000.0 });
+    achievements.push_back({ "Mythos", "Generate 25B Bubbles", AchievementType::TotalBubbles, 25000000000.0 });
+    achievements.push_back({ "Aether", "Generate 50B Bubbles", AchievementType::TotalBubbles, 50000000000.0 });
+    achievements.push_back({ "Bubble Legend", "Generate 75B Bubbles", AchievementType::TotalBubbles, 75000000000.0 });
+    achievements.push_back({ "It only gets harder from here.", "Generate 100B Bubbles", AchievementType::TotalBubbles, 100000000000.0 });
+    achievements.push_back({ "Here already? It gets harder.", "Generate 1T Bubbles", AchievementType::TotalBubbles, 1000000000000.0 });
 
     // Clicking Achievements
     achievements.push_back({ "Your First Click!", "Generate 1 Bubble from Clicking", AchievementType::Clicks, 1 });
