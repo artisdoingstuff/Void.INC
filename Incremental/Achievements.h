@@ -3,6 +3,13 @@
 #include "Includes.h"
 #include "Upgrades.h"
 
+enum class AchievementPerkType {
+    None,
+    ClickMultiplier,
+    BPSMultiplier,
+    BuffSpawnRate
+};
+
 enum class AchievementType
 {
     TotalBubbles,
@@ -13,10 +20,86 @@ enum class AchievementType
     BuffTriggered
 };
 
+struct PerkEffect {
+    AchievementPerkType type;
+    float value;
+};
+
+struct PerkManager {
+    float clickMultiplier = 1.0f;
+    float bpsMultiplier = 1.0f;
+    float buffSpawnRateMultiplier = 1.0f;
+
+    void applyPerk(AchievementPerkType type, float value)
+    {
+        switch (type)
+        {
+        case AchievementPerkType::ClickMultiplier:
+            clickMultiplier += value;
+
+            break;
+        case AchievementPerkType::BPSMultiplier:
+            bpsMultiplier += value;
+            break;
+
+        case AchievementPerkType::BuffSpawnRate:
+            buffSpawnRateMultiplier += value;
+            break;
+
+        default:
+            break;
+        }
+    }
+};
+
+inline PerkEffect getPerkEffectFromAchievementType(AchievementType type)
+{
+    switch (type)
+    {
+    case AchievementType::Clicks:
+        return { AchievementPerkType::ClickMultiplier, 0.05f };
+
+    case AchievementType::TotalBubbles:
+        return { AchievementPerkType::BPSMultiplier, 0.1f };
+
+    case AchievementType::UpgradeCount:
+    case AchievementType::SpecificUpgrade:
+        return { AchievementPerkType::BPSMultiplier, 0.05f };
+
+    case AchievementType::BuffTriggered:
+        return { AchievementPerkType::BuffSpawnRate, 0.15f };
+
+    default:
+        return { AchievementPerkType::None, 0.0f };
+    }
+}
+
+inline AchievementPerkType getPerkFromAchievementType(AchievementType type)
+{
+    switch (type)
+    {
+    case AchievementType::Clicks:
+        return AchievementPerkType::ClickMultiplier;
+
+    case AchievementType::TotalBubbles:
+    case AchievementType::UpgradeCount:
+    case AchievementType::SpecificUpgrade:
+        return AchievementPerkType::BPSMultiplier;
+
+    case AchievementType::BuffTriggered:
+        return AchievementPerkType::BuffSpawnRate;
+
+    default:
+        return AchievementPerkType::None;
+    }
+}
+
+inline PerkManager perkManager;
+
 struct AchievementPopup {
     string title;
     float elapsed = 0.f;
-    float duration = 2.5f;
+    float duration = 3.0f;
     bool active = true;
 };
 
@@ -35,11 +118,13 @@ struct Achievement
 
     optional<sf::Sprite> spriteIcon;
 
+    AchievementPerkType perkType = AchievementPerkType::None;
+
     bool checkUnlock(
         long double totalBubbles,
         long double totalClicks,
         const vector<UpgradeItem>& upgrades,
-        const unordered_map<string, int>& buffTriggers = {}
+        long double buffTriggers
     )
     {
         if (isUnlocked) return false;
@@ -79,10 +164,7 @@ struct Achievement
         }
 
         case AchievementType::BuffTriggered:
-        {
-            auto it = buffTriggers.find(targetUpgrade);
-            return it != buffTriggers.end() && it->second >= unlockThreshold;
-        }
+            return (buffTriggers >= unlockThreshold);
 
         default:
             return false;

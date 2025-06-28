@@ -12,6 +12,7 @@ void saveFileToJson(
     string version,
     time_t timestamp,
     long double duckCounter,
+    long double buffCounter,
     long double bubbles,
     long double allTimeBubbles,
     long double allTimeBubblesPerClick,
@@ -31,6 +32,7 @@ void saveFileToJson(
     saveData["version"] = version;
     saveData["timestamp"] = timestamp;
     saveData["duckCounter"] = round2(duckCounter);
+    saveData["buffCounter"] = round2(buffCounter);
     saveData["bubbles"] = round2(bubbles);
     saveData["allTimeBubbles"] = round2(allTimeBubbles);
     saveData["allTimeBubblesPerClick"] = round2(allTimeBubblesPerClick);
@@ -59,6 +61,7 @@ void saveFileToJson(
 void loadFileFromJson(
     time_t& timestamp,
     long double& duckCounter,
+    long double& buffCounter,
     long double& bubbles,
     long double& allTimeBubbles,
     long double& allTimeBubblesPerClick,
@@ -84,6 +87,7 @@ void loadFileFromJson(
 
     timestamp = saveData["timestamp"];
     duckCounter = saveData["duckCounter"];
+    buffCounter = saveData["buffCounter"];
     bubbles = saveData["bubbles"];
     allTimeBubbles = saveData["allTimeBubbles"];
     allTimeBubblesPerClick = saveData["allTimeBubblesPerClick"];
@@ -134,6 +138,16 @@ void loadFileFromJson(
             if (it != achievements.end())
             {
                 it->isUnlocked = saved.isUnlocked;
+            }
+        }
+
+        perkManager = PerkManager();
+        for (const auto& a : achievements)
+        {
+            if (a.isUnlocked)
+            {
+                PerkEffect effect = getPerkEffectFromAchievementType(a.achievementType);
+                perkManager.applyPerk(effect.type, effect.value);
             }
         }
     }

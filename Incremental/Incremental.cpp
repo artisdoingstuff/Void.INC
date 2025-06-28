@@ -71,7 +71,7 @@ ComboSystem comboSystem;
 
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.2.1-beta";
+string gameVersion = "v1.2.2-beta";
 
 const long double shopInflationMultiplier = 1.15L;
 
@@ -243,10 +243,10 @@ int main()
 	// Bubbles variables here
     long double displayBubbles = 0.0L;
 
+    long double buffCounter = 0.0L;
     long double duckCounter = 0.0L;
 
     // Buffs variables here
-    queueGlobalBuffs(1);
     bool canPressGlobalBubbleBuff = false;
 
     vector<ShootingStar> activeShootingStars;
@@ -314,6 +314,7 @@ int main()
     loadFileFromJson(
         savedTimestamp,
         duckCounter,
+        buffCounter,
         bubbles,
         allTimeBubbles,
         allTimeBubblesPerClick,
@@ -350,6 +351,7 @@ int main()
 
     sf::Clock normalBuffClock;
     sf::Clock multiplicativeBuffClock;
+
 	sf::Clock shootingStarClock;
 
     sf::Clock mutatedBubbleClock;
@@ -404,7 +406,7 @@ int main()
         clickMultiplier = 1.0L;
 
         long double realBubblesPerSecond = bubblesPerSecond;
-        long double realClickMultiplier = clickMultiplier;
+        long double realClickMultiplier = clickMultiplier * perkManager.clickMultiplier;
         long double realBubbles = bubbles;
 
         for (const auto& u : upgrades)
@@ -474,7 +476,7 @@ int main()
                 totalMultiplier *= it->second;
         }
 
-        realBubblesPerSecond = bubblesPerSecond * totalMultiplier;
+        realBubblesPerSecond = bubblesPerSecond * totalMultiplier * perkManager.bpsMultiplier;
 
         for (const auto& upgrade : upgrades)
         {
@@ -529,6 +531,10 @@ int main()
                 break;
             }
 
+            case AchievementType::BuffTriggered:
+                achievement.progressValue = min(buffCounter / achievement.unlockThreshold, 1.0L);
+                break;
+
             default:
                 achievement.progressValue = 0.0;
                 break;
@@ -537,6 +543,12 @@ int main()
             if (!achievement.isUnlocked && achievement.progressValue >= 1.0)
             {
                 achievement.isUnlocked = true;
+
+                PerkEffect effect = getPerkEffectFromAchievementType(achievement.achievementType);
+                if (effect.type != AchievementPerkType::None)
+                {
+                    perkManager.applyPerk(effect.type, effect.value);
+                }
 
                 popupQueue.push({ "Achievement Unlocked: " + achievement.name + "\n> " + achievement.description });
                 cout << "Achievement unlocked: " << achievement.name << endl;
@@ -665,7 +677,7 @@ int main()
             // Click Bubble
             if (!clickHandled && clickArea.contains(mousePositionF))
             {
-                long double clickValue = (baseBubblesPerClick + (bubblesPerSecond * 0.05)) * realClickMultiplier;
+                long double clickValue = (baseBubblesPerClick + (realBubblesPerSecond * 0.05)) * realClickMultiplier;
 
                 comboSystem.onClick(
                     mousePosition.x,
@@ -695,7 +707,7 @@ int main()
                         star.collected = true;
                         clickHandled = true;
 
-                        bubbles += (realBubblesPerSecond * 5) * 30;
+						addBubbles((realBubblesPerSecond * 5) * 30, bubbles, allTimeBubbles);
 
                         bubblePopping.play();
                         break;
@@ -937,6 +949,8 @@ int main()
                     if (variant.variantType == buffVariantType::globalBubbleBuff)
                         bubblePopping.play();
 
+                    buffCounter++;
+
                     switch (variant.effectType)
                     {
                     case GlobalBuffType::Normal:
@@ -954,7 +968,7 @@ int main()
                     case GlobalBuffType::Additive:
                     {
                         float randomValue = 1.0f + static_cast<float>(rand()) / RAND_MAX * 4.0f;
-                        bubbles += (1 + pow(10, (floor(log10(realBubbles)) - 2))) * randomValue;
+						addBubbles((1 + pow(10, (floor(log10(realBubbles)) - 2)))* randomValue, bubbles, allTimeBubbles);
                         break;
                     }
 
@@ -1045,9 +1059,6 @@ int main()
 				isBubbleMayhemActive = false;
 			else
                 realBubblesPerSecond *= bubbleMayhemBuffMultiplier;
-
-        for (auto& star : activeShootingStars)
-            star.update();
 
         activeShootingStars.erase(
             remove_if(activeShootingStars.begin(), activeShootingStars.end(),
@@ -1457,7 +1468,22 @@ int main()
                         totalMultiplier *= it->second;
                 }
 
-                long double finalItemBps = baseItemBps * totalMultiplier;
+                float totalBuffMultiplier = 1.0f;
+
+                if (isNormalBuffActive)
+                    totalBuffMultiplier *= normalBuffMultiplier;
+                if (isMultiplicativeBuffActive)
+                    totalBuffMultiplier *= multiplicativeBuffMultiplier;
+				if (isShootingStarActive)
+					totalBuffMultiplier *= shootingStarBuffMultiplier;
+                if (isBubbleChaosActive)
+                    totalBuffMultiplier *= bubbleChaosBuffMultiplier;
+                if (isBubbleFrenzyActive)
+                    totalBuffMultiplier *= bubbleFrenzyBuffMultiplier;
+                if (isBubbleMayhemActive)
+                    totalBuffMultiplier *= bubbleMayhemBuffMultiplier;
+
+                long double finalItemBps = baseItemBps * totalMultiplier * perkManager.bpsMultiplier * totalBuffMultiplier;
                 float percent = (realBubblesPerSecond > 0.0)
                     ? static_cast<float>((finalItemBps / realBubblesPerSecond) * 100.0f)
                     : 0.0f;
@@ -1844,6 +1870,8 @@ int main()
             window.draw(popupText);
         }
 
+		// Hi buff related rendering
+
         if (isBubbleComboActive && currentBubbleCombo > 1)
         {
             bubbleComboText.setString("Bubble Combo x" + to_string(currentBubbleCombo));
@@ -1859,6 +1887,8 @@ int main()
 
         for (auto& star : activeShootingStars)
         {
+            star.update();
+
             if (star.sprite.has_value())
                 window.draw(star.sprite.value());
         }
@@ -1874,6 +1904,7 @@ int main()
                     gameVersion,
                     currentTimestamp,
                     duckCounter,
+                    buffCounter,
                     bubbles,
                     allTimeBubbles,
                     allTimeBubblesPerClick,

@@ -65,12 +65,15 @@ struct QueuedGlobalBuff {
 
 inline deque<QueuedGlobalBuff> globalBuffQueue;
 inline sf::Clock globalBuffClock;
-inline const float minBuffCooldown = 120.0f;
-inline const float maxBuffCooldown = 180.0f;
+inline const float minBuffCooldown = 200.0f;
+inline const float maxBuffCooldown = 300.0f;
 
 inline void queueGlobalBuffs(int count)
 {
-    float baseDelay = static_cast<float>(rand()) / RAND_MAX * (maxBuffCooldown - minBuffCooldown) + minBuffCooldown;
+    float spawnRateMult = clamp(perkManager.buffSpawnRateMultiplier, 0.1f, 3.0f);
+    float baseDelay = (static_cast<float>(rand()) / RAND_MAX * (maxBuffCooldown - minBuffCooldown) + minBuffCooldown);
+    baseDelay /= spawnRateMult;
+
     for (int i = 0; i < count; ++i)
         globalBuffQueue.push_back({ baseDelay * (i + 1) });
 }

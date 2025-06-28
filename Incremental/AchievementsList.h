@@ -505,4 +505,50 @@ inline void achievementsList()
     achievements.push_back({ "Bubble Wand Placeholder 20", "Purchase 3000 Bubble Wand", AchievementType::SpecificUpgrade, 3000, "Bubble Wand" });
     achievements.push_back({ "Bubble Wand Placeholder 21", "Purchase 4000 Bubble Wand", AchievementType::SpecificUpgrade, 4000, "Bubble Wand" });
     achievements.push_back({ "Bubble Wand Placeholder 22", "Purchase 5000 Bubble Wand", AchievementType::SpecificUpgrade, 5000, "Bubble Wand" });
+
+    // Total Upgrades Achievements
+    achievements.push_back({ "Upgrade Achievement 0", "Purchase 1 Upgrades", AchievementType::UpgradeCount, 1 });
+    achievements.push_back({ "Upgrade Achievement 1", "Purchase 10 Upgrades", AchievementType::UpgradeCount, 10 });
+    achievements.push_back({ "Upgrade Achievement 2", "Purchase 25 Upgrades", AchievementType::UpgradeCount, 25 });
+    achievements.push_back({ "Upgrade Achievement 3", "Purchase 50 Upgrades", AchievementType::UpgradeCount, 50 });
+    achievements.push_back({ "Upgrade Achievement 4", "Purchase 75 Upgrades", AchievementType::UpgradeCount, 75 });
+    achievements.push_back({ "Upgrade Achievement 5", "Purchase 100 Upgrades", AchievementType::UpgradeCount, 100 });
+    achievements.push_back({ "Upgrade Achievement 6", "Purchase 150 Upgrades", AchievementType::UpgradeCount, 150 });
+    achievements.push_back({ "Upgrade Achievement 7", "Purchase 200 Upgrades", AchievementType::UpgradeCount, 200 });
+    achievements.push_back({ "Upgrade Achievement 8", "Purchase 250 Upgrades", AchievementType::UpgradeCount, 250 });
+    achievements.push_back({ "Upgrade Achievement 9", "Purchase 300 Upgrades", AchievementType::UpgradeCount, 300 });
+    achievements.push_back({ "Upgrade Achievement 10", "Purchase 400 Upgrades", AchievementType::UpgradeCount, 400 });
+    achievements.push_back({ "Upgrade Achievement 11", "Purchase 500 Upgrades", AchievementType::UpgradeCount, 500 });
+    achievements.push_back({ "Upgrade Achievement 12", "Purchase 600 Upgrades", AchievementType::UpgradeCount, 600 });
+    achievements.push_back({ "Upgrade Achievement 13", "Purchase 700 Upgrades", AchievementType::UpgradeCount, 700 });
+    achievements.push_back({ "Upgrade Achievement 14", "Purchase 800 Upgrades", AchievementType::UpgradeCount, 800 });
+    achievements.push_back({ "Upgrade Achievement 15", "Purchase 900 Upgrades", AchievementType::UpgradeCount, 900 });
+    achievements.push_back({ "Upgrade Achievement 16", "Purchase 1000 Upgrades", AchievementType::UpgradeCount, 1000 });
+    achievements.push_back({ "Upgrade Achievement 17", "Purchase 1100 Upgrades", AchievementType::UpgradeCount, 1100 });
+    achievements.push_back({ "Upgrade Achievement 18", "Purchase 1200 Upgrades", AchievementType::UpgradeCount, 1200 });
+    achievements.push_back({ "Upgrade Achievement 19", "Purchase 1300 Upgrades", AchievementType::UpgradeCount, 1300 });
+    achievements.push_back({ "Upgrade Achievement 20", "Purchase 1400 Upgrades", AchievementType::UpgradeCount, 1400 });
+    achievements.push_back({ "Upgrade Achievement 21", "Purchase 1500 Upgrades", AchievementType::UpgradeCount, 1500 });
+    achievements.push_back({ "Upgrade Achievement 22", "Purchase 1750 Upgrades", AchievementType::UpgradeCount, 1750 });
+    achievements.push_back({ "Upgrade Achievement 23", "Purchase 2000 Upgrades", AchievementType::UpgradeCount, 2000 });
+    achievements.push_back({ "Upgrade Achievement 24", "Purchase 2250 Upgrades", AchievementType::UpgradeCount, 2250 });
+    achievements.push_back({ "Upgrade Achievement 25", "Purchase 2500 Upgrades", AchievementType::UpgradeCount, 2500 });
+    achievements.push_back({ "Upgrade Achievement 26", "Purchase 3000 Upgrades", AchievementType::UpgradeCount, 3000 });
+    achievements.push_back({ "Upgrade Achievement 27", "Purchase 3500 Upgrades", AchievementType::UpgradeCount, 3500 });
+    achievements.push_back({ "Upgrade Achievement 28", "Purchase 4000 Upgrades", AchievementType::UpgradeCount, 4000 });
+    achievements.push_back({ "Upgrade Achievement 29", "Purchase 5000 Upgrades", AchievementType::UpgradeCount, 5000 });
+    achievements.push_back({ "Upgrade Achievement 30", "Purchase 6000 Upgrades", AchievementType::UpgradeCount, 6000 });
+    achievements.push_back({ "Upgrade Achievement 31", "Purchase 7000 Upgrades", AchievementType::UpgradeCount, 7000 });
+    achievements.push_back({ "Upgrade Achievement 32", "Purchase 8000 Upgrades", AchievementType::UpgradeCount, 8000 });
+    achievements.push_back({ "Upgrade Achievement 33", "Purchase 9000 Upgrades", AchievementType::UpgradeCount, 9000 });
+    achievements.push_back({ "Upgrade Achievement 34", "Purchase 10000 Upgrades", AchievementType::UpgradeCount, 10000 });
+
+    // Buffs Triggered Achievements (collective)
+    achievements.push_back({ "Ooo Shiny!", "Trigger 1 Buff", AchievementType::BuffTriggered, 1 });
+    achievements.push_back({ "Placeholder 1", "Trigger 5 Buffs", AchievementType::BuffTriggered, 5 });
+    achievements.push_back({ "Placeholder 2!", "Trigger 10 Buffs", AchievementType::BuffTriggered, 10 });
+    achievements.push_back({ "Placeholder 3!", "Trigger 25 Buffs", AchievementType::BuffTriggered, 25 });
+    achievements.push_back({ "Placeholder 4", "Trigger 50 Buffs", AchievementType::BuffTriggered, 50 });
+    achievements.push_back({ "Placeholder 5", "Trigger 75 Buffs", AchievementType::BuffTriggered, 75 });
+    achievements.push_back({ "Placeholder 6", "Trigger 100 Buffs", AchievementType::BuffTriggered, 100 });
 }
