@@ -4,6 +4,27 @@
 
 extern vector<UpgradeItem> upgrades;
 
+inline UpgradeRarity getRarityByName(const string& upgradeName)
+{
+	if (upgradeName == "Toothpaste")        return UpgradeRarity::Uncommon;
+	if (upgradeName == "Loofah")            return UpgradeRarity::Uncommon;
+	if (upgradeName == "Bubble Bath")       return UpgradeRarity::Uncommon;
+	if (upgradeName == "Bathtub Jet")       return UpgradeRarity::Uncommon;
+	if (upgradeName == "Luxury Spa")        return UpgradeRarity::Rare;
+	if (upgradeName == "Foam Pit")          return UpgradeRarity::Rare;
+	if (upgradeName == "Foam Party")        return UpgradeRarity::Rare;
+	if (upgradeName == "Sudsy Soap")        return UpgradeRarity::Rare;
+	if (upgradeName == "Bubble Machine")    return UpgradeRarity::Rare;
+    if (upgradeName == "Bubbly Pool")       return UpgradeRarity::Epic;
+	if (upgradeName == "Sparkling Water")   return UpgradeRarity::Epic;
+	if (upgradeName == "Carbonated Soda")   return UpgradeRarity::Epic;
+	if (upgradeName == "Bath Bombs")        return UpgradeRarity::Epic;
+	if (upgradeName == "Bubble Wand")       return UpgradeRarity::Epic;
+    if (upgradeName.find("Super ") == 0)    return UpgradeRarity::Epic;
+
+    return UpgradeRarity::Common;
+}
+
 inline const unordered_map<string, long double> globalUpgradeMultiplierValues = {
     { "Red Bubble", 1.01 }, { "Green Bubble", 1.01 },
     { "Blue Bubble", 1.01 }, { "Rubber Ducky", 1.01 },
@@ -32,20 +53,21 @@ inline void upgradesList()
     // Items
     upgrades.push_back(
         {
-            "Soap",     // Reference Name
-            0,          // Item count
-            10.0, 10.0, // Item base/current cost
-            0.15,        // Item production (bubbles per second)
-            10.0,       // Unlock threshold
-            false,      // isMilestone
-            false,      // unlockedByMilestone
-            0.0,        // milestoneTriggerValue
-            true,       // isitemUpgrade <-- This is what matters for Items
-            false,      // isOtherUpgrade <-- ONLY for non-item upgrades (such as Bubble Milestones)
-            true,       // isClickUpgrade <-- True only for Soap
-            false,      // isDurationUpgrade <-- Doesn't affect buff duration
-            true,       // isMinorUpgrade <-- Will have Minor Upgrades (small buffs)
-            true        // isMajorUpgrade <-- Will have Major Upgrades (big buffs)
+            "Soap",                 // Reference Name
+            0,                      // Item count
+            10.0, 10.0,             // Item base/current cost
+            0.15,                   // Item production (bubbles per second)
+            10.0,                   // Unlock threshold
+            false,                  // isMilestone
+            false,                  // unlockedByMilestone
+            0.0,                    // milestoneTriggerValue
+            true,                   // isitemUpgrade <-- This is what matters for Items
+            false,                  // isOtherUpgrade <-- ONLY for non-item upgrades (such as Bubble Milestones)
+            true,                   // isClickUpgrade <-- True only for Soap
+            false,                  // isDurationUpgrade <-- Doesn't affect buff duration
+            true,                   // isMinorUpgrade <-- Will have Minor Upgrades (small buffs)
+            true,                   // isMajorUpgrade <-- Will have Major Upgrades (big buffs)
+            UpgradeRarity::Common   // Rarity
         }
     );
     upgrades.push_back({ "Hand Wash", 0, 75.0, 75.0, 0.5, 100.0, false, false, 0.0, true, false, false, false, true, true });

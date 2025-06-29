@@ -9,9 +9,12 @@
 #include "GameFileState.h"
 #include "GlobalBuffHandler.h"
 #include "OfflineBubbles.h"
+#include "Popup.h"
 #include "ShootingStarBubble.h"
 #include "Upgrades.h"
 #include "UpgradesList.h"
+#include "WeatherCycle.h"
+#include "WeatherVisuals.h"
 
 // Upgrade shop variables
 namespace UIConstants
@@ -60,6 +63,12 @@ void loadUpgradeTextures(map<string, sf::Texture>& upgradeTextures)
     upgradeTextures["Loofah"].loadFromFile("Assets/loofah_upgrade.png");
 }
 
+void loadAchievementTexture(map<string, sf::Texture>& achievementTextures)
+{
+    achievementTextures["It Begins."].loadFromFile("Assets/Achievements/achievement_bubble_1.png");
+	achievementTextures["Locked"].loadFromFile("Assets/Achievements/locked.png");
+}
+
 sf::Texture bubbleTexture;
 sf::Texture goldenBubbleTexture;
 
@@ -71,7 +80,7 @@ ComboSystem comboSystem;
 
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.2.2-beta";
+string gameVersion = "v1.2.3-beta";
 
 const long double shopInflationMultiplier = 1.15L;
 
@@ -86,8 +95,8 @@ long double clickMultiplier = 1.0L;
 
 long double totalUpgradeCount = 0.0L;
 
-queue<AchievementPopup> popupQueue;
-optional<AchievementPopup> currentPopup;
+queue<PopupStruct> popupQueue;
+optional<PopupStruct> currentPopup;
 
 // Bubble combo variables
 bool isBubbleComboActive = false;
@@ -307,6 +316,18 @@ int main()
     bool isAchievementsAnimating = false;
     float achievementsSlideOffset = -2000.f;
 
+	map<string, sf::Texture> achievementTextures;
+	loadAchievementTexture(achievementTextures);
+
+    for (auto& achievement : achievements)
+    {
+        auto it = achievementTextures.find(achievement.name);
+        if (it != achievementTextures.end())
+            achievement.spriteIcon = sf::Sprite(it->second);
+        else
+            achievement.spriteIcon = sf::Sprite(achievementTextures["Locked"]);
+	}
+
     // Other Variables
     unordered_map<string, float> hoverScales;
 
@@ -476,7 +497,7 @@ int main()
                 totalMultiplier *= it->second;
         }
 
-        realBubblesPerSecond = bubblesPerSecond * totalMultiplier * perkManager.bpsMultiplier;
+        realBubblesPerSecond = bubblesPerSecond * totalMultiplier * perkManager.bpsMultiplier * getWeatherBpsMultiplier(currentWeather.current);
 
         for (const auto& upgrade : upgrades)
         {
@@ -914,6 +935,9 @@ int main()
         }
 
         // Buff logic here
+        // Weather Buff
+        updateWeather(popupQueue);
+
         for (auto& queued : globalBuffQueue)
         {
             queued.delayRemaining -= deltaTime;
@@ -1211,8 +1235,12 @@ int main()
 
                 if (isHovered)
                 {
+                    sf::Color rarityColor = getRarityColor(upgrade.rarity);
+                    if (!upgrade.canAfford(bubbles))
+                        rarityColor = sf::Color(rarityColor.r / 2, rarityColor.g / 2, rarityColor.b / 2);
+
                     box.setOutlineThickness(2.f);
-                    box.setOutlineColor(sf::Color(255, 230, 120));
+                    box.setOutlineColor(rarityColor);
                 }
                 else
                 {
@@ -1246,7 +1274,9 @@ int main()
                 sf::Text nameText(font);
                 nameText.setCharacterSize(12);
                 nameText.setString(upgrade.name);
-                nameText.setFillColor(sf::Color::Black);
+                nameText.setFillColor(sf::Color::White);
+                nameText.setOutlineColor(getRarityColor(upgrade.rarity));
+                nameText.setOutlineThickness(2.f);
                 auto bounds = nameText.getLocalBounds();
                 nameText.setOrigin({ bounds.position.x + bounds.size.x / 2.f, 0.f });
                 nameText.setPosition({ pos.x + milestoneSize / 2.f, pos.y + milestoneSize + 4.f });
@@ -1314,7 +1344,7 @@ int main()
             {
                 float elapsed = itemsSlideClock.getElapsedTime().asSeconds();
                 float duration = 0.5f;
-                float t = std::min(elapsed / duration, 1.f);
+                float t = min(elapsed / duration, 1.f);
                 t = 1.f - pow(1.f - t, 3);
 
                 itemsSlideOffset = 500.f * (1.f - t);
@@ -1380,7 +1410,8 @@ int main()
                     box.setPosition(boxPos + boxSize * 0.5f);
                     box.setScale({ currentScale, currentScale });
                     box.setOutlineThickness(2.f);
-                    box.setOutlineColor(sf::Color(255, 230, 120));
+                    sf::Color rarityColor = getRarityColor(upgrade.rarity);
+                    box.setOutlineColor(rarityColor);
                 }
 
                 else
@@ -1440,7 +1471,9 @@ int main()
                 nameText.setCharacterSize(16);
                 nameText.setString(upgrade.name);
                 nameText.setPosition({ nameOffsetX, boxPos.y + 10.f });
-                nameText.setFillColor(sf::Color::Black);
+                nameText.setFillColor(sf::Color::White);
+                nameText.setOutlineColor(getRarityColor(upgrade.rarity));
+                nameText.setOutlineThickness(2.f);
                 window.draw(nameText);
 
                 // Cost
@@ -1622,6 +1655,75 @@ int main()
             bg.setOutlineColor(sf::Color(255, 215, 100));
             window.draw(bg);
 
+            sf::Vector2f perkBoxSize = { 240.f, 260.f };
+            sf::Vector2f perkBoxPos = {
+                bgPos.x + bgSize.x + 20.f, // Outside the main achievements bg
+                bgPos.y
+            };
+
+            sf::RectangleShape perkBox(perkBoxSize);
+            perkBox.setPosition(perkBoxPos);
+            perkBox.setFillColor(sf::Color(40, 40, 40, 230));
+            perkBox.setOutlineThickness(2.f);
+            perkBox.setOutlineColor(sf::Color(255, 215, 100));
+            window.draw(perkBox);
+
+            // Perk Header
+            sf::Text perkTitle(font);
+            perkTitle.setCharacterSize(16);
+            perkTitle.setFillColor(sf::Color::Yellow);
+            perkTitle.setString("Perk Bonuses");
+
+            float titleX = floor(perkBoxPos.x + 12.f);
+            float titleY = floor(perkBoxPos.y + 8.f);
+            perkTitle.setPosition({ titleX, titleY });
+            window.draw(perkTitle);
+
+            // Unlocked Achievements Count
+            int unlockedCount = count_if(achievements.begin(), achievements.end(),
+                [](const Achievement& a) { return a.isUnlocked; });
+
+            sf::Text countText(font);
+            countText.setCharacterSize(12);
+            countText.setFillColor(sf::Color(200, 200, 200));
+            countText.setString("Achievements Unlocked:\n" + to_string(unlockedCount) + "/" + to_string(achievements.size()));
+            countText.setPosition({ floor(perkBoxPos.x + 12.f), floor(perkBoxPos.y + 32.f) });
+            window.draw(countText);
+
+            // Individual bonuses
+            struct PerkDisplay {
+                string label;
+                float value;
+            };
+
+            vector<PerkDisplay> perkDisplays = {
+                { "\nClick Multiplier", perkManager.clickMultiplier },
+                { "\nBPS Multiplier",   perkManager.bpsMultiplier }
+            };
+
+            float lineY = perkBoxPos.y + 60.f;
+            for (const auto& p : perkDisplays)
+            {
+                sf::Text line(font);
+                line.setCharacterSize(12);
+                line.setFillColor(sf::Color::White);
+                line.setString(p.label + ":\nx" + to_string(p.value).substr(0, 4));
+                line.setPosition({ floor(perkBoxPos.x + 12.f), floor(lineY) });
+                window.draw(line);
+                lineY += 30.f;
+            }
+
+            // Special display for Buff Cooldown
+            float buffReduction = 1.0f - perkManager.buffSpawnRateMultiplier;
+            int percent = static_cast<int>(round(buffReduction * 100.f));
+
+            sf::Text buffLine(font);
+            buffLine.setCharacterSize(12);
+            buffLine.setFillColor(sf::Color::White);
+            buffLine.setString("\nSpawn Rate Cooldown:\n" + to_string(percent) + "%");
+            buffLine.setPosition({ floor(perkBoxPos.x + 12.f), floor(lineY) });
+            window.draw(buffLine);
+
             constexpr int achievementsPerPage = 30;
             constexpr int columns = 6;
             constexpr int rows = achievementsPerPage / columns;
@@ -1655,30 +1757,42 @@ int main()
                 box.setFillColor(a.isUnlocked ? sf::Color(230, 255, 230) : sf::Color(90, 90, 90));
                 window.draw(box);
 
-                if (a.spriteIcon.has_value())
+                const sf::Texture* texToUse = nullptr;
+
+                if (a.spriteIcon.has_value() && (!a.isHidden || a.isUnlocked))
                 {
-                    sf::Sprite icon = *a.spriteIcon;
-                    auto texSize = icon.getTexture().getSize();
-                    if (texSize.x > 0 && texSize.y > 0)
-                    {
-                        icon.setScale({ 32.f / texSize.x, 32.f / texSize.y });
-                        icon.setPosition({ pos.x + 8.f, pos.y + 8.f });
-                        if (!a.isUnlocked)
-                            icon.setColor(sf::Color(80, 80, 80));
-                        window.draw(icon);
-                    }
+                    texToUse = const_cast<sf::Texture*>(&a.spriteIcon->getTexture());
                 }
+                else
+                {
+                    texToUse = &achievementTextures["Locked"];
+                }
+
+                if (texToUse && texToUse->getSize().x > 0 && texToUse->getSize().y > 0)
+                {
+                    sf::Sprite icon(*texToUse);
+                    icon.setScale({ 40.f / texToUse->getSize().x, 40.f / texToUse->getSize().y });
+                    icon.setPosition({ pos.x + 128.f, pos.y + 12.f });
+
+                    if (!a.isUnlocked)
+                        icon.setColor(sf::Color(80, 80, 80));
+
+                    window.draw(icon);
+                }
+
+                string nameToShow = (!a.isHidden || a.isUnlocked) ? a.name : "???";
+                string descToShow = (!a.isHidden || a.isUnlocked) ? a.description : "Unlock to reveal";
 
                 sf::Text nameText(font);
                 nameText.setCharacterSize(12);
-                nameText.setString(a.name);
+                nameText.setString(nameToShow);
                 nameText.setFillColor(sf::Color::Black);
                 nameText.setPosition({ pos.x + 6.f, pos.y + 6.f });
                 window.draw(nameText);
 
                 sf::Text descText(font);
                 descText.setCharacterSize(10);
-                descText.setString(a.description);
+                descText.setString(descToShow);
                 descText.setFillColor(sf::Color(30, 30, 30));
                 descText.setPosition({ pos.x + 6.f, pos.y + 26.f });
                 window.draw(descText);
@@ -1827,7 +1941,7 @@ int main()
 
         if (currentPopup.has_value())
         {
-            AchievementPopup& popup = currentPopup.value();
+            PopupStruct& popup = currentPopup.value();
 
             const float slideDuration = 0.4f;
             const float maxOffsetX = 380.f;
@@ -1883,7 +1997,11 @@ int main()
         updateAndDrawBubbles(activeChaosBubbles, window);
         updateAndDrawBubbles(activeFrenzyBubbles, window);
         updateAndDrawBubbles(activeMayhemBubbles, window);
+
         comboSystem.draw(window);
+
+        drawWeatherLabel(window, font);
+        updateAndDrawWeatherParticles(window, deltaTime);
 
         for (auto& star : activeShootingStars)
         {

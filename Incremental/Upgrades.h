@@ -28,6 +28,14 @@ inline unordered_map<string, long double> perUpgradeMultipliers = {
     { "Bubble Wand", 1.0 }
 };
 
+enum class UpgradeRarity {
+    Common,
+    Uncommon,
+    Rare,
+    Epic,
+    Legendary
+};
+
 struct UpgradeItem
 {
     string name;
@@ -51,6 +59,7 @@ struct UpgradeItem
     bool isMinorUpgrade = false;
     bool isMajorUpgrade = false;
 
+    UpgradeRarity rarity = UpgradeRarity::Common;
     optional<sf::Sprite> spriteUpgrade;
 
     void updateCost(const long double inflation = shopInflationMultiplier)
@@ -128,6 +137,8 @@ struct UpgradeItem
         isMinorUpgrade = saved.isMinorUpgrade;
         isMajorUpgrade = saved.isMajorUpgrade;
 
+        rarity = saved.rarity;
+
         updateCost(); // Recalculate if inflation changes
     }
 };
@@ -158,12 +169,18 @@ inline void generateItemMilestoneUpgrades(
                 0,                                  // count
                 milestoneCost,                      // baseCost
                 milestoneCost,                      // currentCost
-                0.0,                               // baseProduction
-                0.0,                               // unlockThreshold
+                0.0,                                // baseProduction
+                0.0,                                // unlockThreshold
                 true,                               // isMilestone
                 true,                               // unlockedByMilestone
                 static_cast<long double>(threshold),// milestoneTriggerValue
-                true                                // isItemUpgrade
+                true,                               // isItemUpgrade
+                false,
+                false,
+                false,
+                false,
+                false,
+                UpgradeRarity::Epic
             }
         );
     }
@@ -191,7 +208,8 @@ inline void addOtherMilestoneUpgrade(
     vector<UpgradeItem>& upgrades,
     const string& name,
     long double unlockAt,
-    long double cost
+    long double cost,
+    UpgradeRarity rarity = UpgradeRarity::Common
 )
 {
     upgrades.push_back(
@@ -210,7 +228,8 @@ inline void addOtherMilestoneUpgrade(
             false,
             false,
             false,
-            false
+            false,
+            rarity
         }
     );
 }
@@ -247,6 +266,28 @@ inline int calculateMaxAffordable(const UpgradeItem& item, long double available
 
     double maxN = log(1 - (availableBubbles * (1 - rate) / cost)) / log(rate);
     return max(0, static_cast<int>(floor(maxN)));
+}
+
+inline string getRarityName(UpgradeRarity rarity) {
+    switch (rarity) {
+    case UpgradeRarity::Common:    return "Common";
+    case UpgradeRarity::Uncommon:  return "Uncommon";
+    case UpgradeRarity::Rare:      return "Rare";
+    case UpgradeRarity::Epic:      return "Epic";
+    case UpgradeRarity::Legendary: return "Legendary";
+    default:                       return "";
+    }
+}
+
+inline sf::Color getRarityColor(UpgradeRarity rarity) {
+    switch (rarity) {
+    case UpgradeRarity::Common:    return sf::Color(180, 180, 180);
+    case UpgradeRarity::Uncommon:  return sf::Color(100, 200, 100);
+    case UpgradeRarity::Rare:      return sf::Color(100, 150, 250);
+    case UpgradeRarity::Epic:      return sf::Color(180, 100, 250);
+    case UpgradeRarity::Legendary: return sf::Color(255, 200, 60);
+    default:                       return sf::Color::White;
+    }
 }
 
 inline void to_json(json& j, const UpgradeItem& u)

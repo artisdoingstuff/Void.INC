@@ -2,6 +2,7 @@
 
 #include "Includes.h"
 #include "Upgrades.h"
+#include "UpgradesList.h"
 #include "Achievements.h"
 
 extern long double totalUpgradeCount;
@@ -110,7 +111,8 @@ void loadFileFromJson(
 
         if (it != upgrades.end())
         {
-            *it = saved;
+            it->copyFromSave(saved);
+            it->rarity = getRarityByName(it->name);
             it->updateCost(); // Apply inflation if needed
         }
     }

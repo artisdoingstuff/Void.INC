@@ -43,17 +43,17 @@ inline void achievementsList()
     achievements.push_back({ "Here already? It gets harder.", "Generate 1T Bubbles", AchievementType::TotalBubbles, 1000000000000.0 });
 
     // Clicking Achievements
-    achievements.push_back({ "Your First Click!", "Generate 1 Bubble from Clicking", AchievementType::Clicks, 1 });
-    achievements.push_back({ "Having fun?", "Generate 100 Bubbles from Clicking", AchievementType::Clicks, 100.0 });
-    achievements.push_back({ "Surprised you're still clicking", "Generate 1K Bubbles from Clicking", AchievementType::Clicks, 1000.0 });
-    achievements.push_back({ "You must really like clicking", "Generate 10K Bubbles from Clicking", AchievementType::Clicks, 10000.0 });
-    achievements.push_back({ "Still clicking?", "Generate 100K Bubbles from Clicking", AchievementType::Clicks, 100000.0 });
-    achievements.push_back({ "Soapy Fingers", "Generate 1M Bubbles from Clicking", AchievementType::Clicks, 1000000.0 });
-    achievements.push_back({ "Fingers of Steel", "Generate 10M Bubbles from Clicking", AchievementType::Clicks, 10000000.0 });
-    achievements.push_back({ "Really?", "Generate 100M Bubbles from Clicking", AchievementType::Clicks, 100000000.0 });
-    achievements.push_back({ "Watery Fingers", "Generate 1B Bubbles from Clicking", AchievementType::Clicks, 1000000000.0 });
-    achievements.push_back({ "You must be really clean!", "Generate 10B Bubbles from Clicking", AchievementType::Clicks, 10000000000.0 });
-    achievements.push_back({ "Autoclicker?", "Generate 100B Bubbles from Clicking", AchievementType::Clicks, 100000000000.0 });
+    achievements.push_back({ "Your First Click!", "Generate 1 Bubble \nfrom Clicking", AchievementType::Clicks, 1 });
+    achievements.push_back({ "Having fun?", "Generate 100 Bubbles \nfrom Clicking", AchievementType::Clicks, 100.0 });
+    achievements.push_back({ "Surprised you're still clicking", "Generate 1K Bubbles \nfrom Clicking", AchievementType::Clicks, 1000.0 });
+    achievements.push_back({ "You must really like clicking", "Generate 10K Bubbles \nfrom Clicking", AchievementType::Clicks, 10000.0 });
+    achievements.push_back({ "Still clicking?", "Generate 100K Bubbles \nfrom Clicking", AchievementType::Clicks, 100000.0 });
+    achievements.push_back({ "Soapy Fingers", "Generate 1M Bubbles \nfrom Clicking", AchievementType::Clicks, 1000000.0 });
+    achievements.push_back({ "Fingers of Steel", "Generate 10M Bubbles \nfrom Clicking", AchievementType::Clicks, 10000000.0 });
+    achievements.push_back({ "Really?", "Generate 100M Bubbles \nfrom Clicking", AchievementType::Clicks, 100000000.0 });
+    achievements.push_back({ "Watery Fingers", "Generate 1B Bubbles \nfrom Clicking", AchievementType::Clicks, 1000000000.0 });
+    achievements.push_back({ "You must be really clean!", "Generate 10B Bubbles \nfrom Clicking", AchievementType::Clicks, 10000000000.0 });
+    achievements.push_back({ "Autoclicker?", "Generate 100B Bubbles \nfrom Clicking", AchievementType::Clicks, 100000000000.0 });
 
     // Item Achievements
     // Soap Achievements
@@ -551,4 +551,7 @@ inline void achievementsList()
     achievements.push_back({ "Placeholder 4", "Trigger 50 Buffs", AchievementType::BuffTriggered, 50 });
     achievements.push_back({ "Placeholder 5", "Trigger 75 Buffs", AchievementType::BuffTriggered, 75 });
     achievements.push_back({ "Placeholder 6", "Trigger 100 Buffs", AchievementType::BuffTriggered, 100 });
+    
+	// Hidden Achievements (for testing purposes)
+    achievements.push_back({ "Hidden 1", "1 Buff", AchievementType::BuffTriggered, 9999999999999.0, "", false, true  });
 }

@@ -96,13 +96,6 @@ inline AchievementPerkType getPerkFromAchievementType(AchievementType type)
 
 inline PerkManager perkManager;
 
-struct AchievementPopup {
-    string title;
-    float elapsed = 0.f;
-    float duration = 3.0f;
-    bool active = true;
-};
-
 struct Achievement
 {
     string name;
@@ -113,12 +106,17 @@ struct Achievement
     string targetUpgrade = "";          // Only used for SpecificUpgrade
 
     bool isUnlocked = false;
+    bool isHidden = false;
 
     long double progressValue = 0.0;
 
     optional<sf::Sprite> spriteIcon;
 
     AchievementPerkType perkType = AchievementPerkType::None;
+
+    bool isVisible() const {
+        return !isHidden || isUnlocked;
+    }
 
     bool checkUnlock(
         long double totalBubbles,
@@ -181,7 +179,8 @@ inline void to_json(json& j, const Achievement& a)
         {"unlockThreshold", a.unlockThreshold},
         {"targetUpgrade", a.targetUpgrade},
         {"isUnlocked", a.isUnlocked},
-        {"progressValue", a.progressValue}
+        {"progressValue", a.progressValue},
+        {"hidden", a.isHidden}
     };
 }
 
@@ -200,4 +199,6 @@ inline void from_json(const json& j, Achievement& a)
         j.at("progressValue").get_to(a.progressValue);
     else
         a.progressValue = 0.0;
+    if (j.contains("hidden"))
+        j.at("hidden").get_to(a.isHidden);
 }
