@@ -67,7 +67,7 @@ inline void upgradesList()
             false,                  // isDurationUpgrade <-- Doesn't affect buff duration
             true,                   // isMinorUpgrade <-- Will have Minor Upgrades (small buffs)
             true,                   // isMajorUpgrade <-- Will have Major Upgrades (big buffs)
-            UpgradeRarity::Common   // Rarity
+			"Rawr, this is a soap item upgrade!"
         }
     );
     upgrades.push_back({ "Hand Wash", 0, 75.0, 75.0, 0.5, 100.0, false, false, 0.0, true, false, false, false, true, true });

@@ -3,6 +3,7 @@
 #include "Includes.h"
 
 extern const long double shopInflationMultiplier;
+inline float globalCostMultiplier = 1.0f;
 extern long double totalUpgradeCount;
 extern long double bubblesPerSecond;
 
@@ -59,6 +60,8 @@ struct UpgradeItem
     bool isMinorUpgrade = false;
     bool isMajorUpgrade = false;
 
+    string flavorText = "";
+
     UpgradeRarity rarity = UpgradeRarity::Common;
     optional<sf::Sprite> spriteUpgrade;
 
@@ -95,7 +98,7 @@ struct UpgradeItem
 
     bool canAfford(long double currentBubbles) const
     {
-        return currentBubbles >= currentCost;
+        return currentBubbles >= currentCost * globalCostMultiplier;
     }
 
     void purchase(long double& currentBubbles, const long double inflation = shopInflationMultiplier)
@@ -179,8 +182,7 @@ inline void generateItemMilestoneUpgrades(
                 false,
                 false,
                 false,
-                false,
-                UpgradeRarity::Epic
+                false
             }
         );
     }
@@ -208,8 +210,7 @@ inline void addOtherMilestoneUpgrade(
     vector<UpgradeItem>& upgrades,
     const string& name,
     long double unlockAt,
-    long double cost,
-    UpgradeRarity rarity = UpgradeRarity::Common
+    long double cost
 )
 {
     upgrades.push_back(
@@ -228,8 +229,7 @@ inline void addOtherMilestoneUpgrade(
             false,
             false,
             false,
-            false,
-            rarity
+            false
         }
     );
 }
@@ -254,12 +254,12 @@ inline long double calculateTotalCost(const UpgradeItem& item, int amount)
 
     if (rate == 1.0) return cost * amount;
 
-    return cost * (1.0 - pow(rate, amount)) / (1.0 - rate);
+    return cost * (1.0 - pow(rate, amount)) / (1.0 - rate) * globalCostMultiplier;
 }
 
 inline int calculateMaxAffordable(const UpgradeItem& item, long double availableBubbles)
 {
-    long double cost = item.currentCost;
+    long double cost = item.currentCost * globalCostMultiplier;
     long double rate = shopInflationMultiplier;
 
     if (rate == 1.0) return static_cast<int>(availableBubbles / cost);

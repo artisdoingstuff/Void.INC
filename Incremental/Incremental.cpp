@@ -8,6 +8,7 @@
 #include "Combo.h"
 #include "GameFileState.h"
 #include "GlobalBuffHandler.h"
+#include "NewsTicker.h"
 #include "OfflineBubbles.h"
 #include "Popup.h"
 #include "ShootingStarBubble.h"
@@ -66,11 +67,14 @@ void loadUpgradeTextures(map<string, sf::Texture>& upgradeTextures)
 void loadAchievementTexture(map<string, sf::Texture>& achievementTextures)
 {
     achievementTextures["It Begins."].loadFromFile("Assets/Achievements/achievement_bubble_1.png");
+	achievementTextures["Bubble Beginner"].loadFromFile("Assets/Achievements/achievement_bubble_100.png");
+	achievementTextures["Bubble Novice"].loadFromFile("Assets/Achievements/achievement_bubble_1000.png");
 	achievementTextures["Locked"].loadFromFile("Assets/Achievements/locked.png");
 }
 
 sf::Texture bubbleTexture;
 sf::Texture goldenBubbleTexture;
+sf::Texture achievementIconTexture;
 
 // Global variables
 vector<Achievement> achievements;
@@ -80,7 +84,7 @@ ComboSystem comboSystem;
 
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.2.3-beta";
+string gameVersion = "v1.2.4-beta";
 
 const long double shopInflationMultiplier = 1.15L;
 
@@ -234,6 +238,9 @@ int main()
     goldenBubbleTexture.loadFromFile("Assets/golden_bubble.png");
     goldenBubbleTexture.setSmooth(true);
 
+	achievementIconTexture.loadFromFile("Assets/Achievements/achievement_icon.png");
+	achievementIconTexture.setSmooth(true);
+
     // All sounds here
     sf::SoundBuffer rubberDuckQuackBuffer;
     rubberDuckQuackBuffer.loadFromFile("Assets/Audio/rubberDuckQuack.wav");
@@ -291,6 +298,15 @@ int main()
     bool isMultiplicativeBuffActive = false;
     float multiplicativeBuffDuration = 0.0f;
     float multiplicativeBuffMultiplier = 3.0f;
+
+	// Weather variables
+    currentWeather.current = WeatherType::None;
+    currentWeather.duration = 60.f;
+    currentWeather.timer.restart();
+
+	// News ticker variables
+    NewsTicker newsTicker;
+	newsTicker.loadDefaultNews();
 
     srand(static_cast<unsigned>(time(0)));
 
@@ -497,7 +513,7 @@ int main()
                 totalMultiplier *= it->second;
         }
 
-        realBubblesPerSecond = bubblesPerSecond * totalMultiplier * perkManager.bpsMultiplier * getWeatherBpsMultiplier(currentWeather.current);
+        realBubblesPerSecond = bubblesPerSecond * totalMultiplier * perkManager.bpsMultiplier * getWeatherBpsMultiplier(currentWeather.current) * globalBuffMultiplier;
 
         for (const auto& upgrade : upgrades)
         {
@@ -936,6 +952,7 @@ int main()
 
         // Buff logic here
         // Weather Buff
+        newsTicker.update(deltaTime);
         updateWeather(popupQueue);
 
         for (auto& queued : globalBuffQueue)
@@ -1265,7 +1282,7 @@ int main()
                 // Draw cost
                 sf::Text costText(font);
                 costText.setCharacterSize(10);
-                costText.setString(formatDisplayBubbles(upgrade.currentCost));
+                costText.setString(formatDisplayBubbles(upgrade.currentCost * globalCostMultiplier));
                 costText.setFillColor(sf::Color::Black);
                 costText.setPosition({ pos.x + 4.f, pos.y + 4.f });
                 window.draw(costText);
@@ -1538,6 +1555,10 @@ int main()
                     "Contribution: " + to_string(percent).substr(0, 5) + "%\n" +
                     "Buy x" + to_string(buyAmount) + " Cost: " + formatDisplayBubbles(costPreview);
 
+                if (!hoveredItem->flavorText.empty()) {
+                    tooltipStr += "\n\n\"" + hoveredItem->flavorText + "\"";
+                }
+
                 tooltipText.setString(tooltipStr);
 
                 sf::FloatRect bounds = tooltipText.getLocalBounds();
@@ -1714,13 +1735,13 @@ int main()
             }
 
             // Special display for Buff Cooldown
-            float buffReduction = 1.0f - perkManager.buffSpawnRateMultiplier;
+            float buffReduction = perkManager.buffSpawnRateMultiplier - 1.0f;
             int percent = static_cast<int>(round(buffReduction * 100.f));
 
             sf::Text buffLine(font);
             buffLine.setCharacterSize(12);
             buffLine.setFillColor(sf::Color::White);
-            buffLine.setString("\nSpawn Rate Cooldown:\n" + to_string(percent) + "%");
+            buffLine.setString("\nBuff Spawn Rate:\n +" + to_string(percent) + "%");
             buffLine.setPosition({ floor(perkBoxPos.x + 12.f), floor(lineY) });
             window.draw(buffLine);
 
@@ -1904,9 +1925,9 @@ int main()
         achievementsTab.setFillColor(currentTab == GameTabs::Achievements ? sf::Color::White : sf::Color(150, 150, 150));
         window.draw(achievementsTab);
 
-        sf::Sprite achievementsIcon(goldenBubbleTexture);
+        sf::Sprite achievementsIcon(achievementIconTexture);
 
-        sf::Vector2u texSize = goldenBubbleTexture.getSize();
+        sf::Vector2u texSize = achievementIconTexture.getSize();
         if (texSize.x > 0 && texSize.y > 0)
         {
             float targetSize = iconTabSize * 0.6f;
@@ -2003,6 +2024,8 @@ int main()
         drawWeatherLabel(window, font);
         updateAndDrawWeatherParticles(window, deltaTime);
 
+        newsTicker.draw(window, font);
+
         for (auto& star : activeShootingStars)
         {
             star.update();
@@ -2017,6 +2040,20 @@ int main()
         {
             if (event->is<sf::Event::Closed>())
             {
+				// Disable all buffs on exit
+                if (isNormalBuffActive)
+                    realBubblesPerSecond /= normalBuffMultiplier;
+				if (isMultiplicativeBuffActive)
+					realBubblesPerSecond /= multiplicativeBuffMultiplier;
+                if (isShootingStarActive)
+					realBubblesPerSecond /= shootingStarBuffMultiplier;
+                if (isBubbleChaosActive)
+					realBubblesPerSecond /= bubbleChaosBuffMultiplier;
+				if (isBubbleFrenzyActive)
+					realBubblesPerSecond /= bubbleFrenzyBuffMultiplier;
+				if (isBubbleMayhemActive)
+					realBubblesPerSecond /= bubbleMayhemBuffMultiplier;
+
                 time_t currentTimestamp = time(nullptr);
                 saveFileToJson(
                     gameVersion,
@@ -2028,7 +2065,7 @@ int main()
                     allTimeBubblesPerClick,
                     baseBubblesPerClick,
                     realClickMultiplier,
-                    realBubblesPerSecond,
+                    realBubblesPerSecond / getWeatherBpsMultiplier(currentWeather.current) / globalBuffMultiplier,
                     upgrades,
                     achievements
                 );

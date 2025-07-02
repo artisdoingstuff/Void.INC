@@ -41,6 +41,8 @@ inline void achievementsList()
     achievements.push_back({ "Bubble Legend", "Generate 75B Bubbles", AchievementType::TotalBubbles, 75000000000.0 });
     achievements.push_back({ "It only gets harder from here.", "Generate 100B Bubbles", AchievementType::TotalBubbles, 100000000000.0 });
     achievements.push_back({ "Here already? It gets harder.", "Generate 1T Bubbles", AchievementType::TotalBubbles, 1000000000000.0 });
+    achievements.push_back({ "Fabled Bubbler?", "Generate 10T Bubbles", AchievementType::TotalBubbles, 10000000000000.0 });
+    achievements.push_back({ "Hello, World!", "Generate 100T Bubbles", AchievementType::TotalBubbles, 100000000000000.0 });
 
     // Clicking Achievements
     achievements.push_back({ "Your First Click!", "Generate 1 Bubble \nfrom Clicking", AchievementType::Clicks, 1 });
@@ -553,5 +555,5 @@ inline void achievementsList()
     achievements.push_back({ "Placeholder 6", "Trigger 100 Buffs", AchievementType::BuffTriggered, 100 });
     
 	// Hidden Achievements (for testing purposes)
-    achievements.push_back({ "Hidden 1", "1 Buff", AchievementType::BuffTriggered, 9999999999999.0, "", false, true  });
+    achievements.push_back({ "What's that?", "It's special...", AchievementType::TotalBubbles, 92807072808.0, "", false, true  });
 }

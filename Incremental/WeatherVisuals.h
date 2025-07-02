@@ -20,7 +20,7 @@ struct WeatherParticle {
     {
         shape.move(velocity * dt);
         float alpha = 255 * (1.f - clock.getElapsedTime().asSeconds() / lifetime);
-        alpha = std::max(0.f, alpha);
+        alpha = max(0.f, alpha);
         sf::Color c = shape.getFillColor();
         c.a = static_cast<int>(alpha);
         shape.setFillColor(c);
@@ -31,7 +31,7 @@ struct WeatherParticle {
     }
 };
 
-inline std::vector<WeatherParticle> weatherParticles;
+inline vector<WeatherParticle> weatherParticles;
 inline sf::Clock weatherSpawnClock;
 
 inline void spawnWeatherParticles(sf::Vector2u windowSize)
@@ -91,7 +91,7 @@ inline void updateAndDrawWeatherParticles(sf::RenderWindow& window, float dt)
         window.draw(p.shape);
 
     weatherParticles.erase(
-        std::remove_if(weatherParticles.begin(), weatherParticles.end(),
+        remove_if(weatherParticles.begin(), weatherParticles.end(),
             [](const WeatherParticle& p) { return p.isExpired(); }),
         weatherParticles.end()
     );

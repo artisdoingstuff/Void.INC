@@ -19,7 +19,7 @@ struct WeatherState {
 inline WeatherState currentWeather;
 
 // --- Weather name display ---
-inline std::string getWeatherName(WeatherType type) {
+inline string getWeatherName(WeatherType type) {
     switch (type) {
     case WeatherType::BubblyRain:  return "Bubbly Rain";
     case WeatherType::SoapyShower: return "Soapy Shower";
@@ -28,7 +28,7 @@ inline std::string getWeatherName(WeatherType type) {
     }
 }
 
-inline std::string getWeatherEffect(WeatherType type) {
+inline string getWeatherEffect(WeatherType type) {
     switch (type) {
     case WeatherType::BubblyRain:  return "+20% BPS";
     case WeatherType::SoapyShower: return "+10% BPS";

@@ -2,6 +2,8 @@
 
 #include "Includes.h"
 
+inline float globalBuffSpawnDelayMultiplier = 1.0f;
+
 enum class buffVariantType {
     globalBubbleBuff,
     rubberDuckBuff,
@@ -72,6 +74,7 @@ inline void queueGlobalBuffs(int count)
 {
     float spawnRateMult = clamp(perkManager.buffSpawnRateMultiplier, 0.1f, 3.0f);
     float baseDelay = (static_cast<float>(rand()) / RAND_MAX * (maxBuffCooldown - minBuffCooldown) + minBuffCooldown);
+    baseDelay *= globalBuffSpawnDelayMultiplier;
     baseDelay /= spawnRateMult;
 
     for (int i = 0; i < count; ++i)

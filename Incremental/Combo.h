@@ -158,7 +158,7 @@ public:
         for (auto& ripple : ripples)
             ripple.update(deltaTime);
 
-        ripples.erase(std::remove_if(ripples.begin(), ripples.end(),
+        ripples.erase(remove_if(ripples.begin(), ripples.end(),
             [](const Ripple& r) { return r.isExpired(); }),
             ripples.end());
 
