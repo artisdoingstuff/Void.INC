@@ -84,7 +84,7 @@ ComboSystem comboSystem;
 
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.2.4-beta";
+string gameVersion = "v1.2.5-beta";
 
 const long double shopInflationMultiplier = 1.15L;
 
@@ -110,6 +110,17 @@ int highestBubbleCombo = 0;
 sf::Clock bubbleComboTimer;
 
 // Global functions
+void centerText(sf::Text& text, const sf::Vector2f& centerPosition) {
+    sf::FloatRect bounds = text.getLocalBounds();
+
+    text.setOrigin({
+        bounds.position.x + bounds.size.x / 2.f,
+        bounds.position.y + bounds.size.y / 2.f
+        });
+
+    text.setPosition(centerPosition);
+}
+
 sf::Vector2f getGlobalBuffSpawnPosition()
 {
     float x = static_cast<float>(rand() % 1400 + 100);
@@ -393,26 +404,6 @@ int main()
 
     sf::Clock mutatedBubbleClock;
 
-	// Initialize text objects for displaying bubbles and bubbles per second
-	sf::Text bubblesText(font);
-    bubblesText.setPosition({ 300, 50 });
-    bubblesText.setCharacterSize(24);
-	bubblesText.setFillColor(sf::Color::Black);
-
-    sf::Text bubblesPerSecondText(font);
-    bubblesPerSecondText.setPosition({ 320, 80 });
-    bubblesPerSecondText.setCharacterSize(14);
-    bubblesPerSecondText.setFillColor(sf::Color::Black);
-
-	sf::Text bubbleComboText(font);
-	bubbleComboText.setPosition({ 800, 120 });
-	bubbleComboText.setCharacterSize(24);
-	bubbleComboText.setFillColor(sf::Color::Black);
-
-    sf::Text tooltipText(font);
-    tooltipText.setCharacterSize(14);
-    tooltipText.setFillColor(sf::Color::White);
-
     // Objects for buffs
     sf::RectangleShape comboBarBackground;
     comboBarBackground.setSize({ 200.0f, 20.0f });
@@ -426,14 +417,34 @@ int main()
 
 	// Objects for clicking
     sf::FloatRect clickArea({ 300, 350 }, { 200, 150 });
+    sf::Vector2f clickAreaPosition = { 300.f, 350.f };
 
     sf::RectangleShape clickAreaShape;
     clickAreaShape.setSize(sf::Vector2f(200, 150));
     clickAreaShape.setOutlineColor(sf::Color::Red);
     clickAreaShape.setOutlineThickness(5);
-    clickAreaShape.setPosition(sf::Vector2f({ 300, 350 }));
+    clickAreaShape.setPosition(clickAreaPosition);
+	sf::Vector2f clickAreaSize = clickAreaShape.getSize();
 
     constexpr float iconTabSize = UIConstants::TabHeight;
+
+    // Initialize text objects for displaying bubbles and bubbles per second
+    sf::Text bubblesText(font);
+    bubblesText.setCharacterSize(24);
+    bubblesText.setFillColor(sf::Color::Black);
+
+    sf::Text bubblesPerSecondText(font);
+    bubblesPerSecondText.setCharacterSize(14);
+    bubblesPerSecondText.setFillColor(sf::Color::Black);
+
+    sf::Text bubbleComboText(font);
+    bubbleComboText.setPosition({ 800, 120 });
+    bubbleComboText.setCharacterSize(24);
+    bubbleComboText.setFillColor(sf::Color::Black);
+
+    sf::Text tooltipText(font);
+    tooltipText.setCharacterSize(14);
+    tooltipText.setFillColor(sf::Color::White);
 
     while (window.isOpen())
     {
@@ -774,7 +785,7 @@ int main()
                 for (int i = startIdx; i < endIdx; ++i)
                 {
                     UpgradeItem& upgrade = *visibleItems[i];
-                    sf::Vector2f boxPos = { startX - boxWidth - 20.f, upgradeY };
+                    sf::Vector2f boxPos = { startX - boxWidth + 150.f, upgradeY };
 
                     if (sf::FloatRect(boxPos, { boxWidth, boxHeight }).contains(mousePositionF))
                     {
@@ -815,7 +826,7 @@ int main()
                         { "Max", MultibuyMode::Max }
                     };
 
-                    sf::Vector2f multibuyStart = { startX - boxWidth - 20.f, upgradeY + 40.f };
+                    sf::Vector2f multibuyStart = { startX - boxWidth + 150.f, upgradeY };
                     sf::Vector2f multibuySize = { 60.f, 28.f };
 
                     for (int i = 0; i < multibuyOptions.size(); ++i)
@@ -834,8 +845,8 @@ int main()
                 // Pagination
                 if (!clickHandled)
                 {
-                    sf::Vector2f prevPos = { startX - boxWidth - 20.f, upgradeY + 85.f };
-                    sf::Vector2f nextPos = { startX - boxWidth + 80.f, upgradeY + 85.f };
+                    sf::Vector2f prevPos = { startX - boxWidth + 150.f, upgradeY + 40.f };
+                    sf::Vector2f nextPos = { startX - boxWidth + 250.f, upgradeY + 40.f };
                     sf::Vector2f navSize = { 80.f, 30.f };
 
                     if (sf::FloatRect(prevPos, navSize).contains(mousePositionF) && itemPage > 0)
@@ -1165,7 +1176,22 @@ int main()
         isButtonPressed = isCurrentlyPressed;
 
         bubblesText.setString(formatDisplayBubbles(displayBubbles) + " Bubbles Formed");
+        centerText(
+            bubblesText,
+            {
+                clickAreaPosition.x + clickAreaSize.x / 2.f,
+                clickAreaPosition.y - 250.f
+            }
+        );
+
 		bubblesPerSecondText.setString(formatDisplayBubbles(realBubblesPerSecond, true) + " Bubbles Per Second");
+        centerText(
+            bubblesPerSecondText,
+            {
+                clickAreaPosition.x + clickAreaSize.x / 2.f,
+                clickAreaPosition.y - 230.f
+            }
+		);
 
         window.clear(sf::Color::White);
 
@@ -1390,6 +1416,7 @@ int main()
             for (int i = startIdx; i < endIdx; ++i)
             {
                 UpgradeItem& upgrade = *visibleItems[i];
+                int maxAffordable = calculateMaxAffordable(upgrade, bubbles);
 
                 int buyAmount = 1;
                 switch (currentMultibuy)
@@ -1397,14 +1424,14 @@ int main()
                 case MultibuyMode::x1:   buyAmount = 1; break;
                 case MultibuyMode::x10:  buyAmount = 10; break;
                 case MultibuyMode::x100: buyAmount = 100; break;
-                case MultibuyMode::Max:  buyAmount = calculateMaxAffordable(upgrade, bubbles); break;
+                case MultibuyMode::Max:  buyAmount = maxAffordable; break;
                 }
 
                 long double totalCost = calculateTotalCost(upgrade, buyAmount);
                 bool isAffordable = bubbles >= calculateTotalCost(upgrade, buyAmount);
 
                 sf::Vector2f boxSize = { boxWidth, boxHeight };
-                sf::Vector2f boxPos = { startX - boxWidth - 20.f + itemsSlideOffset, upgradeY };
+                sf::Vector2f boxPos = { startX - boxWidth + 150.f + itemsSlideOffset, upgradeY };
                 sf::Color baseColor = isAffordable ? sf::Color(200, 255, 200) : sf::Color(140, 140, 140);
                 sf::RectangleShape box(boxSize);
                 box.setFillColor(baseColor);
@@ -1496,7 +1523,10 @@ int main()
                 // Cost
                 sf::Text costText(font);
                 costText.setCharacterSize(14);
-                costText.setString(formatDisplayBubbles(totalCost) + " Bubbles");
+                string costStr = formatDisplayBubbles(totalCost) + " Bubbles";
+                if (currentMultibuy == MultibuyMode::Max)
+                    costStr += " (x" + to_string(maxAffordable) + ")";
+                costText.setString(costStr);
                 costText.setPosition({ boxPos.x + boxWidth - 140.f, boxPos.y + 10.f });
                 costText.setFillColor(sf::Color::Black);
                 window.draw(costText);
@@ -1533,14 +1563,13 @@ int main()
                 if (isBubbleMayhemActive)
                     totalBuffMultiplier *= bubbleMayhemBuffMultiplier;
 
-                long double finalItemBps = baseItemBps * totalMultiplier * perkManager.bpsMultiplier * totalBuffMultiplier;
+                long double finalItemBps = baseItemBps * totalMultiplier * perkManager.bpsMultiplier * getWeatherBpsMultiplier(currentWeather.current) * totalBuffMultiplier;
                 float percent = (realBubblesPerSecond > 0.0)
                     ? static_cast<float>((finalItemBps / realBubblesPerSecond) * 100.0f)
                     : 0.0f;
 
                 int buyAmount = 1;
-                switch (currentMultibuy)
-                {
+                switch (currentMultibuy) {
                 case MultibuyMode::x1:   buyAmount = 1; break;
                 case MultibuyMode::x10:  buyAmount = 10; break;
                 case MultibuyMode::x100: buyAmount = 100; break;
@@ -1552,8 +1581,7 @@ int main()
                 string tooltipStr =
                     hoveredItem->name + "\n" +
                     "BPS: " + formatDisplayBubbles(finalItemBps) + "\n" +
-                    "Contribution: " + to_string(percent).substr(0, 5) + "%\n" +
-                    "Buy x" + to_string(buyAmount) + " Cost: " + formatDisplayBubbles(costPreview);
+                    "Contribution: " + to_string(percent).substr(0, 5) + "%";
 
                 if (!hoveredItem->flavorText.empty()) {
                     tooltipStr += "\n\n\"" + hoveredItem->flavorText + "\"";
@@ -1564,7 +1592,7 @@ int main()
                 sf::FloatRect bounds = tooltipText.getLocalBounds();
                 sf::Vector2f padding = { 10.f, 6.f };
                 sf::Vector2f tipSize = bounds.size + padding * 2.f;
-                sf::Vector2f tipPos = mousePositionF + sf::Vector2f(12.f, 12.f);
+                sf::Vector2f tipPos = mousePositionF + sf::Vector2f(12.f, -20.f);
 
                 sf::RectangleShape tipBg(tipSize);
                 tipBg.setPosition(tipPos);
@@ -1587,7 +1615,7 @@ int main()
                     { "Max", MultibuyMode::Max }
                 };
 
-                sf::Vector2f multibuyStart = { startX - boxWidth - 20.f + itemsSlideOffset, upgradeY + 40.f };
+                sf::Vector2f multibuyStart = { startX - boxWidth + 150.f + itemsSlideOffset, upgradeY };
                 sf::Vector2f multibuySize = { 60.f, 28.f };
 
                 for (int i = 0; i < multibuyOptions.size(); ++i)
@@ -1617,8 +1645,8 @@ int main()
             if (totalPages > 1)
             {
                 // Prev/Next Buttons (Rest of Pagination)
-                sf::Vector2f prevPos = { startX - boxWidth - 20.f + itemsSlideOffset, upgradeY + 85.f };
-                sf::Vector2f nextPos = { startX - boxWidth + 80.f + itemsSlideOffset, upgradeY + 85.f };
+                sf::Vector2f prevPos = { startX - boxWidth + 150.f + itemsSlideOffset, upgradeY + 40.f };
+                sf::Vector2f nextPos = { startX - boxWidth + 250.f + itemsSlideOffset, upgradeY + 40.f };
                 sf::Vector2f navButtonSize = { 80.f, 30.f };
 
                 sf::RectangleShape prevButton(navButtonSize);

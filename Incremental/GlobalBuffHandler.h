@@ -35,7 +35,7 @@ extern sf::Texture goldenBubbleTexture;
 
 inline vector<GlobalBuffVariant> globalBuffVariants = {
     { GlobalBuffType::Normal,         2.0f, 30.0f, 60.0f, &bubbleTexture,       buffVariantType::globalBubbleBuff },
-    { GlobalBuffType::Multiplicative, 3.0f, 20.0f, 22.0f, &goldenBubbleTexture, buffVariantType::globalBubbleBuff },
+    { GlobalBuffType::Multiplicative, 4.0f, 20.0f, 22.0f, &goldenBubbleTexture, buffVariantType::globalBubbleBuff },
     { GlobalBuffType::Additive,       1.0f,  0.0f,  8.0f, &goldenBubbleTexture, buffVariantType::globalBubbleBuff },
     { GlobalBuffType::Chaos,          0.6f, 14.0f,  1.0f, &goldenBubbleTexture, buffVariantType::globalBubbleBuff },
     { GlobalBuffType::Frenzy,         1.5f, 20.0f,  5.0f, &goldenBubbleTexture, buffVariantType::globalBubbleBuff },
