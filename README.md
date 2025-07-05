@@ -51,4 +51,14 @@ Licensed under [Creative Commons Attribution 4.0 International (CC BY 4.0)](http
 
 ---
 
+## License
+
+This project is licensed under the  
+**Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International**  
+(CC BY-NC-ND 4.0)
+
+More info: [https://creativecommons.org/licenses/by-nc-nd/4.0/](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+
+---
+
 ## 🧼 A Solo Project by [Scott](https://github.com/artisdoingstuff)
