@@ -1,8 +1,7 @@
 #pragma once
 
 #include "Includes.h"
-
-inline float globalBuffMultiplier = 1.0f;
+#include "GlobalVariables.h"
 
 struct NewsItem {
     string text;
@@ -30,27 +29,27 @@ public:
             { "Bubbles swell in the moonlight...", 60.f },
             { "Duckwing Alliance protests price hikes in Scrubtown.", 60.f },
             { "Economists warn: Bubble market is about to burst. Again.", 60.f },
-            { "Foam Party ends in sudsy chaos; mayor 'regretfully moist.'", 60.f },
+            { "Foam Party ends in sudsy chaos; Mayor \"Regretfully moist.\"", 60.f },
             { "Toothpaste surplus declared 'minty fresh crisis' by officials.", 60.f },
             { "Breaking: Loofah unions demand longer soak times.", 60.f },
             { "Duck scientists discover bubbles are 73% air, 27% mystery.", 60.f },
             { "Carbonated Soda banned in Bubbletown for excessive fizz.", 60.f },
             { "Shampoo prices skyrocket after massive foam spill.", 60.f },
             { "A strange bubble drifts by... then pops with a whisper.", 60.f },
-            { "A duck’s quack echoes through the foam fields.", 60.f },
+            { "A ducks quack echoes through the foam fields.", 60.f },
             { "A merchant sells golden soap bars at the bazaar.", 60.f },
             { "Soap prices remain stable, economists relieved.", 60.f },
             { "Bubblemancers gather at the Grand Soakening.", 60.f },
             { "Reports of ducks wearing monocles surface again.", 60.f },
             { "Residents warned not to inhale the fizzy mist.", 60.f },
-            { "Bubble wizards duel in the center plaza — again.", 60.f },
+            { "Bubble wizards duel in the center plaza - again.", 60.f },
             { "A quiet hum fills the air. Is that... carbonation?", 60.f },
-            { "A retired loofah returns to teach at the academy.", 60.f },
+            { "A retired Duck returns to teach at the academy.", 60.f },
             { "Rain of tiny, harmless bubbles puzzles scientists.", 60.f },
             { "The moon appears unusually glossy tonight.", 60.f },
             { "Festival of Foam attracts record-breaking crowds.", 60.f },
-            { "A new spa opens promising ‘quantum exfoliation’.", 60.f },
-            { "Sudsy Seer predicts ‘bubbly times ahead’.", 60.f },
+            { "A new spa opens promising \"quantum exfoliation\".", 60.f },
+            { "Sudsy Seer predicts \"Bubbly times ahead\".", 60.f },
             { "Pop Idol finalists prepare for the finale concert.", 60.f },
             { "Stray bubble whispers secrets to those who listen.", 60.f },
             { "An orb of unknown origin spotted above Spa Hill.", 60.f },
@@ -73,7 +72,7 @@ public:
                 []() { globalCostMultiplier /= 1.25f; }
             },
             {
-                "Mega Sale! All upgrades temporarily discounted by 10%!",
+                "Bubble Sale! All upgrades temporarily discounted by 10%!",
                 20.f,
                 true,
                 []() { globalCostMultiplier *= 0.9f; },

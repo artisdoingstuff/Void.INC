@@ -5,9 +5,12 @@
 #include "BubbleMayhem.h"
 #include "Bubbles.h"
 #include "BubblesFormat.h"
+#include "Marketplace.h"
 #include "Combo.h"
 #include "GameFileState.h"
 #include "GlobalBuffHandler.h"
+#include "GlobalTextures.h"
+#include "GlobalVariables.h"
 #include "NewsTicker.h"
 #include "OfflineBubbles.h"
 #include "Popup.h"
@@ -35,7 +38,8 @@ enum class GameTabs
 {
     Items,
     Milestones,
-    Achievements
+    Achievements,
+    Marketplace
 };
 
 GameTabs currentTab = GameTabs::Items;
@@ -53,29 +57,6 @@ int milestonePage = 0;
 int achievementPage = 0;
 constexpr int itemsPerPage = 9;
 
-// Global Textures
-void loadUpgradeTextures(map<string, sf::Texture>& upgradeTextures)
-{
-    upgradeTextures["Soap"].loadFromFile("Assets/soap_upgrade.png");
-    upgradeTextures["Hand Wash"].loadFromFile("Assets/handwash_upgrade.png");
-    upgradeTextures["Shampoo"].loadFromFile("Assets/shampoo_upgrade.png");
-    upgradeTextures["Shaving Foam"].loadFromFile("Assets/shaving_foam_upgrade.png");
-    upgradeTextures["Toothpaste"].loadFromFile("Assets/toothpaste_upgrade.png");
-    upgradeTextures["Loofah"].loadFromFile("Assets/loofah_upgrade.png");
-}
-
-void loadAchievementTexture(map<string, sf::Texture>& achievementTextures)
-{
-    achievementTextures["It Begins."].loadFromFile("Assets/Achievements/achievement_bubble_1.png");
-	achievementTextures["Bubble Beginner"].loadFromFile("Assets/Achievements/achievement_bubble_100.png");
-	achievementTextures["Bubble Novice"].loadFromFile("Assets/Achievements/achievement_bubble_1000.png");
-	achievementTextures["Locked"].loadFromFile("Assets/Achievements/locked.png");
-}
-
-sf::Texture bubbleTexture;
-sf::Texture goldenBubbleTexture;
-sf::Texture achievementIconTexture;
-
 // Global variables
 vector<Achievement> achievements;
 vector<UpgradeItem> upgrades;
@@ -84,20 +65,7 @@ ComboSystem comboSystem;
 
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.2.5-beta";
-
-const long double shopInflationMultiplier = 1.15L;
-
-long double bubbles = 0.0L;
-long double allTimeBubbles = 0.0L;
-long double allTimeBubblesPerClick = 0.0L;
-
-long double bubblesPerSecond = 0.0L;
-
-long double baseBubblesPerClick = 1.0L;
-long double clickMultiplier = 1.0L;
-
-long double totalUpgradeCount = 0.0L;
+string gameVersion = "v1.3.0-beta";
 
 queue<PopupStruct> popupQueue;
 optional<PopupStruct> currentPopup;
@@ -119,13 +87,6 @@ void centerText(sf::Text& text, const sf::Vector2f& centerPosition) {
         });
 
     text.setPosition(centerPosition);
-}
-
-sf::Vector2f getGlobalBuffSpawnPosition()
-{
-    float x = static_cast<float>(rand() % 1400 + 100);
-    float y = static_cast<float>(rand() % 600 + 100);
-    return { x, y };
 }
 
 template <typename ActiveBubbleType>
@@ -242,16 +203,6 @@ int main()
 
     time_t savedTimestamp = 0;
 
-	// All textures here
-	bubbleTexture.loadFromFile("Assets/bubble.png");
-    bubbleTexture.setSmooth(true);
-
-    goldenBubbleTexture.loadFromFile("Assets/golden_bubble.png");
-    goldenBubbleTexture.setSmooth(true);
-
-	achievementIconTexture.loadFromFile("Assets/Achievements/achievement_icon.png");
-	achievementIconTexture.setSmooth(true);
-
     // All sounds here
     sf::SoundBuffer rubberDuckQuackBuffer;
     rubberDuckQuackBuffer.loadFromFile("Assets/Audio/rubberDuckQuack.wav");
@@ -266,12 +217,6 @@ int main()
     bgm.setLooping(true);
     bgm.setVolume(50.f);
     bgm.play();
-
-	// Bubbles variables here
-    long double displayBubbles = 0.0L;
-
-    long double buffCounter = 0.0L;
-    long double duckCounter = 0.0L;
 
     // Buffs variables here
     bool canPressGlobalBubbleBuff = false;
@@ -382,6 +327,8 @@ int main()
 	sf::Clock deltaClock;
 
     sf::Clock shopClock;
+
+    sf::Clock marketplaceRestockClock;
 
     sf::Clock popupTimer;
     sf::Clock achievementsSlideClock;
@@ -650,6 +597,13 @@ int main()
                 };
                 sf::FloatRect achievementsTabRect(achievementsTabPos, { iconTabSize, iconTabSize });
 
+                sf::Vector2f marketplaceTabPos = {
+                    achievementsTabPos.x - iconTabSize - UIConstants::TabSpacing, tabStartPos.y
+                };
+
+                sf::FloatRect marketplaceTabRect(marketplaceTabPos, { iconTabSize, iconTabSize });
+
+
                 // Items Tab
                 if (itemsTabRect.contains(mousePositionF) && currentTab != GameTabs::Items)
                 {
@@ -682,6 +636,14 @@ int main()
                     isAchievementsAnimating = true;
                     achievementsSlideClock.restart();
                     
+                    clickHandled = true;
+                }
+                // Marketplace Tab
+                else if (marketplaceTabRect.contains(mousePositionF) && currentTab != GameTabs::Marketplace)
+                {
+                    previousTab = currentTab;
+                    currentTab = GameTabs::Marketplace;
+
                     clickHandled = true;
                 }
             }
@@ -965,6 +927,14 @@ int main()
         // Weather Buff
         newsTicker.update(deltaTime);
         updateWeather(popupQueue);
+        upgradeMarketplace(deltaTime);
+
+        if (marketplaceRestockClock.getElapsedTime().asSeconds() >= marketplaceRestockInterval)
+        {
+            randomlyRestockMarketplaceItems();
+            marketplaceRestockClock.restart();
+            popupQueue.push({ "Marketplace has been restocked!" });
+        }
 
         for (auto& queued : globalBuffQueue)
         {
@@ -979,8 +949,8 @@ int main()
             auto result = selectGlobalBuffVariant(position, size);
             if (result.has_value())
             {
-                auto& [variant, sprite] = result.value();
-                spawnGlobalBuff(sprite, static_cast<int>(variant.effectType));
+                auto& [index, variant, sprite] = result.value();
+                spawnGlobalBuff(sprite, index);
             }
 
             queueGlobalBuffs(1);
@@ -1058,7 +1028,7 @@ int main()
                         sf::Vector2f end = { 1600.0f, 600.0f };
                         float arcHeight = 300.0f;
 
-                        activeShootingStars.emplace_back(goldenBubbleTexture, start, end, arcHeight, 3.0f);
+                        activeShootingStars.emplace_back(shootingStarTexture, start, end, arcHeight, 3.0f);
                         break;
                     }
                     }
@@ -1563,7 +1533,7 @@ int main()
                 if (isBubbleMayhemActive)
                     totalBuffMultiplier *= bubbleMayhemBuffMultiplier;
 
-                long double finalItemBps = baseItemBps * totalMultiplier * perkManager.bpsMultiplier * getWeatherBpsMultiplier(currentWeather.current) * totalBuffMultiplier;
+                long double finalItemBps = baseItemBps * totalMultiplier * perkManager.bpsMultiplier * getWeatherBpsMultiplier(currentWeather.current) * totalBuffMultiplier * globalBuffMultiplier;
                 float percent = (realBubblesPerSecond > 0.0)
                     ? static_cast<float>((finalItemBps / realBubblesPerSecond) * 100.0f)
                     : 0.0f;
@@ -1891,6 +1861,148 @@ int main()
             window.draw(nextText);
         }
 
+        else if (currentTab == GameTabs::Marketplace)
+        {
+            constexpr float buffBoxWidth = 240.f;
+            constexpr float buffBoxHeight = 80.f;
+            constexpr float buffSpacingY = 20.f;
+
+            float buffStartY = startY;
+            float buffStartX = startX - buffBoxWidth + 150.f;
+
+            for (auto& item : marketplaceItems)
+            {
+                sf::Vector2f pos(buffStartX, buffStartY);
+                sf::RectangleShape box({ buffBoxWidth, buffBoxHeight });
+                box.setOrigin({ buffBoxWidth / 2.f, buffBoxHeight / 2.f });
+                box.setPosition(pos + sf::Vector2f(buffBoxWidth / 2.f, buffBoxHeight / 2.f));
+
+                bool isHovered = sf::FloatRect(pos, { buffBoxWidth, buffBoxHeight }).contains(mousePositionF);
+                float& currentScale = hoverScales[item.name];
+                float targetScale = isHovered ? 1.05f : 1.0f;
+                float lerpSpeed = 8.0f * deltaTime;
+                currentScale += (targetScale - currentScale) * lerpSpeed;
+                currentScale = clamp(currentScale, 1.0f, 1.1f);
+                box.setScale({ currentScale, currentScale });
+
+                bool canAfford = bubbles >= getEffectiveItemCost(item, realBubblesPerSecond);
+                bool isOnCooldown = item.cooldownRemaining > 0.f;
+                bool isSoldOut = (item.maxStock != -1 && item.stockRemaining <= 0);
+
+                // Fill color
+                if (isSoldOut)
+                    box.setFillColor(sf::Color(80, 80, 80));
+                else if (isOnCooldown)
+                    box.setFillColor(sf::Color(100, 100, 100));
+                else if (isHovered)
+                    box.setFillColor(sf::Color(255, 255, 200));
+                else if (canAfford)
+                    box.setFillColor(sf::Color(210, 250, 210));
+                else
+                    box.setFillColor(sf::Color(120, 120, 120));
+
+                box.setOutlineThickness(2.f);
+                box.setOutlineColor(sf::Color(180, 180, 180));
+                window.draw(box);
+
+                // Name
+                sf::Text nameText(font);
+                nameText.setCharacterSize(16);
+                nameText.setString(item.name);
+                nameText.setFillColor(sf::Color::Black);
+                nameText.setPosition(pos + sf::Vector2f(12.f, 6.f));
+                window.draw(nameText);
+
+                // Description
+                sf::Text descText(font);
+                descText.setCharacterSize(12);
+                descText.setString(item.description);
+                descText.setFillColor(sf::Color::Black);
+                descText.setPosition(pos + sf::Vector2f(12.f, 28.f));
+                window.draw(descText);
+
+                // Cost or cooldown or sold out
+                sf::Text costOrTimerText(font);
+                costOrTimerText.setCharacterSize(14);
+                costOrTimerText.setFillColor(sf::Color::Black);
+
+                if (isSoldOut)
+                {
+                    costOrTimerText.setString("Sold Out");
+                }
+                else if (isOnCooldown)
+                {
+                    int seconds = static_cast<int>(ceilf(item.cooldownRemaining));
+                    costOrTimerText.setString("Cooldown: " + to_string(seconds) + "s");
+                }
+                else
+                {
+                    costOrTimerText.setString("Cost: " + formatDisplayBubbles(getEffectiveItemCost(item, realBubblesPerSecond)) + " Bubbles");
+                }
+
+                costOrTimerText.setPosition(pos + sf::Vector2f(12.f, 52.f));
+                window.draw(costOrTimerText);
+
+                // Stock display
+                if (item.maxStock != -1)
+                {
+                    sf::Text stockText(font);
+                    stockText.setCharacterSize(12);
+                    stockText.setFillColor(sf::Color::Black);
+                    stockText.setString("Stock: " + to_string(item.stockRemaining) + "/" + to_string(item.maxStock));
+                    stockText.setPosition(pos + sf::Vector2f(buffBoxWidth - 92.f, 6.f));
+                    window.draw(stockText);
+                }
+
+                // Manual Restock Button
+                if (isSoldOut && item.canBeRestockedManually)
+                {
+                    sf::Vector2f buttonSize = { 65.f, 28.f };
+                    sf::Vector2f buttonPos = pos + sf::Vector2f(buffBoxWidth - buttonSize.x - 12.f, buffBoxHeight - buttonSize.y - 8.f);
+
+                    bool buttonHovered = sf::FloatRect(buttonPos, buttonSize).contains(mousePositionF);
+
+                    sf::Color buttonFill = buttonHovered ? sf::Color::Black : sf::Color::White;
+                    sf::Color textColor = buttonHovered ? sf::Color::White : sf::Color::Black;
+
+                    sf::RectangleShape restockButton(buttonSize);
+                    restockButton.setPosition(buttonPos);
+                    restockButton.setFillColor(buttonFill);
+                    restockButton.setOutlineThickness(1.f);
+                    restockButton.setOutlineColor(sf::Color(60, 60, 60));
+                    window.draw(restockButton);
+
+                    sf::Text buttonText(font);
+                    buttonText.setCharacterSize(12);
+                    buttonText.setFillColor(textColor);
+                    buttonText.setString("Restock");
+                    buttonText.setPosition(buttonPos + sf::Vector2f(10.f, 5.f));
+                    window.draw(buttonText);
+
+                    if (justClicked && buttonHovered)
+                    {
+                        item.stockRemaining = item.maxStock;
+                    }
+                }
+
+                // Purchase
+                if (isHovered && justClicked && canAfford && !isOnCooldown && !isSoldOut)
+                {
+                    tryPurchaseItem(item, bubbles, realBubblesPerSecond);
+                }
+
+                buffStartY += buffBoxHeight + buffSpacingY;
+            }
+
+            float restockTimeLeft = max(0.f, marketplaceRestockInterval - marketplaceRestockClock.getElapsedTime().asSeconds());
+            sf::Text restockTimerText(font);
+            restockTimerText.setCharacterSize(14);
+            restockTimerText.setFillColor(sf::Color::Black);
+            restockTimerText.setString("Next Auto Restock: " + to_string(static_cast<int>(ceilf(restockTimeLeft))) + "s");
+            restockTimerText.setPosition({ buffStartX, buffStartY + 10.f });
+            window.draw(restockTimerText);
+        }
+
 		// Tab positions and rendering
         sf::Vector2f tabStartPos(
             window.getSize().x - UIConstants::TabWidth - UIConstants::TabRightMargin,
@@ -1955,20 +2067,49 @@ int main()
 
         sf::Sprite achievementsIcon(achievementIconTexture);
 
-        sf::Vector2u texSize = achievementIconTexture.getSize();
-        if (texSize.x > 0 && texSize.y > 0)
+        sf::Vector2u achievementTexSize = achievementIconTexture.getSize();
+        if (achievementTexSize.x > 0 && achievementTexSize.y > 0)
         {
             float targetSize = iconTabSize * 0.6f;
-            float scaleX = targetSize / texSize.x;
-            float scaleY = targetSize / texSize.y;
+            float scaleX = targetSize / achievementTexSize.x;
+            float scaleY = targetSize / achievementTexSize.y;
             achievementsIcon.setScale({ scaleX, scaleY });
 
             achievementsIcon.setPosition({
-                achievementsTabPos.x + (iconTabSize - texSize.x * scaleX) / 2.f,
-                achievementsTabPos.y + (iconTabSize - texSize.y * scaleY) / 2.f
+                achievementsTabPos.x + (iconTabSize - achievementTexSize.x * scaleX) / 2.f,
+                achievementsTabPos.y + (iconTabSize - achievementTexSize.y * scaleY) / 2.f
                 });
 
             window.draw(achievementsIcon);
+        }
+
+        // Marketplace Tab (icon-only)
+        sf::Vector2f marketplaceTabPos = {
+            tabStartPos.x - UIConstants::TabWidth - UIConstants::TabSpacing - iconTabSize * 2.f - 20.f,
+            tabStartPos.y
+        };
+
+        sf::RectangleShape marketplaceTab({ iconTabSize, iconTabSize });
+        marketplaceTab.setPosition(marketplaceTabPos);
+        marketplaceTab.setFillColor(currentTab == GameTabs::Marketplace ? sf::Color::White : sf::Color(150, 150, 150));
+        window.draw(marketplaceTab);
+
+        sf::Sprite buffIcon(achievementIconTexture);
+        sf::Vector2u marketplaceTexSize = achievementIconTexture.getSize();
+
+        if (marketplaceTexSize.x > 0 && marketplaceTexSize.y > 0)
+        {
+            float targetSize = iconTabSize * 0.6f;
+            float scaleX = targetSize / marketplaceTexSize.x;
+            float scaleY = targetSize / marketplaceTexSize.y;
+            buffIcon.setScale({ scaleX, scaleY });
+
+            buffIcon.setPosition({
+                marketplaceTabPos.x + (iconTabSize - marketplaceTexSize.x * scaleX) / 2.f,
+                marketplaceTabPos.y + (iconTabSize - marketplaceTexSize.y * scaleY) / 2.f
+                });
+
+            window.draw(buffIcon);
         }
 
         // Achievements

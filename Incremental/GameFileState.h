@@ -1,9 +1,10 @@
 ﻿#pragma once
 
+#include "Achievements.h"
 #include "Includes.h"
+#include "Marketplace.h"
 #include "Upgrades.h"
 #include "UpgradesList.h"
-#include "Achievements.h"
 
 extern long double totalUpgradeCount;
 extern string gameVersion;
@@ -29,6 +30,11 @@ void saveFileToJson(
     auto round2 = [](long double val) -> long double {
         return round(val * 100.0) / 100.0;
         };
+    
+    json marketplaceData = json::array();
+
+    for (const auto& item : marketplaceItems)
+        marketplaceData.push_back(item);
 
     saveData["version"] = version;
     saveData["timestamp"] = timestamp;
@@ -43,6 +49,7 @@ void saveFileToJson(
     saveData["totalUpgradeCount"] = round2(totalUpgradeCount);
     saveData["upgrades"] = upgrades;
     saveData["gameAchievements"] = achievements;
+    saveData["marketplace"] = marketplaceData;
 
     ofstream file("save_file.json");
 
@@ -150,6 +157,25 @@ void loadFileFromJson(
             {
                 PerkEffect effect = getPerkEffectFromAchievementType(a.achievementType);
                 perkManager.applyPerk(effect.type, effect.value);
+            }
+        }
+    }
+
+    // Load Buff Shop
+    if (saveData.contains("marketplace"))
+    {
+        for (const auto& savedMarketplace : saveData["marketplace"])
+        {
+            string name = savedMarketplace["name"];
+            auto it = find_if(marketplaceItems.begin(), marketplaceItems.end(), [&](marketplaceItemsList& item) {
+                return item.name == name;
+                });
+            
+            if (it != marketplaceItems.end())
+            {
+                from_json(savedMarketplace, *it);
+                // Recalculate current cost from saved timesBought
+                it->cost = round(it->baseCost * pow(itemInflationRate, it->timesBought));
             }
         }
     }

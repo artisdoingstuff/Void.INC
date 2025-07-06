@@ -45,21 +45,22 @@ inline void achievementsList()
     achievements.push_back({ "Hello, World!", "Generate 100T Bubbles", AchievementType::TotalBubbles, 100000000000000.0 });
 
     // Clicking Achievements
-    achievements.push_back({ "Your First Click!", "Generate 1 Bubble \nfrom Clicking", AchievementType::Clicks, 1 });
-    achievements.push_back({ "Having fun?", "Generate 100 Bubbles \nfrom Clicking", AchievementType::Clicks, 100.0 });
-    achievements.push_back({ "Surprised you're still clicking", "Generate 1K Bubbles \nfrom Clicking", AchievementType::Clicks, 1000.0 });
-    achievements.push_back({ "You must really like clicking", "Generate 10K Bubbles \nfrom Clicking", AchievementType::Clicks, 10000.0 });
-    achievements.push_back({ "Still clicking?", "Generate 100K Bubbles \nfrom Clicking", AchievementType::Clicks, 100000.0 });
-    achievements.push_back({ "Soapy Fingers", "Generate 1M Bubbles \nfrom Clicking", AchievementType::Clicks, 1000000.0 });
-    achievements.push_back({ "Fingers of Steel", "Generate 10M Bubbles \nfrom Clicking", AchievementType::Clicks, 10000000.0 });
-    achievements.push_back({ "Really?", "Generate 100M Bubbles \nfrom Clicking", AchievementType::Clicks, 100000000.0 });
-    achievements.push_back({ "Watery Fingers", "Generate 1B Bubbles \nfrom Clicking", AchievementType::Clicks, 1000000000.0 });
-    achievements.push_back({ "You must be really clean!", "Generate 10B Bubbles \nfrom Clicking", AchievementType::Clicks, 10000000000.0 });
-    achievements.push_back({ "Autoclicker?", "Generate 100B Bubbles \nfrom Clicking", AchievementType::Clicks, 100000000000.0 });
+    achievements.push_back({ "Your First Click!", "Click 1 Bubble", AchievementType::Clicks, 1 });
+    achievements.push_back({ "Having fun?", "Click 100 Bubbles", AchievementType::Clicks, 100.0 });
+    achievements.push_back({ "Surprised you're still clicking", "Click 1K Bubbles", AchievementType::Clicks, 1000.0 });
+    achievements.push_back({ "You must really like clicking", "Click 10K Bubbles", AchievementType::Clicks, 10000.0 });
+    achievements.push_back({ "Still clicking?", "Click 100K Bubbles", AchievementType::Clicks, 100000.0 });
+    achievements.push_back({ "Soapy Fingers", "Click 1M Bubbles", AchievementType::Clicks, 1000000.0 });
+    achievements.push_back({ "Fingers of Steel", "Click 10M Bubbles", AchievementType::Clicks, 10000000.0 });
+    achievements.push_back({ "Really?", "Click 100M Bubbles", AchievementType::Clicks, 100000000.0 });
+    achievements.push_back({ "Watery Fingers", "Click 1B Bubbles", AchievementType::Clicks, 1000000000.0 });
+    achievements.push_back({ "You must be really clean!", "Click 10B Bubbles", AchievementType::Clicks, 10000000000.0 });
+    achievements.push_back({ "Autoclicker?", "Click 100B Bubbles", AchievementType::Clicks, 100000000000.0 });
+	achievements.push_back({ "Clicking Machine", "Click 1T Bubbles", AchievementType::Clicks, 1000000000000.0 });
 
     // Item Achievements
     // Soap Achievements
-    achievements.push_back({ "First Bubbly Producer", "Purchase 1 Soap", AchievementType::SpecificUpgrade, 1, "Soap" });
+    achievements.push_back({ "Sudsy Start", "Purchase 1 Soap", AchievementType::SpecificUpgrade, 1, "Soap" });
     achievements.push_back({ "Soap Bars", "Purchase 10 Soap", AchievementType::SpecificUpgrade, 10, "Soap" });
     achievements.push_back({ "More Soap!", "Purchase 25 Soap", AchievementType::SpecificUpgrade, 25, "Soap" });
     achievements.push_back({ "Fresh Soap", "Purchase 50 Soap", AchievementType::SpecificUpgrade, 50, "Soap" });

@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Includes.h"
+#include "GlobalVariables.h"
 
-extern const long double shopInflationMultiplier;
-inline float globalCostMultiplier = 1.0f;
 extern long double totalUpgradeCount;
 extern long double bubblesPerSecond;
 

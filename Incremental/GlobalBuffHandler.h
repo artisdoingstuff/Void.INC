@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Includes.h"
-
-inline float globalBuffSpawnDelayMultiplier = 1.0f;
+#include "GlobalTextures.h"
+#include "GlobalVariables.h"
 
 enum class buffVariantType {
     globalBubbleBuff,
@@ -33,6 +33,13 @@ struct GlobalBuffVariant {
 extern sf::Texture bubbleTexture;
 extern sf::Texture goldenBubbleTexture;
 
+inline sf::Vector2f getGlobalBuffSpawnPosition()
+{
+    float x = static_cast<float>(rand() % 1400 + 100);
+    float y = static_cast<float>(rand() % 600 + 100);
+    return { x, y };
+}
+
 inline vector<GlobalBuffVariant> globalBuffVariants = {
     { GlobalBuffType::Normal,         2.0f, 30.0f, 60.0f, &bubbleTexture,       buffVariantType::globalBubbleBuff },
     { GlobalBuffType::Multiplicative, 4.0f, 20.0f, 22.0f, &goldenBubbleTexture, buffVariantType::globalBubbleBuff },
@@ -41,7 +48,7 @@ inline vector<GlobalBuffVariant> globalBuffVariants = {
     { GlobalBuffType::Frenzy,         1.5f, 20.0f,  5.0f, &goldenBubbleTexture, buffVariantType::globalBubbleBuff },
     { GlobalBuffType::Mayhem,         0.9f, 20.0f,  2.0f, &goldenBubbleTexture, buffVariantType::globalBubbleBuff },
     { GlobalBuffType::Mutated,        1.0f, 25.0f,  0.0f, &goldenBubbleTexture, buffVariantType::mutationBuff },
-    { GlobalBuffType::ShootingStar,   5.0f, 10.0f,  2.0f, &goldenBubbleTexture, buffVariantType::globalBubbleBuff },
+    { GlobalBuffType::ShootingStar,   5.0f, 10.0f,  2.0f, &shootingStarTexture, buffVariantType::globalBubbleBuff },
     
 };
 
@@ -95,10 +102,12 @@ inline bool shouldSpawnGlobalBuff()
     return false;
 }
 
-inline optional<pair<GlobalBuffVariant, sf::Sprite>> selectGlobalBuffVariant(sf::Vector2f pos, sf::Vector2f size)
+inline optional<tuple<int, GlobalBuffVariant, sf::Sprite>> selectGlobalBuffVariant(sf::Vector2f pos, sf::Vector2f size)
 {
     float totalRarity = 0.0f;
-    for (auto& v : globalBuffVariants) totalRarity += v.rarity;
+    for (auto& v : globalBuffVariants)
+        totalRarity += v.rarity;
+
     float roll = static_cast<float>(rand()) / RAND_MAX * totalRarity;
 
     float cumulative = 0.0f;
@@ -107,20 +116,18 @@ inline optional<pair<GlobalBuffVariant, sf::Sprite>> selectGlobalBuffVariant(sf:
         cumulative += globalBuffVariants[i].rarity;
         if (roll <= cumulative)
         {
-            GlobalBuffVariant outVariant = globalBuffVariants[i];
-            if (!outVariant.textureOpt.has_value()) return nullopt;
+            const GlobalBuffVariant& variant = globalBuffVariants[i];
+            if (!variant.textureOpt.has_value()) return nullopt;
 
-            sf::Texture* tex = outVariant.textureOpt.value();
-            sf::Sprite outSprite(*tex);
-            outSprite.setPosition(pos);
+            sf::Texture* tex = variant.textureOpt.value();
+            sf::Sprite sprite(*tex);
+            sprite.setPosition(pos);
 
             sf::Vector2u texSize = tex->getSize();
             if (texSize.x > 0 && texSize.y > 0)
-            {
-                outSprite.setScale({ size.x / texSize.x, size.y / texSize.y });
-            }
+                sprite.setScale({ size.x / texSize.x, size.y / texSize.y });
 
-            return make_pair(outVariant, outSprite);
+            return make_tuple(static_cast<int>(i), variant, sprite);
         }
     }
 
@@ -131,6 +138,32 @@ inline void spawnGlobalBuff(const sf::Sprite& sprite, int variantIndex)
 {
     const auto& variant = globalBuffVariants[variantIndex];
     activeGlobalBuffs.emplace_back(sprite, variant.effectType, variant.variantType, variant.duration, variantIndex);
+}
+
+inline bool spawnBuffByType(GlobalBuffType typeToSpawn, sf::Vector2f position, sf::Vector2f size = { 100.f, 100.f })
+{
+    for (size_t i = 0; i < globalBuffVariants.size(); ++i)
+    {
+        const auto& variant = globalBuffVariants[i];
+        if (variant.effectType == typeToSpawn)
+        {
+            if (!variant.textureOpt.has_value())
+                return false;
+
+            sf::Texture* tex = variant.textureOpt.value();
+            if (tex->getSize().x == 0 || tex->getSize().y == 0)
+                return false;
+
+            sf::Sprite sprite(*tex);
+            sprite.setPosition(position);
+            sprite.setScale({ size.x / tex->getSize().x, size.y / tex->getSize().y });
+            sprite.setOrigin({ tex->getSize().x / 2.f, tex->getSize().y / 2.f });
+
+            spawnGlobalBuff(sprite, static_cast<int>(i));
+            return true;
+        }
+    }
+    return false;
 }
 
 inline void updateGlobalBuffs(float dt)
@@ -154,6 +187,9 @@ inline void updateGlobalBuffs(float dt)
         float t = buff.pulseClock.getElapsedTime().asMilliseconds();
         float pulse = 1.0f + 0.02f * sinf(t * 0.003f);
         buff.sprite.setScale({ pulse * 0.8f, pulse * 0.8f });
+
+        sf::Angle rotation = sf::degrees(20.f * sinf(t * 0.001f));
+        buff.sprite.setRotation(rotation);
 
 		sf::Vector2u textureSize = buff.sprite.getTexture().getSize();
         buff.sprite.setOrigin({ textureSize.x / 2.0f, textureSize.y / 2.0f });
