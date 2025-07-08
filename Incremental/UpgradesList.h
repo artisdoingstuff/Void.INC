@@ -4,27 +4,6 @@
 
 extern vector<UpgradeItem> upgrades;
 
-inline UpgradeRarity getRarityByName(const string& upgradeName)
-{
-	if (upgradeName == "Toothpaste")        return UpgradeRarity::Uncommon;
-	if (upgradeName == "Loofah")            return UpgradeRarity::Uncommon;
-	if (upgradeName == "Bubble Bath")       return UpgradeRarity::Uncommon;
-	if (upgradeName == "Bathtub Jet")       return UpgradeRarity::Uncommon;
-	if (upgradeName == "Luxury Spa")        return UpgradeRarity::Rare;
-	if (upgradeName == "Foam Pit")          return UpgradeRarity::Rare;
-	if (upgradeName == "Foam Party")        return UpgradeRarity::Rare;
-	if (upgradeName == "Sudsy Soap")        return UpgradeRarity::Rare;
-	if (upgradeName == "Bubble Machine")    return UpgradeRarity::Rare;
-    if (upgradeName == "Bubbly Pool")       return UpgradeRarity::Epic;
-	if (upgradeName == "Sparkling Water")   return UpgradeRarity::Epic;
-	if (upgradeName == "Carbonated Soda")   return UpgradeRarity::Epic;
-	if (upgradeName == "Bath Bombs")        return UpgradeRarity::Epic;
-	if (upgradeName == "Bubble Wand")       return UpgradeRarity::Epic;
-    if (upgradeName.find("Super ") == 0)    return UpgradeRarity::Epic;
-
-    return UpgradeRarity::Common;
-}
-
 inline const unordered_map<string, long double> globalUpgradeMultiplierValues = {
     { "Red Bubble", 1.01 }, { "Green Bubble", 1.01 },
     { "Blue Bubble", 1.01 }, { "Rubber Ducky", 1.01 },
@@ -36,7 +15,7 @@ inline const unordered_map<string, long double> globalUpgradeMultiplierValues = 
     { "Misprint Bubble", 1.125 }, { "Spring Bubble", 1.02 },
     { "Cherry Bubble", 1.02 }, { "Blossoming Bubble", 1.02 },
     { "Rose Bubble", 1.02 }, { "Dandelion Bubble", 1.02 },
-    { "Charming Bubble", 1.02 }, { "Lucky Bubble", 1.07 },
+    { "Charming Bubble", 1.03 }, { "Lucky Bubble", 1.07 },
     { "Sudsy Water Balloon", 1.02 }, { "Heated Bubble", 1.02 },
     { "Boiling Bubble", 1.02 }, { "Leafy Bubble", 1.02 },
     { "Autumn Bubble", 1.02 }, { "Sunflower Bubble", 1.02 },
@@ -45,7 +24,25 @@ inline const unordered_map<string, long double> globalUpgradeMultiplierValues = 
     { "Cryogenic Bubble", 1.02 }, { "Inflatable Ducky", 1.02 },
     { "Glistening Bubble", 1.05 }, { "Sparkling Bubble", 1.05 },
     { "Gleaming Bubble", 1.05 }, { "Lucky Golden Bubble", 1.07 },
-    { "Fusion Bubble", 1.03 }, { "Fragmented Bubble", 1.03 }
+    { "Fusion Bubble", 1.03 }, { "Fragmented Bubble", 1.03 },
+    { "Ionized Bubble", 1.03 }, { "Nuclear Bubble", 1.03 },
+    { "Atomic Bubble", 1.03 }, { "Atomized Bubble", 1.03 },
+    { "Dark Matter Bubble", 1.03 }, { "Graviton Bubble", 1.03 },
+    { "Quantum Foam", 1.03 }, { "Neutrino Bubble", 1.03 },
+    { "Void Bubble", 1.03 }, { "Nebula Bubble", 1.04 },
+    { "Supernova Bubble", 1.04 }, { "Cosmic Bubble", 1.04 },
+    { "Bubbleverse Rift", 1.1 }, { "Timeless Bubble", 1.05 },
+    { "Chronofoam", 1.03 }, { "Infinity Bubble", 1.1 },
+    { "Hyperclean Bubble", 1.03 }, { "Ultrafoam Reactor", 1.03 },
+    { "Transcendent Bubble", 1.05 }, { "Pressure Bubble", 1.03 },
+    { "Ultrasoap Bubble", 1.05 }, { "Bubbledrift", 1.04 },
+    { "Steam Bubble", 1.03 }, { "Skyfoam Capsule", 1.03 },
+    { "Duck of Dawn", 1.05 }, { "Echoing Bubble", 1.11 },
+    { "Solar Bubble", 1.04 }, { "Crystal Bubble", 1.03 },
+    { "Supercleanser", 1.05 }, { "Dreamweaver Bubble", 1.03 },
+    { "Bubble Collider", 1.05 }, { "Polished Bubble", 1.03 },
+    { "Sudburst", 1.03 }, { "Nebulized Bubble", 1.03 },
+	{ "Bubble Synthesizer", 1.1 }, { "Omnibubble", 1.1 }
 };
 
 inline void upgradesList()
@@ -160,4 +157,46 @@ inline void upgradesList()
     addOtherMilestoneUpgrade(upgrades, "Fragmented Bubble", 8500000.0, 10000000.0);
     addOtherMilestoneUpgrade(upgrades, "More Toothpaste!", 10000000.0, 12000000.0);
     addOtherMilestoneUpgrade(upgrades, "Blue Soap Bar", 12000000.0, 14000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Ionized Bubble", 15000000.0, 17500000.0);
+    addOtherMilestoneUpgrade(upgrades, "Nuclear Bubble", 20000000.0, 25000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Atomic Bubble", 25000000.0, 30000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Atomized Bubble", 25000000.0, 30000000.0);
+	addOtherMilestoneUpgrade(upgrades, "Large Loofah", 27500000.0, 32500000.0);
+    addOtherMilestoneUpgrade(upgrades, "Dark Matter Bubble", 30000000.0, 35000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Graviton Bubble", 35000000.0, 40000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Quantum Foam", 40000000.0, 50000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Neutrino Bubble", 50000000.0, 60000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Void Bubble", 60000000.0, 70000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Nebula Bubble", 70000000.0, 85000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Supernova Bubble", 85000000.0, 100000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Galaxy Soap", 100000000.0, 120000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Cosmic Bubble", 120000000.0, 140000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Singularity Sud", 140000000.0, 160000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Bubbleverse Rift", 160000000.0, 200000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Timeless Bubble", 200000000.0, 250000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Chronofoam", 250000000.0, 300000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Infinity Bubble", 300000000.0, 350000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Hyperclean Bubble", 350000000.0, 400000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Beyond Clean", 400000000.0, 500000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Ultrafoam Reactor", 500000000.0, 600000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Transcendent Bubble", 600000000.0, 750000000.0);
+    addOtherMilestoneUpgrade(upgrades, "True Soap", 750000000.0, 1000000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Pressure Bubble", 900000000.0, 1050000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Ultrasoap Bubble", 1050000000.0, 1200000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Bubbledrift", 1200000000.0, 1400000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Steam Bubble", 1400000000.0, 1600000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Skyfoam Capsule", 1600000000.0, 1800000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Duck of Dawn", 1800000000.0, 2100000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Echoing Bubble", 2100000000.0, 2400000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Solar Bubble", 2400000000.0, 2750000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Crystal Bubble", 2750000000.0, 3100000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Supercleanser", 3100000000.0, 3500000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Dreamweaver Bubble", 3500000000.0, 3900000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Bubble Collider", 3900000000.0, 4400000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Polished Bubble", 4400000000.0, 4900000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Sudburst", 4900000000.0, 5500000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Nebulized Bubble", 5500000000.0, 6100000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Liquid Spectrum", 7500000000.0, 8300000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Bubble Synthesizer", 8300000000.0, 9200000000.0);
+    addOtherMilestoneUpgrade(upgrades, "Omnibubble", 9200000000.0, 10000000000.0);
 }

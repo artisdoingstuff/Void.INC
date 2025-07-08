@@ -21,28 +21,37 @@ inline WeatherState currentWeather;
 // --- Weather name display ---
 inline string getWeatherName(WeatherType type) {
     switch (type) {
-    case WeatherType::BubblyRain:  return "Bubbly Rain";
-    case WeatherType::SoapyShower: return "Soapy Shower";
-    case WeatherType::FoamyFog:    return "Foamy Fog";
-    default: return "Clear Skies";
+        case WeatherType::BubblyRain:  return "Bubbly Rain";
+        case WeatherType::SoapyShower: return "Soapy Shower";
+        case WeatherType::FoamyFog:    return "Foamy Fog";
+        default: return "Clear Skies";
     }
 }
 
 inline string getWeatherEffect(WeatherType type) {
     switch (type) {
-    case WeatherType::BubblyRain:  return "+20% BPS";
-    case WeatherType::SoapyShower: return "+10% BPS";
-    case WeatherType::FoamyFog:    return "-10% BPS";
-    default: return "No effect";
+        case WeatherType::BubblyRain:  return "+20% BPS";
+        case WeatherType::SoapyShower: return "+10% BPS";
+        case WeatherType::FoamyFog:    return "-10% BPS";
+        default: return "No.";
     }
 }
 
 inline float getWeatherBpsMultiplier(WeatherType type) {
     switch (type) {
-    case WeatherType::BubblyRain:  return 1.2f;
-    case WeatherType::SoapyShower: return 1.1f;
-    case WeatherType::FoamyFog:    return 0.9f;
-    default: return 1.0f;
+        case WeatherType::BubblyRain:  return 1.2f;
+        case WeatherType::SoapyShower: return 1.1f;
+        case WeatherType::FoamyFog:    return 0.9f;
+        default: return 1.0f;
+    }
+}
+
+inline float getWeatherSpawnRateMultiplier(WeatherType type) {
+    switch (type) {
+        case WeatherType::BubblyRain:  return 1.0f;
+        case WeatherType::SoapyShower: return 1.0f;
+        case WeatherType::FoamyFog:    return 1.5f;
+        default: return 1.0f;
     }
 }
 
@@ -61,7 +70,7 @@ inline void updateWeather(queue<PopupStruct>& popupQueue)
 
         popupQueue.push({
             "Current Weather:" + getWeatherName(currentWeather.current) +
-            "\n~ " + getWeatherEffect(currentWeather.current)
+            "\nWeather Effect: " + getWeatherEffect(currentWeather.current)
             });
     }
 }

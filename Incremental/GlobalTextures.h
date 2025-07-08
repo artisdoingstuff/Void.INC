@@ -23,6 +23,8 @@ inline void loadAchievementTexture(map<string, sf::Texture>& achievementTextures
 inline sf::Texture bubbleTexture("Assets/Buffs/bubble.png");
 inline sf::Texture goldenBubbleTexture("Assets/Buffs/golden_bubble.png");
 inline sf::Texture shootingStarTexture("Assets/Buffs/shooting_star.png");
+
 inline sf::Texture achievementIconTexture("Assets/Achievements/achievement_icon.png");
+inline sf::Texture marketplaceIconTexture("Assets/Marketplace/marketplace_icon.png");
 
 inline map<string, sf::Texture> achievementTextures;

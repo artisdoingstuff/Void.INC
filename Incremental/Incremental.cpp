@@ -17,6 +17,7 @@
 #include "ShootingStarBubble.h"
 #include "Upgrades.h"
 #include "UpgradesList.h"
+#include "UpgradeRarities.h"
 #include "WeatherCycle.h"
 #include "WeatherVisuals.h"
 
@@ -219,8 +220,6 @@ int main()
     bgm.play();
 
     // Buffs variables here
-    bool canPressGlobalBubbleBuff = false;
-
     vector<ShootingStar> activeShootingStars;
 	bool isShootingStarActive = false;
 	float shootingStarDuration = 0.0f;
@@ -458,6 +457,84 @@ int main()
                         appliedUpgradeEffects.insert("Blue Soap Bar");
                     }
                 }
+            },
+            {
+                "Large Loofah", [&]() {
+                    if (appliedUpgradeEffects.find("Large Loofah") == appliedUpgradeEffects.end()) {
+                        perUpgradeMultipliers["Loofah"] *= 2.0;
+                        appliedUpgradeEffects.insert("Large Loofah");
+                    }
+                }
+            },
+            {
+                "Galaxy Soap", [&]() {
+                    if (appliedUpgradeEffects.find("Galaxy Soap") == appliedUpgradeEffects.end()) {
+                        perUpgradeMultipliers["Soap"] *= 2.0;
+                        appliedUpgradeEffects.insert("Galaxy Soap");
+                    }
+                }
+            },
+            {
+                "Singularity Sud", [&]() {
+                    if (appliedUpgradeEffects.find("Singularity Sud") == appliedUpgradeEffects.end()) {
+                        perUpgradeMultipliers["Soap"] *= 2.0;
+                        perUpgradeMultipliers["Hand Wash"] *= 2.0;
+                        perUpgradeMultipliers["Shampoo"] *= 2.0;
+                        appliedUpgradeEffects.insert("Singularity Sud");
+                    }
+                }
+            },
+            {
+                "Beyond Clean", [&]() {
+                    if (appliedUpgradeEffects.find("Beyond Clean") == appliedUpgradeEffects.end()) {
+                        perUpgradeMultipliers["Bubble Bath"] *= 2.0;
+                        perUpgradeMultipliers["Bathtub Jet"] *= 2.0;
+                        appliedUpgradeEffects.insert("Beyond Clean");
+                    }
+                }
+            },
+            {
+                "True Soap", [&]() {
+                    if (appliedUpgradeEffects.find("True Soap") == appliedUpgradeEffects.end()) {
+                        perUpgradeMultipliers["Soap"] *= 2.5;
+                        appliedUpgradeEffects.insert("True Soap");
+                    }
+                }
+            },
+            {
+                "Liquid Spectrum", [&]() {
+                    if (appliedUpgradeEffects.find("Liquid Spectrum") == appliedUpgradeEffects.end()) {
+                        perUpgradeMultipliers["Hand Wash"] *= 2.0;
+						perUpgradeMultipliers["Shampoo"] *= 2.0;
+                        appliedUpgradeEffects.insert("Liquid Spectrum");
+                    }
+                }
+            },
+            {
+                "Omnibubble", [&]() {
+                    if (appliedUpgradeEffects.find("Omnibubble") == appliedUpgradeEffects.end()) {
+                        perUpgradeMultipliers["Soap"] *= 1.2;
+						perUpgradeMultipliers["Hand Wash"] *= 1.2;
+						perUpgradeMultipliers["Shampoo"] *= 1.2;
+						perUpgradeMultipliers["Shaving Foam"] *= 1.2;
+						perUpgradeMultipliers["Toothpaste"] *= 1.2;
+						perUpgradeMultipliers["Loofah"] *= 1.2;
+						perUpgradeMultipliers["Bubble Bath"] *= 1.2;
+						perUpgradeMultipliers["Bathtub Jet"] *= 1.2;
+						perUpgradeMultipliers["Luxury Spa"] *= 1.2;
+						perUpgradeMultipliers["Foam Pit"] *= 1.2;
+						perUpgradeMultipliers["Foam Party"] *= 1.2;
+						perUpgradeMultipliers["Sudsy Soap"] *= 1.2;
+						perUpgradeMultipliers["Bubble Machine"] *= 1.2;
+						perUpgradeMultipliers["Bubbly Pool"] *= 1.2;
+						perUpgradeMultipliers["Sparkling Water"] *= 1.2;
+						perUpgradeMultipliers["Carbonated Soda"] *= 1.2;
+						perUpgradeMultipliers["Bath Bombs"] *= 1.2;
+						perUpgradeMultipliers["Bubble Wand"] *= 1.2;
+
+                        appliedUpgradeEffects.insert("Omnibubble");
+					}
+}
             }
         };
 
@@ -489,50 +566,40 @@ int main()
             // Update progressValue based on type
             switch (achievement.achievementType)
             {
-            case AchievementType::TotalBubbles:
-                achievement.progressValue = min(allTimeBubbles / achievement.unlockThreshold, 1.0L);
-                break;
+                case AchievementType::TotalBubbles:
+                    achievement.progressValue = min(allTimeBubbles / achievement.unlockThreshold, 1.0L);
+                    break;
 
-            case AchievementType::Clicks:
-                achievement.progressValue = min(allTimeBubblesPerClick / achievement.unlockThreshold, 1.0L);
-                break;
+                case AchievementType::Clicks:
+                    achievement.progressValue = min(allTimeBubblesPerClick / achievement.unlockThreshold, 1.0L);
+                    break;
 
-            case AchievementType::UpgradeCount:
-            {
-                long double totalCount = 0.0;
-                for (const auto& u : upgrades)
-                    totalCount += u.count;
-                achievement.progressValue = min(totalCount / achievement.unlockThreshold, 1.0L);
-                break;
-            }
+                case AchievementType::UpgradeCount:
+                {
+                    long double totalCount = 0.0;
+                    for (const auto& u : upgrades)
+                        totalCount += u.count;
+                    achievement.progressValue = min(totalCount / achievement.unlockThreshold, 1.0L);
+                    break;
+                }
 
-            case AchievementType::SpecificUpgrade:
-            {
-                auto it = find_if(upgrades.begin(), upgrades.end(), [&](const UpgradeItem& u) {
-                    return u.name == achievement.targetUpgrade;
-                    });
-                if (it != upgrades.end())
-                    achievement.progressValue = min(it->count / achievement.unlockThreshold, 1.0L);
-                break;
-            }
+                case AchievementType::SpecificUpgrade:
+                {
+                    auto it = find_if(upgrades.begin(), upgrades.end(), [&](const UpgradeItem& u) {
+                        return u.name == achievement.targetUpgrade;
+                        });
+                    if (it != upgrades.end())
+                        achievement.progressValue = min(it->count / achievement.unlockThreshold, 1.0L);
+                    break;
+                }
 
-            case AchievementType::MilestoneReached:
-            {
-                int milestoneCount = 0;
-                for (const auto& u : upgrades)
-                    if (u.isMilestone && u.count > 0)
-                        ++milestoneCount;
-                achievement.progressValue = min((long double)milestoneCount / achievement.unlockThreshold, 1.0L);
-                break;
-            }
+                case AchievementType::BuffTriggered:
+                    achievement.progressValue = min(buffCounter / achievement.unlockThreshold, 1.0L);
+                    break;
 
-            case AchievementType::BuffTriggered:
-                achievement.progressValue = min(buffCounter / achievement.unlockThreshold, 1.0L);
-                break;
-
-            default:
-                achievement.progressValue = 0.0;
-                break;
+                default:
+                    achievement.progressValue = 0.0;
+                    break;
             }
 
             if (!achievement.isUnlocked && achievement.progressValue >= 1.0)
@@ -754,10 +821,10 @@ int main()
                         int buyAmount = 1;
                         switch (currentMultibuy)
                         {
-                        case MultibuyMode::x1:   buyAmount = 1; break;
-                        case MultibuyMode::x10:  buyAmount = 10; break;
-                        case MultibuyMode::x100: buyAmount = 100; break;
-                        case MultibuyMode::Max:  buyAmount = calculateMaxAffordable(upgrade, bubbles); break;
+                            case MultibuyMode::x1:   buyAmount = 1; break;
+                            case MultibuyMode::x10:  buyAmount = 10; break;
+                            case MultibuyMode::x100: buyAmount = 100; break;
+                            case MultibuyMode::Max:  buyAmount = calculateMaxAffordable(upgrade, bubbles); break;
                         }
 
                         long double totalCost = calculateTotalCost(upgrade, buyAmount);
@@ -975,62 +1042,62 @@ int main()
 
                     switch (variant.effectType)
                     {
-                    case GlobalBuffType::Normal:
-                        isNormalBuffActive = true;
-                        normalBuffDuration = variant.duration;
-                        normalBuffClock.restart();
-                        break;
+                        case GlobalBuffType::Normal:
+                            isNormalBuffActive = true;
+                            normalBuffDuration = variant.duration;
+                            normalBuffClock.restart();
+                            break;
 
-                    case GlobalBuffType::Multiplicative:
-                        isMultiplicativeBuffActive = true;
-                        multiplicativeBuffDuration = variant.duration;
-                        multiplicativeBuffClock.restart();
-                        break;
+                        case GlobalBuffType::Multiplicative:
+                            isMultiplicativeBuffActive = true;
+                            multiplicativeBuffDuration = variant.duration;
+                            multiplicativeBuffClock.restart();
+                            break;
 
-                    case GlobalBuffType::Additive:
-                    {
-                        float randomValue = 1.0f + static_cast<float>(rand()) / RAND_MAX * 4.0f;
-						addBubbles((1 + pow(10, (floor(log10(realBubbles)) - 2)))* randomValue, bubbles, allTimeBubbles);
-                        break;
-                    }
+                        case GlobalBuffType::Additive:
+                        {
+                            float randomValue = 1.0f + static_cast<float>(rand()) / RAND_MAX * 4.0f;
+						    addBubbles((1 + pow(10, (floor(log10(realBubbles)) - 2)))* randomValue, bubbles, allTimeBubbles);
+                            break;
+                        }
 
-                    case GlobalBuffType::Chaos:
-                        isBubbleChaosActive = true;
-                        bubbleChaosClock.restart();
-                        bubbleChaosSpawnIntervalClock.restart();
-                        break;
+                        case GlobalBuffType::Chaos:
+                            isBubbleChaosActive = true;
+                            bubbleChaosClock.restart();
+                            bubbleChaosSpawnIntervalClock.restart();
+                            break;
 
-                    case GlobalBuffType::Frenzy:
-                        isBubbleFrenzyActive = true;
-                        bubbleFrenzyClock.restart();
-                        bubbleFrenzySpawnIntervalClock.restart();
-                        break;
+                        case GlobalBuffType::Frenzy:
+                            isBubbleFrenzyActive = true;
+                            bubbleFrenzyClock.restart();
+                            bubbleFrenzySpawnIntervalClock.restart();
+                            break;
 
-                    case GlobalBuffType::Mayhem:
-                        isBubbleMayhemActive = true;
-                        bubbleMayhemClock.restart();
-                        bubbleMayhemSpawnIntervalClock.restart();
-                        break;
+                        case GlobalBuffType::Mayhem:
+                            isBubbleMayhemActive = true;
+                            bubbleMayhemClock.restart();
+                            bubbleMayhemSpawnIntervalClock.restart();
+                            break;
 
-                    case GlobalBuffType::Mutated:
-                        isMutatedBubbleActive = true;
-                        mutatedBubbleDuration = variant.duration;
-                        mutatedBubbleClock.restart();
-                        break;
+                        case GlobalBuffType::Mutated:
+                            isMutatedBubbleActive = true;
+                            mutatedBubbleDuration = variant.duration;
+                            mutatedBubbleClock.restart();
+                            break;
 
-                    case GlobalBuffType::ShootingStar:
-                    {
-						isShootingStarActive = true;
-                        shootingStarDuration = variant.duration;
-                        shootingStarClock.restart();
+                        case GlobalBuffType::ShootingStar:
+                        {
+						    isShootingStarActive = true;
+                            shootingStarDuration = variant.duration;
+                            shootingStarClock.restart();
 
-                        sf::Vector2f start = { 0.0f, 200.0f };
-                        sf::Vector2f end = { 1600.0f, 600.0f };
-                        float arcHeight = 300.0f;
+                            sf::Vector2f start = { 0.0f, 200.0f };
+                            sf::Vector2f end = { 1600.0f, 600.0f };
+                            float arcHeight = 300.0f;
 
-                        activeShootingStars.emplace_back(shootingStarTexture, start, end, arcHeight, 3.0f);
-                        break;
-                    }
+                            activeShootingStars.emplace_back(shootingStarTexture, start, end, arcHeight, 3.0f);
+                            break;
+                        }
                     }
                 }
             );
@@ -1391,10 +1458,10 @@ int main()
                 int buyAmount = 1;
                 switch (currentMultibuy)
                 {
-                case MultibuyMode::x1:   buyAmount = 1; break;
-                case MultibuyMode::x10:  buyAmount = 10; break;
-                case MultibuyMode::x100: buyAmount = 100; break;
-                case MultibuyMode::Max:  buyAmount = maxAffordable; break;
+                    case MultibuyMode::x1:   buyAmount = 1; break;
+                    case MultibuyMode::x10:  buyAmount = 10; break;
+                    case MultibuyMode::x100: buyAmount = 100; break;
+                    case MultibuyMode::Max:  buyAmount = maxAffordable; break;
                 }
 
                 long double totalCost = calculateTotalCost(upgrade, buyAmount);
@@ -1540,10 +1607,10 @@ int main()
 
                 int buyAmount = 1;
                 switch (currentMultibuy) {
-                case MultibuyMode::x1:   buyAmount = 1; break;
-                case MultibuyMode::x10:  buyAmount = 10; break;
-                case MultibuyMode::x100: buyAmount = 100; break;
-                case MultibuyMode::Max:  buyAmount = calculateMaxAffordable(*hoveredItem, bubbles); break;
+                    case MultibuyMode::x1:   buyAmount = 1; break;
+                    case MultibuyMode::x10:  buyAmount = 10; break;
+                    case MultibuyMode::x100: buyAmount = 100; break;
+                    case MultibuyMode::Max:  buyAmount = calculateMaxAffordable(*hoveredItem, bubbles); break;
                 }
 
                 long double costPreview = calculateTotalCost(*hoveredItem, buyAmount);
@@ -2094,25 +2161,25 @@ int main()
         marketplaceTab.setFillColor(currentTab == GameTabs::Marketplace ? sf::Color::White : sf::Color(150, 150, 150));
         window.draw(marketplaceTab);
 
-        sf::Sprite buffIcon(achievementIconTexture);
-        sf::Vector2u marketplaceTexSize = achievementIconTexture.getSize();
+        sf::Sprite marketplaceIcon(marketplaceIconTexture);
+        sf::Vector2u marketplaceTexSize = marketplaceIconTexture.getSize();
 
         if (marketplaceTexSize.x > 0 && marketplaceTexSize.y > 0)
         {
             float targetSize = iconTabSize * 0.6f;
             float scaleX = targetSize / marketplaceTexSize.x;
             float scaleY = targetSize / marketplaceTexSize.y;
-            buffIcon.setScale({ scaleX, scaleY });
+            marketplaceIcon.setScale({ scaleX, scaleY });
 
-            buffIcon.setPosition({
+            marketplaceIcon.setPosition({
                 marketplaceTabPos.x + (iconTabSize - marketplaceTexSize.x * scaleX) / 2.f,
                 marketplaceTabPos.y + (iconTabSize - marketplaceTexSize.y * scaleY) / 2.f
                 });
 
-            window.draw(buffIcon);
+            window.draw(marketplaceIcon);
         }
 
-        // Achievements
+        // Popups
         if (currentPopup.has_value())
         {
             currentPopup->elapsed += deltaTime;

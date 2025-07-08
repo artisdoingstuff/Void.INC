@@ -29,7 +29,7 @@ def format_patch_note(line):
     return f"+ {name} | {unlock_str} Bubble Unlock\n> {current_str} Bubbles";
 
 lines = [   # Input goes here (ie. '"Blue Soap Bar", 12000000.0, 14000000.0')
-    ''
+    '"Large Loofah", 27500000.0, 32500000.0'
 ];
 
 for line in lines:

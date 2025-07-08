@@ -5,6 +5,7 @@
 #include "Marketplace.h"
 #include "Upgrades.h"
 #include "UpgradesList.h"
+#include "UpgradeRarities.h"
 
 extern long double totalUpgradeCount;
 extern string gameVersion;

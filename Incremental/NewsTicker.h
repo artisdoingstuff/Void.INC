@@ -82,8 +82,8 @@ public:
                 "An eerie calm settles...",
                 120.f,
                 true,
-                []() { globalBuffSpawnDelayMultiplier = 2.0f; },
-                []() { globalBuffSpawnDelayMultiplier = 1.0f; }
+                []() { globalBuffSpawnDelayMultiplier *= 2.0f; },
+                []() { globalBuffSpawnDelayMultiplier /= 2.0f; }
             }
         };
 
@@ -94,37 +94,37 @@ public:
 
     void update(float deltaTime) {
         switch (state) {
-        case NewsState::Idle:
-            loadNext();
-            break;
+            case NewsState::Idle:
+                loadNext();
+                break;
 
-        case NewsState::Entering:
-            animationTime += deltaTime;
-            positionY = lerp(-80.f, targetY, easeOut(animationTime / animDuration));
-            if (animationTime >= animDuration) {
-                positionY = targetY;
-                state = NewsState::Displaying;
-                holdClock.restart();
-            }
-            break;
+            case NewsState::Entering:
+                animationTime += deltaTime;
+                positionY = lerp(-80.f, targetY, easeOut(animationTime / animDuration));
+                if (animationTime >= animDuration) {
+                    positionY = targetY;
+                    state = NewsState::Displaying;
+                    holdClock.restart();
+                }
+                break;
 
-        case NewsState::Displaying:
-            if (holdClock.getElapsedTime().asSeconds() >= current.durationSec) {
-                state = NewsState::Exiting;
-                animationTime = 0.f;
-            }
-            break;
+            case NewsState::Displaying:
+                if (holdClock.getElapsedTime().asSeconds() >= current.durationSec) {
+                    state = NewsState::Exiting;
+                    animationTime = 0.f;
+                }
+                break;
 
-        case NewsState::Exiting:
-            animationTime += deltaTime;
-            positionY = lerp(targetY, -80.f, easeIn(animationTime / animDuration));
-            if (animationTime >= animDuration) {
-                positionY = -80.f;
-                if (current.hasEffect && current.revertEffect)
-                    current.revertEffect();
-                state = NewsState::Idle;
-            }
-            break;
+            case NewsState::Exiting:
+                animationTime += deltaTime;
+                positionY = lerp(targetY, -80.f, easeIn(animationTime / animDuration));
+                if (animationTime >= animDuration) {
+                    positionY = -80.f;
+                    if (current.hasEffect && current.revertEffect)
+                        current.revertEffect();
+                    state = NewsState::Idle;
+                }
+                break;
         }
     }
 

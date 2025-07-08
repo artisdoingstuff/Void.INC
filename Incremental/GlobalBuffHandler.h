@@ -3,6 +3,7 @@
 #include "Includes.h"
 #include "GlobalTextures.h"
 #include "GlobalVariables.h"
+#include "WeatherCycle.h"
 
 enum class buffVariantType {
     globalBubbleBuff,
@@ -81,7 +82,7 @@ inline void queueGlobalBuffs(int count)
 {
     float spawnRateMult = clamp(perkManager.buffSpawnRateMultiplier, 0.1f, 3.0f);
     float baseDelay = (static_cast<float>(rand()) / RAND_MAX * (maxBuffCooldown - minBuffCooldown) + minBuffCooldown);
-    baseDelay *= globalBuffSpawnDelayMultiplier;
+    baseDelay *= globalBuffSpawnDelayMultiplier * getWeatherSpawnRateMultiplier(currentWeather.current);
     baseDelay /= spawnRateMult;
 
     for (int i = 0; i < count; ++i)

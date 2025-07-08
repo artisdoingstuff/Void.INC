@@ -16,7 +16,6 @@ enum class AchievementType
     Clicks,
     UpgradeCount,
     SpecificUpgrade,
-    MilestoneReached,
     BuffTriggered
 };
 
@@ -34,20 +33,20 @@ struct PerkManager {
     {
         switch (type)
         {
-        case AchievementPerkType::ClickMultiplier:
-            clickMultiplier += value;
+            case AchievementPerkType::ClickMultiplier:
+                clickMultiplier += value;
 
-            break;
-        case AchievementPerkType::BPSMultiplier:
-            bpsMultiplier += value;
-            break;
+                break;
+            case AchievementPerkType::BPSMultiplier:
+                bpsMultiplier += value;
+                break;
 
-        case AchievementPerkType::BuffSpawnRate:
-            buffSpawnRateMultiplier += value;
-            break;
+            case AchievementPerkType::BuffSpawnRate:
+                buffSpawnRateMultiplier += value;
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
     }
 };
@@ -56,21 +55,21 @@ inline PerkEffect getPerkEffectFromAchievementType(AchievementType type)
 {
     switch (type)
     {
-    case AchievementType::Clicks:
-        return { AchievementPerkType::ClickMultiplier, 0.05f };
+        case AchievementType::Clicks:
+            return { AchievementPerkType::ClickMultiplier, 0.05f };
 
-    case AchievementType::TotalBubbles:
-        return { AchievementPerkType::BPSMultiplier, 0.1f };
+        case AchievementType::TotalBubbles:
+            return { AchievementPerkType::BPSMultiplier, 0.1f };
 
-    case AchievementType::UpgradeCount:
-    case AchievementType::SpecificUpgrade:
-        return { AchievementPerkType::BPSMultiplier, 0.05f };
+        case AchievementType::UpgradeCount:
+        case AchievementType::SpecificUpgrade:
+            return { AchievementPerkType::BPSMultiplier, 0.05f };
 
-    case AchievementType::BuffTriggered:
-        return { AchievementPerkType::BuffSpawnRate, 0.15f };
+        case AchievementType::BuffTriggered:
+            return { AchievementPerkType::BuffSpawnRate, 0.15f };
 
-    default:
-        return { AchievementPerkType::None, 0.0f };
+        default:
+            return { AchievementPerkType::None, 0.0f };
     }
 }
 
@@ -78,19 +77,19 @@ inline AchievementPerkType getPerkFromAchievementType(AchievementType type)
 {
     switch (type)
     {
-    case AchievementType::Clicks:
-        return AchievementPerkType::ClickMultiplier;
+        case AchievementType::Clicks:
+            return AchievementPerkType::ClickMultiplier;
 
-    case AchievementType::TotalBubbles:
-    case AchievementType::UpgradeCount:
-    case AchievementType::SpecificUpgrade:
-        return AchievementPerkType::BPSMultiplier;
+        case AchievementType::TotalBubbles:
+        case AchievementType::UpgradeCount:
+        case AchievementType::SpecificUpgrade:
+            return AchievementPerkType::BPSMultiplier;
 
-    case AchievementType::BuffTriggered:
-        return AchievementPerkType::BuffSpawnRate;
+        case AchievementType::BuffTriggered:
+            return AchievementPerkType::BuffSpawnRate;
 
-    default:
-        return AchievementPerkType::None;
+        default:
+            return AchievementPerkType::None;
     }
 }
 
@@ -129,43 +128,34 @@ struct Achievement
 
         switch (achievementType)
         {
-        case AchievementType::TotalBubbles:
-            return (totalBubbles >= unlockThreshold);
+            case AchievementType::TotalBubbles:
+                return (totalBubbles >= unlockThreshold);
 
-        case AchievementType::Clicks:
-            return (totalClicks >= unlockThreshold);
+            case AchievementType::Clicks:
+                return (totalClicks >= unlockThreshold);
 
-        case AchievementType::UpgradeCount:
-        {
-            long long sum = 0;
-            for (const auto& u : upgrades)
-                sum += u.count;
-            return sum >= unlockThreshold;
-        }
+            case AchievementType::UpgradeCount:
+            {
+                long long sum = 0;
+                for (const auto& u : upgrades)
+                    sum += u.count;
+                return sum >= unlockThreshold;
+            }
 
-        case AchievementType::SpecificUpgrade:
-        {
-            auto it = find_if(upgrades.begin(), upgrades.end(),
-                [&](const UpgradeItem& u) {
-                    return u.name == targetUpgrade && u.count >= unlockThreshold;
-                });
-            return it != upgrades.end();
-        }
+            case AchievementType::SpecificUpgrade:
+            {
+                auto it = find_if(upgrades.begin(), upgrades.end(),
+                    [&](const UpgradeItem& u) {
+                        return u.name == targetUpgrade && u.count >= unlockThreshold;
+                    });
+                return it != upgrades.end();
+            }
 
-        case AchievementType::MilestoneReached:
-        {
-            int milestoneCount = 0;
-            for (const auto& u : upgrades)
-                if (u.isMilestone && u.count > 0)
-                    ++milestoneCount;
-            return milestoneCount >= unlockThreshold;
-        }
+            case AchievementType::BuffTriggered:
+                return (buffTriggers >= unlockThreshold);
 
-        case AchievementType::BuffTriggered:
-            return (buffTriggers >= unlockThreshold);
-
-        default:
-            return false;
+            default:
+                return false;
         }
     }
 };

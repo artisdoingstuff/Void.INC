@@ -81,9 +81,25 @@ inline vector<marketplaceItemsList> marketplaceItems = {
         5, 3,
         true, 250000.0,
         0.5f,
-		false, 0.0,
+        false, 0.0,
         []() { clickMultiplier *= 2.0f; },
         []() { clickMultiplier /= 2.0f; }
+    },
+    {
+        "Buff Radar",
+        "Increases buff spawn rates for 60s",
+        150000.0,
+        150000.0,
+        60.0f,
+        180.0f,
+        0.f,
+        0, true, true, false, 0.0f,
+        3, 1,
+        false, 0.0,
+        0.5f,
+        false, 0.0,
+        []() { globalBuffSpawnDelayMultiplier *= 0.5f; },
+        []() { globalBuffSpawnDelayMultiplier /= 0.5f; }
     },
     {
 		"Random Buff",
@@ -128,16 +144,6 @@ inline vector<marketplaceItemsList> marketplaceItems = {
         },
         []() {}
     }
-    //{
-    //    "Soap Radar",
-    //    "Increases buff spawn chance for 45s",
-    //    150000.0,
-    //    150000.0,
-    //    45.0f,
-    //    0, true, true, false, 0.0f,
-    //    []() { globalBuffSpawnDelayMultiplier *= 0.5f; },
-    //    []() { globalBuffSpawnDelayMultiplier = 1.0f; }
-    //}
 };
 
 inline long double getEffectiveItemCost(const marketplaceItemsList& item, long double currentBps)
@@ -248,7 +254,9 @@ inline void to_json(json& j, const marketplaceItemsList& item)
         { "restockCost", item.restockCost },
         { "restockChance", item.restockChance },
         { "dynamicPricing", item.dynamicPricing },
-        { "dynamicPriceMultiplier", item.dynamicPriceMultiplier }
+        { "dynamicPriceMultiplier", item.dynamicPriceMultiplier },
+        { "cooldownRemaining", item.cooldownRemaining },
+        { "remaining", item.remaining }
     };
 }
 
@@ -264,6 +272,8 @@ inline void from_json(const json& j, marketplaceItemsList& item)
     if (j.contains("restockChance")) j.at("restockChance").get_to(item.restockChance);
     if (j.contains("dynamicPricing")) j.at("dynamicPricing").get_to(item.dynamicPricing);
     if (j.contains("dynamicPriceMultiplier")) j.at("dynamicPriceMultiplier").get_to(item.dynamicPriceMultiplier);
+    if (j.contains("cooldownRemaining")) j.at("cooldownRemaining").get_to(item.cooldownRemaining);
+    if (j.contains("remaining")) j.at("remaining").get_to(item.remaining);
 
     auto it = restockOverrideMap.find(item.name);
     if (it != restockOverrideMap.end()) {
