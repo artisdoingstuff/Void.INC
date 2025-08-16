@@ -1,0 +1,363 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    margin: 0;
+    background: linear-gradient(135deg, #1b2735, #121212);
+    color: #e6f1ff;
+    line-height: 1.6;
+    padding-top: 120px;
+    padding-bottom: 50px;
+}
+
+.site-title a {
+    text-decoration: none;
+    color: #4fc3f7;
+    font-family: 'Segoe UI', sans-serif;
+    font-weight: bold;
+    font-size: 22px;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.site-title a:hover {
+    color: #81d4fa;
+    text-shadow: 0 0 8px rgba(129, 212, 250, 0.6);
+}
+
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(20, 30, 48, 0.95);
+    padding: 1rem;
+    padding-left: calc(1rem + 46.5px);
+    text-align: center;
+    border-bottom: 2px solid #00b4ff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+}
+
+header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -15px;
+    width: 15px;
+    height: 100%;
+    background-color: rgba(30, 42, 56, 0.4);
+}
+
+header h1 {
+    margin: 0;
+    color: #00b4ff;
+    padding-bottom: 12px;
+    font-size: 2rem;
+}
+
+header nav a {
+    color: #a0b8cc;
+    margin: 0 12px;
+    text-decoration: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    transition: background-color 0.25s ease, color 0.25s ease;
+    font-weight: 500;
+}
+
+header nav a.active, header nav a:hover {
+    color: #fff;
+    background-color: rgba(0, 192, 255, 0.2);
+}
+
+.wiki-container {
+    display: flex;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #223448 0%, #343434 50%, #223448 100%);
+}
+
+.wiki-sidebar {
+    width: 250px;
+    background: rgba(45, 45, 45, 0.4);
+    color: #fff;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+}
+
+.wiki-sidebar h2 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.wiki-sidebar nav ul {
+    list-style: none;
+}
+
+.wiki-sidebar nav ul li {
+    margin-bottom: 10px;
+}
+
+@keyframes pulseGlow {
+    0%, 100% {
+        box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5),
+            0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+    50% {
+        box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.8),
+            0 4px 12px rgba(0, 0, 0, 0.6);
+    }
+}
+
+.wiki-sidebar nav ul li a {
+    color: #ccc;
+    text-decoration: none;
+    display: block;
+    padding: 8px;
+    border-radius: 4px;
+    transition: all 0.25s ease-in-out;
+}
+
+.wiki-sidebar nav ul li a:hover {
+    background: linear-gradient(145deg, #81d4fa, #039be5);
+    color: #ffffff;
+    transform: scale(1.05);
+    border-left: none;
+    box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.6),
+                0 3px 8px rgba(0, 0, 0, 0.5);
+    position: relative;
+}
+
+.wiki-sidebar nav ul li a:hover::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.5), transparent 50%);
+    border-radius: 4px;
+    pointer-events: none;
+    transition: opacity 0.25s ease-in-out;
+}
+
+.wiki-sidebar nav ul li a.active {
+    background: linear-gradient(145deg, #4fc3f7, #0288d1);
+    color: #ffffff;
+    font-weight: bold;
+    transform: scale(1.02);
+    border-left: none;
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5),
+                0 2px 6px rgba(0, 0, 0, 0.4);
+    position: relative;
+    animation: pulseGlow 2.5s ease-in-out infinite;
+}
+
+.wiki-sidebar nav ul li a.active::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.5), transparent 50%);
+    border-radius: 4px;
+    pointer-events: none;
+}
+
+.version-note {
+    font-size: 0.9rem;
+    border-top: 1px solid #444;
+    padding: 10px 0;
+    text-align: center;
+}
+
+.version-note a {
+    color: #66c2ff;
+    text-decoration: none;
+}
+
+.version-note a:hover {
+    text-decoration: underline;
+}
+
+.wiki-content {
+    flex: 1;
+    padding: 30px;
+    padding-top: 30px;
+    background-color: transparent;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+}
+
+.wiki-inner {
+    max-width: 800px;
+    width: 100%;
+}
+
+.wiki-content h1 {
+    margin-bottom: 20px;
+    color: #66ccff;
+}
+
+.wiki-content h2 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #66ccff;
+}
+
+.wiki-content a {
+    color: #66c2ff;
+    text-decoration: none;
+}
+
+.wiki-content p, ul, li, ol {
+    margin-bottom: 15px;
+}
+
+.wiki-content ul, ol {
+    list-style: disc;
+    margin-left: 20px;
+}
+
+.wiki-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(45, 45, 45, 0.4);
+    color: #ccc;
+    text-align: center;
+    padding: 15px;
+    font-size: 14px;
+    border-top: 1px solid #444;
+    z-index: 1000;
+}
+
+.wiki-footer p {
+    margin: 0;
+}
+
+.wiki-footer a {
+    color: #7fcfff;
+    text-decoration: none;
+}
+
+.wiki-footer a:hover {
+    color: #a5dfff;
+    text-decoration: underline;
+}
+
+.wiki-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: rgba(20, 28, 40, 0.95);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.wiki-table th {
+  background: linear-gradient(135deg, #223448, #334);
+  color: #00c0ff;
+  padding: 12px;
+  text-align: left;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 2px solid #00c0ff;
+}
+
+.wiki-table td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e6e6e6;
+  font-size: 0.95rem;
+}
+
+.wiki-table tr:hover td {
+  background: rgba(0, 192, 255, 0.08);
+  transition: background 0.2s ease-in-out;
+}
+
+.wiki-table td:first-child {
+  font-weight: bold;
+  font-size: 1.05rem;
+  color: #fff;
+}
+
+.wiki-table tr:nth-child(even) td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.wiki-table td:last-child {
+  font-weight: bold;
+  color: #ffd700;
+}
+
+.negative {
+  color: #ff4c4c;
+  font-weight: bold;
+}
+
+.controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin: 12px 0 18px;
+}
+.controls input[type="search"] {
+    max-width: 380px;
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border, #d0d7de);
+    border-radius: 8px;
+    background: var(--surface, #0b1220);
+    color: var(--text, #e6edf3);
+}
+.pager {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+.pager button {
+    padding: 8px 12px;
+    border: 1px solid var(--border, #d0d7de);
+    background: var(--surface, #0b1220);
+    color: var(--text, #e6edf3);
+    border-radius: 8px;
+    cursor: pointer;
+}
+.pager button[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.pager .info {
+    opacity: 0.8;
+    font-size: 0.95rem;
+    margin-left: 6px;
+}
+.wiki-table.upgrades-table td:nth-child(2),
+.wiki-table.upgrades-table td:nth-child(3) {
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .wiki-container {
+        flex-direction: column;
+    }
+    .wiki-sidebar {
+        width: 100%;
+    }
+}

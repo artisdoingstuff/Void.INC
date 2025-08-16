@@ -1,50 +1,54 @@
-﻿#include "Achievements.h"
-#include "AchievementsList.h"
-#include "BubbleFrenzy.h"
-#include "BubbleChaos.h"
-#include "BubbleMayhem.h"
-#include "Bubbles.h"
-#include "BubblesFormat.h"
-#include "Marketplace.h"
-#include "Combo.h"
-#include "GameFileState.h"
-#include "GlobalBuffHandler.h"
-#include "GlobalTextures.h"
-#include "GlobalVariables.h"
-#include "NewsTicker.h"
-#include "OfflineBubbles.h"
-#include "Popup.h"
-#include "ShootingStarBubble.h"
-#include "Upgrades.h"
-#include "UpgradesList.h"
-#include "UpgradeRarities.h"
-#include "WeatherCycle.h"
-#include "WeatherVisuals.h"
+﻿#include "Achievements/Achievements.hpp"
+#include "Achievements/AchievementsList.hpp"
+#include "Achievements/AchievementsTab.hpp"
+
+#include "Bubbles/Bubbles.hpp"
+#include "Bubbles/BubblesFormat.hpp"
+#include "Bubbles/OfflineBubbles.hpp"
+
+#include "Buffs/Bubbles/BubbleFrenzy.hpp"
+#include "Buffs/Bubbles/BubbleChaos.hpp"
+#include "Buffs/Bubbles/BubbleMayhem.hpp"
+#include "Buffs/Bubbles/MutatedBubble.hpp"
+#include "Buffs/Bubbles/ShootingStarBubble.hpp"
+#include "Buffs/Trader/TradersList.hpp"
+#include "Buffs/GlobalBuffHandler.hpp"
+
+#include "Clicking/ClickingHotspots.hpp"
+#include "Clicking/CritCombo.hpp"
+
+#include "Library/Library.hpp"
+
+#include "Marketplace/Trader.hpp"
+
+#include "Misc/GameFileState.hpp"
+#include "Misc/GlobalFunctions.hpp"
+#include "Misc/GlobalTextures.hpp"
+#include "Misc/GlobalVariables.hpp"
+#include "Misc/NewsTicker.hpp"
+#include "Misc/Popup.hpp"
+
+#include "Upgrades/Upgrades.hpp"
+#include "Upgrades/UpgradesList.hpp"
+#include "Upgrades/UpgradeRarities.hpp"
+
+#include "Weather/WeatherCycle.hpp"
+#include "Weather/WeatherVisuals.hpp"
 
 // Upgrade shop variables
-namespace UIConstants
-{
-    constexpr float TabWidth = 150.0f;
-    constexpr float TabHeight = 40.0f;
-    constexpr float TabSpacing = 10.0f;
-    constexpr float TabRightMargin = 40.0f;
-    constexpr float TabTopOffset = 50.0f;
-
-    constexpr float StartYOffset = UIConstants::TabTopOffset + UIConstants::TabHeight + 20.0f;
-}
-
 float scrollOffset = 0.0f;
 
 enum class GameTabs
 {
     Items,
     Milestones,
-    Achievements,
-    Marketplace
+    Library,
+    Trader
 };
 
 GameTabs currentTab = GameTabs::Items;
 GameTabs previousTab = GameTabs::Items;
+
 
 enum class MultibuyMode
 {
@@ -64,9 +68,9 @@ vector<UpgradeItem> upgrades;
 
 ComboSystem comboSystem;
 
-const sf::Font font("Assets/Fonts/arial.ttf");
+sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.3.0-beta";
+string gameVersion = "v1.4.0-beta";
 
 queue<PopupStruct> popupQueue;
 optional<PopupStruct> currentPopup;
@@ -243,6 +247,7 @@ int main()
     float bubbleMayhemBuffMultiplier = 0.9f;
     float bubbleMayhemSpawnInterval = 0.125f;
 
+    MutatedBubbleBuff mutatedBubble;
     bool isMutatedBubbleActive = false;
     float mutatedBubbleDuration = 0.0f;
 
@@ -282,12 +287,17 @@ int main()
             u.spriteUpgrade = sf::Sprite(it->second);
     }
 
+	// The Library
+    Library library(font, achievements);
+    bool isLibraryOpen = false;
+
     // Achievements Variables
     achievementsList();
-    bool isAchievementsAnimating = false;
-    float achievementsSlideOffset = -2000.f;
-
+    AchievementsTab achievementsTab(font);
 	map<string, sf::Texture> achievementTextures;
+    bool isLibraryAnimating = false;
+    float librarySlideOffset = -2000.f;
+
 	loadAchievementTexture(achievementTextures);
 
     for (auto& achievement : achievements)
@@ -327,10 +337,10 @@ int main()
 
     sf::Clock shopClock;
 
-    sf::Clock marketplaceRestockClock;
+    sf::Clock traderRestockClock;
 
     sf::Clock popupTimer;
-    sf::Clock achievementsSlideClock;
+    sf::Clock librarySlideClock;
     sf::Clock itemsSlideClock;
     sf::Clock milestonesSlideClock;
 
@@ -371,6 +381,10 @@ int main()
     clickAreaShape.setOutlineThickness(5);
     clickAreaShape.setPosition(clickAreaPosition);
 	sf::Vector2f clickAreaSize = clickAreaShape.getSize();
+
+	// Clicking hotspot variables
+    initializeHotspotSystem();
+    updateHotspotSystem(clickAreaSize, clickAreaPosition);
 
     constexpr float iconTabSize = UIConstants::TabHeight;
 
@@ -548,7 +562,7 @@ int main()
                 totalMultiplier *= it->second;
         }
 
-        realBubblesPerSecond = bubblesPerSecond * totalMultiplier * perkManager.bpsMultiplier * getWeatherBpsMultiplier(currentWeather.current) * globalBuffMultiplier;
+        realBubblesPerSecond = bubblesPerSecond * totalMultiplier * perkManager.bpsMultiplier * getWeatherBpsMultiplier(currentWeather.current);
 
         for (const auto& upgrade : upgrades)
         {
@@ -658,18 +672,17 @@ int main()
                     { UIConstants::TabWidth, UIConstants::TabHeight }
                 );
 
-                sf::Vector2f achievementsTabPos = {
+                sf::Vector2f libraryTabPos = {
                     tabStartPos.x - UIConstants::TabWidth - UIConstants::TabSpacing - iconTabSize - 10.f,
                     tabStartPos.y
                 };
-                sf::FloatRect achievementsTabRect(achievementsTabPos, { iconTabSize, iconTabSize });
+                sf::FloatRect libraryTabRect(libraryTabPos, { iconTabSize, iconTabSize });
 
-                sf::Vector2f marketplaceTabPos = {
-                    achievementsTabPos.x - iconTabSize - UIConstants::TabSpacing, tabStartPos.y
+                sf::Vector2f traderTabPos = {
+                    libraryTabPos.x - iconTabSize - UIConstants::TabSpacing, tabStartPos.y
                 };
 
-                sf::FloatRect marketplaceTabRect(marketplaceTabPos, { iconTabSize, iconTabSize });
-
+                sf::FloatRect traderTabRect(traderTabPos, { iconTabSize, iconTabSize });
 
                 // Items Tab
                 if (itemsTabRect.contains(mousePositionF) && currentTab != GameTabs::Items)
@@ -693,68 +706,48 @@ int main()
 
                     clickHandled = true;
                 }
-                // Achievements Tab
-                else if (achievementsTabRect.contains(mousePositionF) && currentTab != GameTabs::Achievements)
+				// Library Tab
+                else if (libraryTabRect.contains(mousePositionF) && currentTab != GameTabs::Library)
                 {
                     previousTab = currentTab;
-                    currentTab = GameTabs::Achievements;
+                    currentTab = GameTabs::Library;
 
-                    achievementsSlideOffset = -500.f;
-                    isAchievementsAnimating = true;
-                    achievementsSlideClock.restart();
-                    
+                    librarySlideOffset = -500.f;
+                    isLibraryAnimating = true;
+                    librarySlideClock.restart();
+
                     clickHandled = true;
+
+                    isLibraryOpen = true;
+
+                    library.startAchievementsAnimation();
                 }
-                // Marketplace Tab
-                else if (marketplaceTabRect.contains(mousePositionF) && currentTab != GameTabs::Marketplace)
+                // Trader Tab
+                else if (traderTabRect.contains(mousePositionF) && currentTab != GameTabs::Trader)
                 {
                     previousTab = currentTab;
-                    currentTab = GameTabs::Marketplace;
+                    currentTab = GameTabs::Trader;
 
                     clickHandled = true;
+                }
+                // Library disable
+                if (currentTab != GameTabs::Library)
+                {
+                    isLibraryOpen = false;
                 }
             }
-
-            // Achievements tab pagination
-            if (!clickHandled && currentTab == GameTabs::Achievements)
-            {
-                constexpr int achievementsPerPage = 30;
-                constexpr int columns = 6;
-                constexpr int rows = achievementsPerPage / columns;
-                constexpr float boxWidth = 180.f;
-                constexpr float boxHeight = 64.f;
-                constexpr float spacingX = 24.f;
-                constexpr float spacingY = 16.f;
-
-                float gridStartX = startX - boxWidth * columns - spacingX * (columns - 1);
-                float gridStartY = startY;
-                float navY = gridStartY + rows * (boxHeight + spacingY) + 10.f;
-
-                sf::Vector2f navSize = { 80.f, 30.f };
-                sf::Vector2f prevPos = { gridStartX, navY };
-                sf::Vector2f nextPos = { gridStartX + 100.f, navY };
-
-                if (sf::FloatRect(prevPos, navSize).contains(mousePositionF) && achievementPage > 0)
-                {
-                    achievementPage--;
-                    clickHandled = true;
-                }
-                else if (sf::FloatRect(nextPos, navSize).contains(mousePositionF) &&
-                    (achievementPage + 1) * achievementsPerPage < achievements.size())
-                {
-                    achievementPage++;
-                    clickHandled = true;
-                }
-                else
-                {
-                    clickHandled = true;
-                }
-            }
+            
+            achievementsTab.handleInput(mousePositionF, !clickHandled, achievements);
 
             // Click Bubble
             if (!clickHandled && clickArea.contains(mousePositionF))
             {
-                long double clickValue = (baseBubblesPerClick + (realBubblesPerSecond * 0.05)) * realClickMultiplier;
+                float hotspotBonus = 1.f;
+
+                if (hotspotActive && currentHotspot.contains(mousePositionF))
+                    hotspotBonus = 1.2f;
+
+                long double clickValue = (baseBubblesPerClick + (realBubblesPerSecond * 0.05)) * realClickMultiplier * hotspotBonus;
 
                 comboSystem.onClick(
                     mousePosition.x,
@@ -994,14 +987,16 @@ int main()
         // Weather Buff
         newsTicker.update(deltaTime);
         updateWeather(popupQueue);
-        upgradeMarketplace(deltaTime);
+        upgradeTrader(deltaTime);
 
-        if (marketplaceRestockClock.getElapsedTime().asSeconds() >= marketplaceRestockInterval)
+        if (traderRestockClock.getElapsedTime().asSeconds() >= traderRestockInterval)
         {
-            randomlyRestockMarketplaceItems();
-            marketplaceRestockClock.restart();
-            popupQueue.push({ "Marketplace has been restocked!" });
+            randomlyRestockTraderItems();
+            traderRestockClock.restart();
+            popupQueue.push({ "Trader has been restocked!" });
         }
+
+        updateHotspotSystem(clickAreaSize, clickAreaPosition);
 
         for (auto& queued : globalBuffQueue)
         {
@@ -1080,10 +1075,28 @@ int main()
                             break;
 
                         case GlobalBuffType::Mutated:
+                        {
                             isMutatedBubbleActive = true;
                             mutatedBubbleDuration = variant.duration;
                             mutatedBubbleClock.restart();
+
+                            mutatedBubble.activate(upgrades);
+
+                            if (!mutatedBubble.backfire && mutatedBubble.affectedItemIndex >= 0)
+                            {
+                                int percent = static_cast<int>((mutatedBubble.multiplier - 1.f) * 100);
+                                string sign = (percent >= 0) ? "+" : "";
+                                popupQueue.push({ upgrades[mutatedBubble.affectedItemIndex].name + " buffed: " + sign + std::to_string(percent) + "%", 0.f, 3.f, true });
+                            }
+                            else
+                            {
+                                int percent = static_cast<int>((mutatedBubble.multiplier - 1.f) * 100);
+                                string sign = (percent >= 0) ? "+" : "";
+                                popupQueue.push({ "Mutated Buff Backfire! " + sign + std::to_string(percent) + "%", 0.f, 3.f, true });
+                            }
+
                             break;
+                        }
 
                         case GlobalBuffType::ShootingStar:
                         {
@@ -1148,6 +1161,20 @@ int main()
 				isBubbleMayhemActive = false;
 			else
                 realBubblesPerSecond *= bubbleMayhemBuffMultiplier;
+
+        if (isMutatedBubbleActive)
+        {
+            if (mutatedBubbleClock.getElapsedTime().asSeconds() >= mutatedBubbleDuration)
+                isMutatedBubbleActive = false;
+            else
+            {
+                float mutatedMultiplier = mutatedBubble.getMultiplier();
+
+                realBubblesPerSecond *= mutatedMultiplier;
+                realClickMultiplier *= mutatedMultiplier;
+            }
+        }
+
 
         activeShootingStars.erase(
             remove_if(activeShootingStars.begin(), activeShootingStars.end(),
@@ -1236,6 +1263,20 @@ int main()
 		window.draw(bubblesPerSecondText);
 
         window.draw(clickAreaShape);
+
+        // Hotspot rendering
+        if (hotspotActive)
+        {
+            sf::RectangleShape hotspotVisual;
+            hotspotVisual.setSize({ currentHotspot.size.x, currentHotspot.size.y });
+            hotspotVisual.setPosition({ currentHotspot.position.x, currentHotspot.position.y });
+
+            hotspotVisual.setFillColor(sf::Color(255, 100, 100));
+            hotspotVisual.setOutlineColor(sf::Color::Red);
+            hotspotVisual.setOutlineThickness(2.f);
+
+            window.draw(hotspotVisual);
+        }
         
 		// Entire shop/upgrade rendering logic
         float currentY = startY;
@@ -1712,223 +1753,7 @@ int main()
             }
         }
 
-        else if (currentTab == GameTabs::Achievements)
-        {
-            float achievementsSlideOffset = 0.f;
-            if (isAchievementsAnimating)
-            {
-                float elapsed = achievementsSlideClock.getElapsedTime().asSeconds();
-                float duration = 0.5f;
-                float t = min(elapsed / duration, 1.f);
-                t = 1.f - pow(1.f - t, 3);
-                achievementsSlideOffset = -2000.f * (1.f - t);
-
-                if (t >= 1.f)
-                    isAchievementsAnimating = false;
-            }
-
-            sf::Vector2f bgSize(1215.f, 400.f);
-            sf::Vector2f bgPos(
-                (window.getSize().x - bgSize.x) / 2.f + 10.f + achievementsSlideOffset,
-                (window.getSize().y - bgSize.y) / 2.f - 147.5f
-            );
-
-            sf::RectangleShape bg;
-            bg.setSize(bgSize);
-            bg.setPosition(bgPos);
-            bg.setFillColor(sf::Color(30, 30, 30, 230));
-            bg.setOutlineThickness(2.f);
-            bg.setOutlineColor(sf::Color(255, 215, 100));
-            window.draw(bg);
-
-            sf::Vector2f perkBoxSize = { 240.f, 260.f };
-            sf::Vector2f perkBoxPos = {
-                bgPos.x + bgSize.x + 20.f, // Outside the main achievements bg
-                bgPos.y
-            };
-
-            sf::RectangleShape perkBox(perkBoxSize);
-            perkBox.setPosition(perkBoxPos);
-            perkBox.setFillColor(sf::Color(40, 40, 40, 230));
-            perkBox.setOutlineThickness(2.f);
-            perkBox.setOutlineColor(sf::Color(255, 215, 100));
-            window.draw(perkBox);
-
-            // Perk Header
-            sf::Text perkTitle(font);
-            perkTitle.setCharacterSize(16);
-            perkTitle.setFillColor(sf::Color::Yellow);
-            perkTitle.setString("Perk Bonuses");
-
-            float titleX = floor(perkBoxPos.x + 12.f);
-            float titleY = floor(perkBoxPos.y + 8.f);
-            perkTitle.setPosition({ titleX, titleY });
-            window.draw(perkTitle);
-
-            // Unlocked Achievements Count
-            int unlockedCount = count_if(achievements.begin(), achievements.end(),
-                [](const Achievement& a) { return a.isUnlocked; });
-
-            sf::Text countText(font);
-            countText.setCharacterSize(12);
-            countText.setFillColor(sf::Color(200, 200, 200));
-            countText.setString("Achievements Unlocked:\n" + to_string(unlockedCount) + "/" + to_string(achievements.size()));
-            countText.setPosition({ floor(perkBoxPos.x + 12.f), floor(perkBoxPos.y + 32.f) });
-            window.draw(countText);
-
-            // Individual bonuses
-            struct PerkDisplay {
-                string label;
-                float value;
-            };
-
-            vector<PerkDisplay> perkDisplays = {
-                { "\nClick Multiplier", perkManager.clickMultiplier },
-                { "\nBPS Multiplier",   perkManager.bpsMultiplier }
-            };
-
-            float lineY = perkBoxPos.y + 60.f;
-            for (const auto& p : perkDisplays)
-            {
-                sf::Text line(font);
-                line.setCharacterSize(12);
-                line.setFillColor(sf::Color::White);
-                line.setString(p.label + ":\nx" + to_string(p.value).substr(0, 4));
-                line.setPosition({ floor(perkBoxPos.x + 12.f), floor(lineY) });
-                window.draw(line);
-                lineY += 30.f;
-            }
-
-            // Special display for Buff Cooldown
-            float buffReduction = perkManager.buffSpawnRateMultiplier - 1.0f;
-            int percent = static_cast<int>(round(buffReduction * 100.f));
-
-            sf::Text buffLine(font);
-            buffLine.setCharacterSize(12);
-            buffLine.setFillColor(sf::Color::White);
-            buffLine.setString("\nBuff Spawn Rate:\n +" + to_string(percent) + "%");
-            buffLine.setPosition({ floor(perkBoxPos.x + 12.f), floor(lineY) });
-            window.draw(buffLine);
-
-            constexpr int achievementsPerPage = 30;
-            constexpr int columns = 6;
-            constexpr int rows = achievementsPerPage / columns;
-            constexpr float boxWidth = 180.f;
-            constexpr float boxHeight = 64.f;
-            constexpr float spacingX = 24.f;
-            constexpr float spacingY = 16.f;
-
-            float gridStartX = startX - boxWidth * columns - spacingX * (columns - 1) + achievementsSlideOffset;
-            float gridStartY = startY;
-
-            int totalPages = (achievements.size() + achievementsPerPage - 1) / achievementsPerPage;
-            achievementPage = clamp(achievementPage, 0, max(0, totalPages - 1));
-            int startIdx = achievementPage * achievementsPerPage;
-            int endIdx = min<int>(startIdx + achievementsPerPage, achievements.size());
-
-            for (int i = startIdx; i < endIdx; ++i)
-            {
-                Achievement& a = achievements[i];
-                int localIndex = i - startIdx;
-                int row = localIndex / columns;
-                int col = localIndex % columns;
-
-                sf::Vector2f pos = {
-                    gridStartX + col * (boxWidth + spacingX),
-                    gridStartY + row * (boxHeight + spacingY)
-                };
-
-                sf::RectangleShape box({ boxWidth, boxHeight });
-                box.setPosition(pos);
-                box.setFillColor(a.isUnlocked ? sf::Color(230, 255, 230) : sf::Color(90, 90, 90));
-                window.draw(box);
-
-                const sf::Texture* texToUse = nullptr;
-
-                if (a.spriteIcon.has_value() && (!a.isHidden || a.isUnlocked))
-                {
-                    texToUse = const_cast<sf::Texture*>(&a.spriteIcon->getTexture());
-                }
-                else
-                {
-                    texToUse = &achievementTextures["Locked"];
-                }
-
-                if (texToUse && texToUse->getSize().x > 0 && texToUse->getSize().y > 0)
-                {
-                    sf::Sprite icon(*texToUse);
-                    icon.setScale({ 40.f / texToUse->getSize().x, 40.f / texToUse->getSize().y });
-                    icon.setPosition({ pos.x + 128.f, pos.y + 12.f });
-
-                    if (!a.isUnlocked)
-                        icon.setColor(sf::Color(80, 80, 80));
-
-                    window.draw(icon);
-                }
-
-                string nameToShow = (!a.isHidden || a.isUnlocked) ? a.name : "???";
-                string descToShow = (!a.isHidden || a.isUnlocked) ? a.description : "Unlock to reveal";
-
-                sf::Text nameText(font);
-                nameText.setCharacterSize(12);
-                nameText.setString(nameToShow);
-                nameText.setFillColor(sf::Color::Black);
-                nameText.setPosition({ pos.x + 6.f, pos.y + 6.f });
-                window.draw(nameText);
-
-                sf::Text descText(font);
-                descText.setCharacterSize(10);
-                descText.setString(descToShow);
-                descText.setFillColor(sf::Color(30, 30, 30));
-                descText.setPosition({ pos.x + 6.f, pos.y + 26.f });
-                window.draw(descText);
-
-                if (!a.isUnlocked)
-                {
-                    sf::Text progressText(font);
-                    progressText.setCharacterSize(10);
-
-                    float percent = static_cast<float>(a.progressValue * 100.0);
-
-                    progressText.setString(to_string(static_cast<int>(percent)) + "%");
-                    progressText.setFillColor(sf::Color::White);
-                    progressText.setPosition({ pos.x + boxWidth - 25.f, pos.y + 6.f });
-                    window.draw(progressText);
-                }
-            }
-
-            // Pagination Buttons
-            float navY = gridStartY + rows * (boxHeight + spacingY) + 10.f;
-            sf::Vector2f navSize = { 80.f, 30.f };
-            sf::Vector2f prevPos = { gridStartX, navY };
-            sf::Vector2f nextPos = { gridStartX + 100.f, navY };
-
-            sf::RectangleShape prevButton(navSize);
-            prevButton.setPosition(prevPos);
-            prevButton.setFillColor(achievementPage > 0 ? sf::Color(180, 180, 180) : sf::Color(100, 100, 100));
-            window.draw(prevButton);
-
-            sf::Text prevText(font);
-            prevText.setCharacterSize(14);
-            prevText.setString("Prev");
-            prevText.setFillColor(sf::Color::Black);
-            prevText.setPosition(prevPos + sf::Vector2f(10.f, 5.f));
-            window.draw(prevText);
-
-            sf::RectangleShape nextButton(navSize);
-            nextButton.setPosition(nextPos);
-            nextButton.setFillColor((achievementPage + 1) < totalPages ? sf::Color(180, 180, 180) : sf::Color(100, 100, 100));
-            window.draw(nextButton);
-
-            sf::Text nextText(font);
-            nextText.setCharacterSize(14);
-            nextText.setString("Next");
-            nextText.setFillColor(sf::Color::Black);
-            nextText.setPosition(nextPos + sf::Vector2f(10.f, 5.f));
-            window.draw(nextText);
-        }
-
-        else if (currentTab == GameTabs::Marketplace)
+        else if (currentTab == GameTabs::Trader)
         {
             constexpr float buffBoxWidth = 240.f;
             constexpr float buffBoxHeight = 80.f;
@@ -1937,7 +1762,7 @@ int main()
             float buffStartY = startY;
             float buffStartX = startX - buffBoxWidth + 150.f;
 
-            for (auto& item : marketplaceItems)
+            for (auto& item : traderItems)
             {
                 sf::Vector2f pos(buffStartX, buffStartY);
                 sf::RectangleShape box({ buffBoxWidth, buffBoxHeight });
@@ -2061,13 +1886,44 @@ int main()
                 buffStartY += buffBoxHeight + buffSpacingY;
             }
 
-            float restockTimeLeft = max(0.f, marketplaceRestockInterval - marketplaceRestockClock.getElapsedTime().asSeconds());
+            float restockTimeLeft = max(0.f, traderRestockInterval - traderRestockClock.getElapsedTime().asSeconds());
             sf::Text restockTimerText(font);
             restockTimerText.setCharacterSize(14);
             restockTimerText.setFillColor(sf::Color::Black);
-            restockTimerText.setString("Next Auto Restock: " + to_string(static_cast<int>(ceilf(restockTimeLeft))) + "s");
+            restockTimerText.setString("Next Restock: " + to_string(static_cast<int>(ceilf(restockTimeLeft))) + "s");
             restockTimerText.setPosition({ buffStartX, buffStartY + 10.f });
             window.draw(restockTimerText);
+        }
+
+        else if (currentTab == GameTabs::Library)
+        {
+            float librarySlideOffset = 0.f;
+            if (isLibraryAnimating)
+            {
+                float elapsed = librarySlideClock.getElapsedTime().asSeconds();
+                float duration = 0.5f;
+                float t = min(elapsed / duration, 1.f);
+                t = 1.f - pow(1.f - t, 3);
+                librarySlideOffset = -1500.f * (1.f - t);
+
+                if (t >= 1.f)
+                    isLibraryAnimating = false;
+            }
+
+            // Background
+            sf::Vector2f bgSize(1215.f, 400.f);
+            sf::Vector2f bgPos(
+                (window.getSize().x - bgSize.x) / 2.f + 10.f + librarySlideOffset,
+                (window.getSize().y - bgSize.y) / 2.f - 147.5f
+            );
+
+            sf::RectangleShape bg;
+            bg.setSize(bgSize);
+            bg.setPosition(bgPos);
+            bg.setFillColor(sf::Color(30, 30, 30, 230));
+            bg.setOutlineThickness(2.f);
+            bg.setOutlineColor(sf::Color(255, 215, 100));
+            window.draw(bg);
         }
 
 		// Tab positions and rendering
@@ -2121,62 +1977,68 @@ int main()
         milestonesText.setFillColor(sf::Color::Black);
         window.draw(milestonesText);
 
-        // Achievements Tab (icon-only)
-        sf::Vector2f achievementsTabPos = {
+        // Library Tab (icon-only)
+        sf::Vector2f libraryTabPos = {
             tabStartPos.x - UIConstants::TabWidth - UIConstants::TabSpacing - iconTabSize - 10.f,
             tabStartPos.y
         };
 
-        sf::RectangleShape achievementsTab({ iconTabSize, iconTabSize });
-        achievementsTab.setPosition(achievementsTabPos);
-        achievementsTab.setFillColor(currentTab == GameTabs::Achievements ? sf::Color::White : sf::Color(150, 150, 150));
-        window.draw(achievementsTab);
+        sf::RectangleShape libraryTab({ iconTabSize, iconTabSize });
+        libraryTab.setPosition(libraryTabPos);
+        libraryTab.setFillColor(currentTab == GameTabs::Library ? sf::Color::White : sf::Color(150, 150, 150));
+        window.draw(libraryTab);
 
-        sf::Sprite achievementsIcon(achievementIconTexture);
+        sf::Sprite libraryIcon(achievementIconTexture);
 
-        sf::Vector2u achievementTexSize = achievementIconTexture.getSize();
-        if (achievementTexSize.x > 0 && achievementTexSize.y > 0)
+        sf::Vector2u libraryTexSize = achievementIconTexture.getSize();
+        if (libraryTexSize.x > 0 && libraryTexSize.y > 0)
         {
             float targetSize = iconTabSize * 0.6f;
-            float scaleX = targetSize / achievementTexSize.x;
-            float scaleY = targetSize / achievementTexSize.y;
-            achievementsIcon.setScale({ scaleX, scaleY });
+            float scaleX = targetSize / libraryTexSize.x;
+            float scaleY = targetSize / libraryTexSize.y;
+            libraryIcon.setScale({ scaleX, scaleY });
 
-            achievementsIcon.setPosition({
-                achievementsTabPos.x + (iconTabSize - achievementTexSize.x * scaleX) / 2.f,
-                achievementsTabPos.y + (iconTabSize - achievementTexSize.y * scaleY) / 2.f
+            libraryIcon.setPosition({
+                libraryTabPos.x + (iconTabSize - libraryTexSize.x * scaleX) / 2.f,
+                libraryTabPos.y + (iconTabSize - libraryTexSize.y * scaleY) / 2.f
                 });
 
-            window.draw(achievementsIcon);
+            window.draw(libraryIcon);
         }
 
-        // Marketplace Tab (icon-only)
-        sf::Vector2f marketplaceTabPos = {
+        // Trader Tab (icon-only)
+        sf::Vector2f traderTabPos = {
             tabStartPos.x - UIConstants::TabWidth - UIConstants::TabSpacing - iconTabSize * 2.f - 20.f,
             tabStartPos.y
         };
 
-        sf::RectangleShape marketplaceTab({ iconTabSize, iconTabSize });
-        marketplaceTab.setPosition(marketplaceTabPos);
-        marketplaceTab.setFillColor(currentTab == GameTabs::Marketplace ? sf::Color::White : sf::Color(150, 150, 150));
-        window.draw(marketplaceTab);
+        sf::RectangleShape traderTab({ iconTabSize, iconTabSize });
+        traderTab.setPosition(traderTabPos);
+        traderTab.setFillColor(currentTab == GameTabs::Trader ? sf::Color::White : sf::Color(150, 150, 150));
+        window.draw(traderTab);
 
-        sf::Sprite marketplaceIcon(marketplaceIconTexture);
-        sf::Vector2u marketplaceTexSize = marketplaceIconTexture.getSize();
+        sf::Sprite traderIcon(traderIconTexture);
+        sf::Vector2u traderTexSize = traderIconTexture.getSize();
 
-        if (marketplaceTexSize.x > 0 && marketplaceTexSize.y > 0)
+        if (traderTexSize.x > 0 && traderTexSize.y > 0)
         {
             float targetSize = iconTabSize * 0.6f;
-            float scaleX = targetSize / marketplaceTexSize.x;
-            float scaleY = targetSize / marketplaceTexSize.y;
-            marketplaceIcon.setScale({ scaleX, scaleY });
+            float scaleX = targetSize / traderTexSize.x;
+            float scaleY = targetSize / traderTexSize.y;
+            traderIcon.setScale({ scaleX, scaleY });
 
-            marketplaceIcon.setPosition({
-                marketplaceTabPos.x + (iconTabSize - marketplaceTexSize.x * scaleX) / 2.f,
-                marketplaceTabPos.y + (iconTabSize - marketplaceTexSize.y * scaleY) / 2.f
+            traderIcon.setPosition({
+                traderTabPos.x + (iconTabSize - traderTexSize.x * scaleX) / 2.f,
+                traderTabPos.y + (iconTabSize - traderTexSize.y * scaleY) / 2.f
                 });
 
-            window.draw(marketplaceIcon);
+            window.draw(traderIcon);
+        }
+
+        // Library
+        if (isLibraryOpen) {
+            library.handleInput(mousePositionF, justClicked);
+            library.draw(window);
         }
 
         // Popups
@@ -2257,7 +2119,6 @@ int main()
 
         comboSystem.draw(window);
 
-        drawWeatherLabel(window, font);
         updateAndDrawWeatherParticles(window, deltaTime);
 
         newsTicker.draw(window, font);

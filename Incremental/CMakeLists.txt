@@ -6,6 +6,6 @@ include_directories("C:/SFML-3.0.0+32-Bit/include")
 
 link_directories("C:/SFML-3.0.0+32-Bit/lib")
 
-add_executable (Incremental "Incremental.cpp" "GameFileState.h" "OfflineBubbles.h" "Includes.h" "Upgrades.h" "BubblesFormat.h"  "GlobalBuffHandler.h"    "BubbleMayhem.h" "BubbleFrenzy.h" "BubbleChaos.h" "Bubbles.h" "Achievements.h" "AchievementsList.h" "UpgradesList.h"  "Combo.h" "ShootingStarBubble.h" "WeatherCycle.h" "Popup.h" "WeatherVisuals.h" "NewsTicker.h" "GlobalVariables.h" "GlobalTextures.h" "Marketplace.h"  "UpgradeRarities.h")
+add_executable (Incremental "Incremental.cpp" "Misc/GameFileState.hpp" "Bubbles/OfflineBubbles.hpp" "Misc/Includes.hpp" "Upgrades/Upgrades.hpp" "Bubbles/BubblesFormat.hpp"  "Buffs/GlobalBuffHandler.hpp"    "Buffs/BubbleMayhem.hpp" "Buffs/BubbleFrenzy.hpp" "Buffs/BubbleChaos.hpp" "Bubbles/Bubbles.hpp" "Achievements/Achievements.hpp" "Achievements/AchievementsList.hpp" "Upgrades/UpgradesList.hpp"  "Clicking/CritCombo.hpp" "Buffs/ShootingStarBubble.hpp" "Weather/WeatherCycle.hpp" "Misc/Popup.hpp" "Weather/WeatherVisuals.hpp" "Misc/NewsTicker.hpp" "Misc/GlobalVariables.hpp" "Misc/GlobalTextures.hpp" "Marketplace/Trader.hpp"  "Upgrades/UpgradeRarities.hpp" "Ascension/Ascension.hpp" "Misc/GlobalFunctions.hpp" "Marketplace/Potions.hpp" "Marketplace/TradersList.hpp" "Marketplace/PotionsList.hpp" "Marketplace/PotionBrewery.hpp" "Clicking/ClickingHotspots.hpp")
 
 target_link_libraries(Incremental sfml-graphics sfml-window sfml-system sfml-audio sfml-network)

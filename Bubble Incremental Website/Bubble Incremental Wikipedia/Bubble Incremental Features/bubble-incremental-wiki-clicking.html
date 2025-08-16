@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubble Incremental Wiki - Clicking</title>
+    <link rel="stylesheet" href="../styles/bubble-incremental-wiki-styles.css">
+    <link rel="icon" href="../../Bubble Incremental Favicons/home-page-favicon.png" type="image/png">
+</head>
+<body>
+    <header>
+        <h1>Bubble Incremental - Wiki</h1>
+        <nav class="top-nav">
+            <a href="../../bubble-incremental-home.html">Home</a>
+            <a href="../../bubble-incremental-announcements.html">Announcements</a>
+            <a href="../../bubble-incremental-roadmap.html">Roadmap</a>
+            <a href="../bubble-incremental-wiki-home.html" class="active">Wiki</a>
+            <a href="../../bubble-incremental-patch-notes.html">Patch Notes</a>
+        </nav>
+    </header>
+
+    <div class="wiki-container">
+        <aside class="wiki-sidebar">
+            <nav>
+                <ul>
+                    <li><a href="../bubble-incremental-wiki-home.html">Home</a></li>
+                    <li><a href="bubble-incremental-wiki-achievements.html">Achievements</a></li>
+                    <li><a href="bubble-incremental-wiki-ascension.html">Ascension</a></li>
+                    <li><a href="bubble-incremental-wiki-bubbles.html">Bubbles</a></li>
+                    <li><a href="bubble-incremental-wiki-buffs.html">Buffs</a></li>
+                    <li><a href="bubble-incremental-wiki-clicking.html" class="active">Clicking</a></li>
+                    <li><a href="bubble-incremental-wiki-items.html"">Items</a></li>
+                    <li><a href="bubble-incremental-wiki-marketplace.html">Marketplace</a></li>
+                    <li><a href="bubble-incremental-wiki-upgrades.html">Upgrades</a></li>
+                    <li><a href="bubble-incremental-wiki-weather.html">Weather</a></li>
+                </ul>
+            </nav>
+            <div class="version-note">
+                <p><em>This wiki is accurate as of 
+                    <a href="https://github.com/artisdoingstuff/Bubble-Incremental/releases/tag/v1.4.0-beta">
+                        <br>v1.4.0-Beta
+                    </a>
+                </em></p>
+            </div>
+        </aside>
+
+        <main class="wiki-content">
+            <div class="wiki-inner">
+                <h1>Clicking</h1>
+
+                <section>
+                    <h2>Overview</h2>
+                    <p>Clicking is one of the core mechanics of <strong>Bubble Incremental</strong>, allowing you to generate Bubbles manually with increasing effectiveness.</p>
+                    <p>As of <a href="https://github.com/artisdoingstuff/Bubble-Incremental/releases/tag/v1.4.0-beta"><strong>v1.4.0-Beta</strong></a>, clicks benefit from <strong>multipliers</strong>, <strong>combo bonuses</strong>, and <strong>critical hits</strong>.</p>
+                </section>
+
+                <section>
+                    <h2>How Clicking Works</h2>
+                    <p>Each click produces a number of Bubbles, calculated with this formula:</p>
+                    <pre><code>(baseBubblesPerClick + (realBubblesPerSecond × 0.05)) × realClickMultiplier</code></pre>
+                    <p>This means your passive production improves your clicks, and clicking-related upgrades (such as 
+                        <a href="bubble-incremental-wiki-achievements.html">Achievements</a>) further amplify that value.</p>
+                </section>
+
+                <section>
+                    <h2>Critical Hits</h2>
+                    <p>Each click has a <strong>1% chance</strong> to become a critical hit.</p>
+                    <ul>
+                        <li><strong>Effect:</strong> Multiplies your click value by <strong>3×</strong>.</li>
+                        <li><strong>Visual Feedback:</strong> A green <strong>"CRITICAL!"</strong> floating text appears.</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Combo System</h2>
+                    <p>Clicking in rapid succession builds up a <strong>combo multiplier</strong>, rewarding consistent clicks with better output.</p>
+
+                    <h3>How it Works</h3>
+                    <ul>
+                        <li>Each valid click increases your combo count by <code>+1</code>.</li>
+                        <li>Each combo level increases your click multiplier by <strong>+2%</strong> 
+                            (<code>1.0 + 0.02 × comboCount</code>).</li>
+                        <li>When you hit <strong>50 combos</strong>, you reach <strong>Max Combo</strong> and the decay phase begins.</li>
+                    </ul>
+
+                    <h3>Decay &amp; Cooldown</h3>
+                    <ul>
+                        <li>If you stop clicking for <strong>0.5 seconds</strong>, the combo starts <strong>decaying</strong>.</li>
+                        <li>Once the combo reaches <code>0</code>, you enter a <strong>60-second cooldown</strong> where combos are disabled.</li>
+                    </ul>
+
+                    <h3>Combo Bar</h3>
+                    <ul>
+                        <li>A combo bar appears when clicking rapidly.</li>
+                        <li>Bar color states:
+                            <ul>
+                                <li><strong>Blue:</strong> Normal progress</li>
+                                <li><strong>Red:</strong> During decay</li>
+                                <li><strong>Gray:</strong> During cooldown</li>
+                            </ul>
+                        </li>
+                        <li>The bar fades in and out based on activity.</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Clicking Hotspots</h2>
+                    <ul>
+                        <li>Clicking Hotspots are a new way to earn more Bubbles through clicks.</li>
+                        <li>Periodically, a hotspot appears on the clicking area.</li>
+                        <li>Clicking on this hotspot gives you an extra x1.2 multiplier to your clicks.</li>
+                        <li>They appear at random intervals and each lasts between 5 to 15 seconds.</li>
+                    </ul>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <footer class="wiki-footer">
+        <p>&copy; 2025 Bubble Incremental. All rights reserved.</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubble Incremental Wiki - Upgrades</title>
+    <link rel="stylesheet" href="../styles/bubble-incremental-wiki-styles.css">
+    <link rel="icon" href="../../Bubble Incremental Favicons/home-page-favicon.png" type="image/png">
+</head>
+<body>
+    <header>
+        <h1>Bubble Incremental - Wiki</h1>
+        <nav class="top-nav">
+            <a href="../../bubble-incremental-home.html">Home</a>
+            <a href="../../bubble-incremental-announcements.html">Announcements</a>
+            <a href="../../bubble-incremental-roadmap.html">Roadmap</a>
+            <a href="../bubble-incremental-wiki-home.html" class="active">Wiki</a>
+            <a href="../../bubble-incremental-patch-notes.html">Patch Notes</a>
+        </nav>
+    </header>
+
+    <div class="wiki-container">
+        <aside class="wiki-sidebar">
+            <nav>
+                <ul>
+                    <li><a href="../bubble-incremental-wiki-home.html">Home</a></li>
+                    <li><a href="bubble-incremental-wiki-achievements.html">Achievements</a></li>
+                    <li><a href="bubble-incremental-wiki-ascension.html">Ascension</a></li>
+                    <li><a href="bubble-incremental-wiki-bubbles.html">Bubbles</a></li>
+                    <li><a href="bubble-incremental-wiki-buffs.html">Buffs</a></li>
+                    <li><a href="bubble-incremental-wiki-clicking.html">Clicking</a></li>
+                    <li><a href="bubble-incremental-wiki-items.html"">Items</a></li>
+                    <li><a href="bubble-incremental-wiki-marketplace.html">Marketplace</a></li>
+                    <li><a href="bubble-incremental-wiki-upgrades.html" class="active">Upgrades</a></li>
+                    <li><a href="bubble-incremental-wiki-weather.html">Weather</a></li>
+                </ul>
+            </nav>
+            <div class="version-note">
+                <p><em>This wiki is accurate as of 
+                    <a href="https://github.com/artisdoingstuff/Bubble-Incremental/releases/tag/v1.4.0-beta">
+                        <br>v1.4.0-Beta
+                    </a>
+                </em></p>
+            </div>
+        </aside>
+
+        <main class="wiki-content">
+            <div class="wiki-inner">
+                <h1>Upgrades</h1>
+
+                <section>
+                    <h2>Overview</h2>
+                    <p>
+                        Upgrades enhance your production by applying global multipliers or directly boosting specific items. 
+                        This page covers non-item milestone upgrades that are purchased once you meet their unlock conditions.
+                        <br>
+                        <small>Page content reflects
+                            <a href="https://github.com/artisdoingstuff/Bubble-Incremental/releases/tag/v1.4.0-beta">v1.4.0-Beta</a>.
+                        </small>
+                    </p>
+                </section>
+
+                <section>
+                    <h2>Upgrades</h2>
+
+                    <div class="controls">
+                        <input id="upgradeSearch" type="search" placeholder="Search upgrades" aria-label="Search upgrades">
+                        <div class="pager">
+                            <button id="prevPage">Prev</button>
+                            <button id="nextPage">Next</button>
+                            <span class="info" id="pageInfo"></span>
+                        </div>
+                    </div>
+
+                    <table class="wiki-table upgrades-table" id="upgradesTable">
+                        <thead>
+                            <tr>
+                                <th>Upgrade Name</th>
+                                <th>Cost</th>
+                                <th>Unlock At</th>
+                                <th>Effect</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Red Bubble</td><td>250</td><td>100</td><td>+1% Global Production</td></tr>
+                            <tr><td>Green Bubble</td><td>500</td><td>250</td><td>+1% Global Production</td></tr>
+                            <tr><td>Blue Bubble</td><td>750</td><td>500</td><td>+1% Global Production</td></tr>
+                            <tr><td>Rubber Ducky</td><td>1,000</td><td>750</td><td>+1% Global Production</td></tr>
+                            <tr><td>Rainbow Bubble</td><td>1,500</td><td>1,000</td><td>+2% Global Production</td></tr>
+                            <tr><td>Cyan Bubble</td><td>2,500</td><td>1,500</td><td>+1% Global Production</td></tr>
+                            <tr><td>Indigo Bubble</td><td>4,000</td><td>2,500</td><td>+1% Global Production</td></tr>
+                            <tr><td>Heart-Shaped Bubble</td><td>7,500</td><td>5,000</td><td>+2% Global Production</td></tr>
+                            <tr><td>Soap Dispenser</td><td>10,000</td><td>7,500</td><td>×2 Production from Soap</td></tr>
+                            <tr><td>Bath Bubbles</td><td>15,000</td><td>10,000</td><td>+2% Global Production</td></tr>
+                            <tr><td>Detergent Bubbles</td><td>20,000</td><td>15,000</td><td>+2% Global Production</td></tr>
+                            <tr><td>Duck?</td><td>10,000</td><td>20,000</td><td>+1% Global Production</td></tr>
+                            <tr><td>Carbonation</td><td>35,000</td><td>25,000</td><td>+2% Global Production</td></tr>
+                            <tr><td>Golden Bubble</td><td>100,000</td><td>40,000</td><td>+10% Global Production</td></tr>
+                            <tr><td>Hand Wash Refiller</td><td>75,000</td><td>50,000</td><td>×2 Production from Hand Wash</td></tr>
+                            <tr><td>Fool's Bubble</td><td>90,000</td><td>75,000</td><td>+1% Global Production</td></tr>
+                            <tr><td>Misprint Bubble</td><td>250,000</td><td>100,000</td><td>+12.5% Global Production</td></tr>
+                            <tr><td>Spring Bubble</td><td>250,000</td><td>150,000</td><td>+2% Global Production</td></tr>
+                            <tr><td>Cherry Bubble</td><td>300,000</td><td>200,000</td><td>+2% Global Production</td></tr>
+                            <tr><td>Blossoming Bubble</td><td>350,000</td><td>250,000</td><td>+2% Global Production</td></tr>
+                            <tr><td>Rose Bubble</td><td>400,000</td><td>300,000</td><td>+2% Global Production</td></tr>
+                            <tr><td>Dandelion Bubble</td><td>450,000</td><td>350,000</td><td>+2% Global Production</td></tr>
+                            <tr><td>Charming Bubble</td><td>650,000</td><td>400,000</td><td>+2% Global Production</td></tr>
+                            <tr><td>Lucky Bubble</td><td>777,777</td><td>450,000</td><td>+7% Global Production</td></tr>
+                            <tr><td>Lavender Shampoo</td><td>850,000</td><td>500,000</td><td>×2 Production from Shampoo</td></tr>
+                            <tr><td>Sudsy Water Balloon</td><td>900,000</td><td>600,000</td><td>+2% Global Production</td></tr>
+                            <tr><td>Heated Bubble</td><td>1,000,000</td><td>750,000</td><td>+2% Global Production</td></tr>
+                            <tr><td>Boiling Bubble</td><td>1,100,000</td><td>850,000</td><td>+2% Global Production</td></tr>
+                            <tr><td>Leafy Bubble</td><td>1,200,000</td><td>1,000,000</td><td>+2% Global Production</td></tr>
+                            <tr><td>Autumn Bubble</td><td>1,500,000</td><td>1,250,000</td><td>+2% Global Production</td></tr>
+                            <tr><td>Sunflower Bubble</td><td>1,800,000</td><td>1,500,000</td><td>+2% Global Production</td></tr>
+                            <tr><td>Daisy Bubble</td><td>2,000,000</td><td>1,800,000</td><td>+2% Global Production</td></tr>
+                            <tr><td>Florescent Bubble</td><td>2,400,000</td><td>2,100,000</td><td>+5% Global Production</td></tr>
+                            <tr><td>Green Shaving Foam</td><td>3,000,000</td><td>2,500,000</td><td>×2 Production from Shaving Foam</td></tr>
+                            <tr><td>Chilly Bubble</td><td>4,000,000</td><td>3,000,000</td><td>+2% Global Production</td></tr>
+                            <tr><td>Frosty Bubble</td><td>4,750,000</td><td>3,500,000</td><td>+2% Global Production</td></tr>
+                            <tr><td>Cryogenic Bubble</td><td>5,500,000</td><td>4,000,000</td><td>+2% Global Production</td></tr>
+                            <tr><td>Inflatable Ducky</td><td>6,000,000</td><td>4,500,000</td><td>+2% Global Production</td></tr>
+                            <tr><td>Glistening Bubble</td><td>6,500,000</td><td>5,000,000</td><td>+5% Global Production</td></tr>
+                            <tr><td>Sparkling Bubble</td><td>7,000,000</td><td>5,500,000</td><td>+5% Global Production</td></tr>
+                            <tr><td>Gleaming Bubble</td><td>7,500,000</td><td>6,000,000</td><td>+5% Global Production</td></tr>
+                            <tr><td>Lucky Golden Bubble</td><td>7,777,777</td><td>6,500,000</td><td>+7% Global Production</td></tr>
+                            <tr><td>Fusion Bubble</td><td>8,000,000</td><td>7,500,000</td><td>+3% Global Production</td></tr>
+                            <tr><td>Fragmented Bubble</td><td>10,000,000</td><td>8,500,000</td><td>+3% Global Production</td></tr>
+                            <tr><td>More Toothpaste!</td><td>12,000,000</td><td>10,000,000</td><td>×2 Production from Toothpaste</td></tr>
+                            <tr><td>Blue Soap Bar</td><td>14,000,000</td><td>12,000,000</td><td>×2 Production from Soap</td></tr>
+                            <tr><td>Ionized Bubble</td><td>17,500,000</td><td>15,000,000</td><td>+3% Global Production</td></tr>
+                            <tr><td>Nuclear Bubble</td><td>25,000,000</td><td>20,000,000</td><td>+3% Global Production</td></tr>
+                            <tr><td>Atomic Bubble</td><td>30,000,000</td><td>25,000,000</td><td>+3% Global Production</td></tr>
+                            <tr><td>Atomized Bubble</td><td>30,000,000</td><td>25,000,000</td><td>+3% Global Production</td></tr>
+                            <tr><td>Large Loofah</td><td>32,500,000</td><td>27,500,000</td><td>×2 Production from Loofah</td></tr>
+                            <tr><td>Dark Matter Bubble</td><td>35,000,000</td><td>30,000,000</td><td>+3% Global Production</td></tr>
+                            <tr><td>Graviton Bubble</td><td>40,000,000</td><td>35,000,000</td><td>+3% Global Production</td></tr>
+                            <tr><td>Quantum Foam</td><td>50,000,000</td><td>40,000,000</td><td>+3% Global Production</td></tr>
+                            <tr><td>Neutrino Bubble</td><td>60,000,000</td><td>50,000,000</td><td>+3% Global Production</td></tr>
+                            <tr><td>Void Bubble</td><td>70,000,000</td><td>60,000,000</td><td>+3% Global Production</td></tr>
+                            <tr><td>Nebula Bubble</td><td>85,000,000</td><td>70,000,000</td><td>+4% Global Production</td></tr>
+                            <tr><td>Supernova Bubble</td><td>100,000,000</td><td>85,000,000</td><td>+4% Global Production</td></tr>
+                            <tr><td>Galaxy Soap</td><td>120,000,000</td><td>100,000,000</td><td>×2 Production from Soap</td></tr>
+                            <tr><td>Cosmic Bubble</td><td>140,000,000</td><td>120,000,000</td><td>+4% Global Production</td></tr>
+                            <tr><td>Singularity Sud</td><td>160,000,000</td><td>140,000,000</td><td>×2 Production from 3 sources</td></tr>
+                            <tr><td>Bubbleverse Rift</td><td>200,000,000</td><td>160,000,000</td><td>+10% Global Production</td></tr>
+                            <tr><td>Timeless Bubble</td><td>250,000,000</td><td>200,000,000</td><td>+5% Global Production</td></tr>
+                            <tr><td>Chronofoam</td><td>300,000,000</td><td>250,000,000</td><td>+3% Global Production</td></tr>
+                            <tr><td>Infinity Bubble</td><td>350,000,000</td><td>300,000,000</td><td>+10% Global Production</td></tr>
+                            <tr><td>Hyperclean Bubble</td><td>400,000,000</td><td>350,000,000</td><td>+3% Global Production</td></tr>
+                            <tr><td>Beyond Clean</td><td>500,000,000</td><td>400,000,000</td><td>×2 Production from 2 items</td></tr>
+                            <tr><td>Ultrafoam Reactor</td><td>600,000,000</td><td>500,000,000</td><td>+3% Global Production</td></tr>
+                            <tr><td>Transcendent Bubble</td><td>750,000,000</td><td>600,000,000</td><td>+5% Global Production</td></tr>
+                            <tr><td>True Soap</td><td>1,000,000,000</td><td>750,000,000</td><td>×2.5 Production from Soap</td></tr>
+                            <tr><td>Pressure Bubble</td><td>1,050,000,000</td><td>900,000,000</td><td>+3% Global Production</td></tr>
+                            <tr><td>Ultrasoap Bubble</td><td>1,200,000,000</td><td>1,050,000,000</td><td>+5% Global Production</td></tr>
+                            <tr><td>Bubbledrift</td><td>1,400,000,000</td><td>1,200,000,000</td><td>+4% Global Production</td></tr>
+                            <tr><td>Steam Bubble</td><td>1,600,000,000</td><td>1,400,000,000</td><td>+3% Global Production</td></tr>
+                            <tr><td>Skyfoam Capsule</td><td>1,800,000,000</td><td>1,600,000,000</td><td>+3% Global Production</td></tr>
+                            <tr><td>Duck of Dawn</td><td>2,100,000,000</td><td>1,800,000,000</td><td>+5% Global Production</td></tr>
+                            <tr><td>Echoing Bubble</td><td>2,400,000,000</td><td>2,100,000,000</td><td>+11% Global Production</td></tr>
+                            <tr><td>Solar Bubble</td><td>2,750,000,000</td><td>2,400,000,000</td><td>+4% Global Production</td></tr>
+                            <tr><td>Crystal Bubble</td><td>3,100,000,000</td><td>2,750,000,000</td><td>+3% Global Production</td></tr>
+                            <tr><td>Supercleanser</td><td>3,500,000,000</td><td>3,100,000,000</td><td>+5% Global Production</td></tr>
+                            <tr><td>Dreamweaver Bubble</td><td>3,900,000,000</td><td>3,500,000,000</td><td>+3% Global Production</td></tr>
+                            <tr><td>Bubble Collider</td><td>4,400,000,000</td><td>3,900,000,000</td><td>+5% Global Production</td></tr>
+                            <tr><td>Polished Bubble</td><td>4,900,000,000</td><td>4,400,000,000</td><td>+3% Global Production</td></tr>
+                            <tr><td>Sudburst</td><td>5,500,000,000</td><td>4,900,000,000</td><td>+3% Global Production</td></tr>
+                            <tr><td>Nebulized Bubble</td><td>6,100,000,000</td><td>5,500,000,000</td><td>+3% Global Production</td></tr>
+                            <tr><td>Liquid Spectrum</td><td>8,300,000,000</td><td>7,500,000,000</td><td>×2 Production from 2 sources</td></tr>
+                            <tr><td>Bubble Synthesizer</td><td>9,200,000,000</td><td>8,300,000,000</td><td>+10% Global Production</td></tr>
+                            <tr><td>Omnibubble</td><td>10,000,000,000</td><td>9,200,000,000</td><td>×1.2 Production from Legacy Items</td></tr>
+                        </tbody>
+                    </table>
+
+                    <div class="pager">
+                        <button id="prevPageBottom">Prev</button>
+                        <button id="nextPageBottom">Next</button>
+                        <span class="info" id="pageInfoBottom"></span>
+                    </div>
+                </section>
+
+                <section>
+                    <h2>Upgrade Types</h2>
+                    <ul>
+                        <li><strong>Global Multiplier</strong>: Adds a percentage bonus to all BPS.</li>
+                        <li><strong>Item-Specific Bonus</strong>: Doubles (or more) the production of a particular item.</li>
+                    </ul>
+                    <p><em>Some upgrades follow visual or lore themes (e.g., seasonal sets).</em></p>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <footer class="wiki-footer">
+        <p>&copy; 2025 Bubble Incremental. All rights reserved.</p>
+    </footer>
+
+    <script src="../scripts/upgrades.js"></script>
+</body>
+</html>

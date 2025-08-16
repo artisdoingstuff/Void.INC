@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubble Incremental Wiki - Buffs</title>
+    <link rel="stylesheet" href="../styles/bubble-incremental-wiki-styles.css">
+    <link rel="icon" href="../../Bubble Incremental Favicons/home-page-favicon.png" type="image/png">
+</head>
+<body>
+    <header>
+        <h1>Bubble Incremental - Wiki</h1>
+        <nav class="top-nav">
+            <a href="../../bubble-incremental-home.html">Home</a>
+            <a href="../../bubble-incremental-announcements.html">Announcements</a>
+            <a href="../../bubble-incremental-roadmap.html">Roadmap</a>
+            <a href="../bubble-incremental-wiki-home.html" class="active">Wiki</a>
+            <a href="../../bubble-incremental-patch-notes.html">Patch Notes</a>
+        </nav>
+    </header>
+
+    <div class="wiki-container">
+        <aside class="wiki-sidebar">
+            <nav>
+                <ul>
+                    <li><a href="../bubble-incremental-wiki-home.html">Home</a></li>
+                    <li><a href="bubble-incremental-wiki-achievements.html">Achievements</a></li>
+                    <li><a href="bubble-incremental-wiki-ascension.html">Ascension</a></li>
+                    <li><a href="bubble-incremental-wiki-bubbles.html">Bubbles</a></li>
+                    <li><a href="bubble-incremental-wiki-buffs.html" class="active">Buffs</a></li>
+                    <li><a href="bubble-incremental-wiki-clicking.html">Clicking</a></li>
+                    <li><a href="bubble-incremental-wiki-items.html"">Items</a></li>
+                    <li><a href="bubble-incremental-wiki-marketplace.html">Marketplace</a></li>
+                    <li><a href="bubble-incremental-wiki-upgrades.html">Upgrades</a></li>
+                    <li><a href="bubble-incremental-wiki-weather.html">Weather</a></li>
+                </ul>
+            </nav>
+            <div class="version-note">
+                <p><em>This wiki is accurate as of 
+                    <a href="https://github.com/artisdoingstuff/Bubble-Incremental/releases/tag/v1.4.0-beta">
+                        <br>v1.4.0-Beta
+                    </a>
+                </em></p>
+            </div>
+        </aside>
+
+        <main class="wiki-content">
+            <div class="wiki-inner">
+                <h1>Buffs</h1>
+                
+                <section>
+                    <h2>Overview</h2>
+                    <p>Buffs are temporary effects that change how bubbles are generated or collected. Each buff has its own multiplier, duration, and rarity. Multiple buffs can be active at once, and all are managed by a unified system that handles spawning, timers, and effects.</p>
+                </section>
+
+                <section>
+                    <h2>Buff List</h2>
+                    <table class="wiki-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Effect</th>
+                                <th>Duration</th>
+                                <th>Rarity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Bubble</td>
+                                <td>Multiplicative</td>
+                                <td>×2 Multiplier</td>
+                                <td>30s</td>
+                                <td>60%</td>
+                            </tr>
+                            <tr>
+                                <td>Golden Bubble (Multiplicative)</td>
+                                <td>Multiplicative</td>
+                                <td>×4 Multiplier</td>
+                                <td>20s</td>
+                                <td>8%</td>
+                            </tr>
+                            <tr>
+                                <td>Golden Bubble (Additive)</td>
+                                <td>Additive</td>
+                                <td><code>10^log10(Bubbles - 2) × (1–4)</code> added</td>
+                                <td>Instant</td>
+                                <td>20%</td>
+                            </tr>
+                            <tr>
+                                <td>Bubble Chaos</td>
+                                <td>Event</td>
+                                <td>×0.6 Multiplier; spawns additive bubbles rapidly</td>
+                                <td>14s</td>
+                                <td>1%</td>
+                            </tr>
+                            <tr>
+                                <td>Bubble Frenzy</td>
+                                <td>Event</td>
+                                <td>×1.5 Multiplier; spawns additive bubbles</td>
+                                <td>20s</td>
+                                <td>3%</td>
+                            </tr>
+                            <tr>
+                                <td>Bubble Mayhem</td>
+                                <td>Event</td>
+                                <td>×0.9 Multiplier; spawns additive bubbles</td>
+                                <td>20s</td>
+                                <td>2%</td>
+                            </tr>
+                            <tr>
+                                <td>Shooting Bubble Star</td>
+                                <td>Event</td>
+                                <td>×5 Multiplier; arcs across screen</td>
+                                <td>10s</td>
+                                <td>2%</td>
+                            </tr>
+                            <tr>
+                                <td>Shooting Bubble Star</td>
+                                <td>Event</td>
+                                <td>×5 Multiplier; arcs across screen</td>
+                                <td>10s</td>
+                                <td>2%</td>
+                            </tr>
+                            <tr>
+                                <td>Mutated Bubble</td>
+                                <td>Special</td>
+                                <td>+20% × Amount of a <strong>random item</strong> (e.g. 20 Soap → +400% production)<br>20% chance to <span class="negative">backfire</span> and halve total production</td>
+                                <td>30s</td>
+                                <td>3%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section>
+                    <h2>Global Bubble Rules</h2>
+                    <p>Global bubbles are spawned on a queued system. Only one global bubble appears at a time, with the next spawn occurring randomly between 120 and 180 seconds. Clicking these bubbles activates one of the buffs above.</p>
+                </section>
+
+                <section>
+                    <h2>Stacking Rules</h2>
+                    <p>Buff multipliers stack multiplicatively with each other and with other game systems such as milestones, upgrades, and achievements. If multiple buffs are active, their effects are compounded.</p>
+                </section>
+
+                <section>
+                    <h2>Strategy Tips</h2>
+                    <ul>
+                        <li>Time <strong>Multiplicative</strong> or <strong>Shooting Bubble Star</strong> buffs right before making large purchases to maximize efficiency.</li>
+                        <li>Use <strong>Frenzy</strong> as a stable mid-length multiplier, especially in combination with milestones.</li>
+                        <li><strong>Chaos</strong> and <strong>Mayhem</strong> are best during active play, where frequent clicks can take advantage of their effects.</li>
+                        <li>Save <strong>Mutated</strong> bubbles for experimental runs or stacking with rare multipliers.</li>
+                    </ul>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <footer class="wiki-footer">
+        <p>&copy; 2025 Bubble Incremental. All rights reserved.</p>
+    </footer>
+</body>
+</html>
