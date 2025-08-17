@@ -2,7 +2,7 @@
 
 **Bubble Incremental** is a satisfying idle/clicker game where you generate bubbles, unlock powerful upgrades, and trigger satisfying combos—all wrapped in a bubbly aesthetic.
 
-> 🧪 *Currently in Beta — v1.2.5*  
+> 🧪 *Currently in Beta — v1.3.1*  
 > 🎮 Built with C++17 and SFML 3.0
 
 ---
