@@ -1,0 +1,4 @@
+- Fix Mutated Bubble (it buffs ALL kinds of upgrades instead of just items)
+- Trader merged to Marketplace
+- Brewery
+- Potions

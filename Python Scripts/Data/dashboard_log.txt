@@ -1,0 +1,110 @@
+2025-08-13 13:32:59  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\dashboard.py
+2025-08-13 13:33:04  [EXIT] dashboard.py -> code=0, status=NormalExit
+2025-08-13 13:44:10  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\sqliteview.py
+2025-08-13 13:44:13  [EXIT] sqliteview.py -> code=0, status=NormalExit
+2025-08-13 13:44:16  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\canvas-animator.py
+2025-08-13 13:44:20  [EXIT] canvas-animator.py -> code=0, status=NormalExit
+2025-08-13 14:00:53  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\canvas-animator.py
+2025-08-13 14:00:55  [EXIT] canvas-animator.py -> code=0, status=NormalExit
+2025-08-13 14:00:56  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\habits.py
+2025-08-13 14:00:56  [habits.py] Traceback (most recent call last):
+2025-08-13 14:00:56  [habits.py]   File "C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\habits.py", line 13, in <module>
+2025-08-13 14:00:56  [habits.py]     from PyQt6.QtGUi import QIcon
+2025-08-13 14:00:56  [habits.py] ModuleNotFoundError: No module named 'PyQt6.QtGUi'
+2025-08-13 14:00:56  [EXIT] habits.py -> code=1, status=NormalExit
+2025-08-13 14:01:02  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\habits.py
+2025-08-13 14:01:03  [habits.py] Traceback (most recent call last):
+2025-08-13 14:01:03  [habits.py]   File "C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\habits.py", line 13, in <module>
+2025-08-13 14:01:03  [habits.py]     from PyQt6.QtGUi import QIcon
+2025-08-13 14:01:03  [habits.py] ModuleNotFoundError: No module named 'PyQt6.QtGUi'
+2025-08-13 14:01:03  [EXIT] habits.py -> code=1, status=NormalExit
+2025-08-13 14:01:03  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\md2htmlnreverse.py
+2025-08-13 14:01:05  [EXIT] md2htmlnreverse.py -> code=0, status=NormalExit
+2025-08-13 14:01:06  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\notes.py
+2025-08-13 14:01:08  [EXIT] notes.py -> code=0, status=NormalExit
+2025-08-13 14:01:08  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\pomodoro.py
+2025-08-13 14:01:10  [EXIT] pomodoro.py -> code=0, status=NormalExit
+2025-08-13 14:01:10  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\sqliteview.py
+2025-08-13 14:01:12  [EXIT] sqliteview.py -> code=0, status=NormalExit
+2025-08-13 14:01:13  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\habits.py
+2025-08-13 14:01:13  [habits.py] Traceback (most recent call last):
+2025-08-13 14:01:13  [habits.py]   File "C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\habits.py", line 13, in <module>
+2025-08-13 14:01:13  [habits.py]     from PyQt6.QtGUi import QIcon
+2025-08-13 14:01:13  [habits.py] ModuleNotFoundError: No module named 'PyQt6.QtGUi'
+2025-08-13 14:01:13  [EXIT] habits.py -> code=1, status=NormalExit
+2025-08-13 14:01:40  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\canvas-animator.py
+2025-08-13 14:01:43  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\habits.py
+2025-08-13 14:01:44  [habits.py] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\habits.py:482: UserWarning: set_ticklabels() should only be used with a fixed number of ticks, i.e. after set_ticks() or using a FixedLocator.
+2025-08-13 14:01:44  [habits.py]   ax.set_xticklabels(day_labels, rotation=45, ha="right")
+2025-08-13 14:01:54  [EXIT] habits.py -> code=0, status=NormalExit
+2025-08-13 14:01:54  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\md2htmlnreverse.py
+2025-08-13 14:02:02  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\notes.py
+2025-08-13 14:02:07  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\pomodoro.py
+2025-08-13 14:02:08  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\sqliteview.py
+2025-08-13 14:03:47  [EXIT] notes.py -> code=0, status=NormalExit
+2025-08-13 14:03:50  [EXIT] md2htmlnreverse.py -> code=0, status=NormalExit
+2025-08-13 14:03:53  [EXIT] sqliteview.py -> code=0, status=NormalExit
+2025-08-13 14:03:53  [EXIT] pomodoro.py -> code=0, status=NormalExit
+2025-08-13 14:04:38  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\notes.py
+2025-08-13 14:04:40  [EXIT] notes.py -> code=0, status=NormalExit
+2025-08-13 15:24:27  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\capycapy.py
+2025-08-13 15:24:45  [EXIT] capycapy.py -> code=0, status=NormalExit
+2025-08-13 23:12:17  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\notes.py
+2025-08-13 23:23:54  [EXIT] notes.py -> code=0, status=NormalExit
+2025-08-14 00:32:42  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\htmlpreview.py
+2025-08-14 00:32:42  [htmlpreview.py] Traceback (most recent call last):
+2025-08-14 00:32:42  [htmlpreview.py]   File "C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\htmlpreview.py", line 2, in <module>
+2025-08-14 00:32:42  [htmlpreview.py]     from PyQt6.QtWidgets import (
+2025-08-14 00:32:42  [htmlpreview.py]     ...<2 lines>...
+2025-08-14 00:32:42  [htmlpreview.py]     )
+2025-08-14 00:32:42  [htmlpreview.py] ImportError: cannot import name 'QAction' from 'PyQt6.QtWidgets' (C:\Users\defau\AppData\Local\Programs\Python\Python313\Lib\site-packages\PyQt6\QtWidgets.pyd)
+2025-08-14 00:32:42  [EXIT] htmlpreview.py -> code=1, status=NormalExit
+2025-08-14 00:34:44  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\htmlpreview.py
+2025-08-14 00:35:04  [htmlpreview.py] QDxgiVSyncService: DXGI Factory is no longer Current
+2025-08-14 00:35:30  [htmlpreview.py] QDxgiVSyncService: DXGI Factory is no longer Current
+2025-08-14 00:35:34  [EXIT] htmlpreview.py -> code=0, status=NormalExit
+2025-08-14 00:35:37  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\mdpreview.py
+2025-08-14 00:35:37  [mdpreview.py] Traceback (most recent call last):
+2025-08-14 00:35:37  [mdpreview.py]   File "C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\mdpreview.py", line 2, in <module>
+2025-08-14 00:35:37  [mdpreview.py]     from PyQt6.QtWidgets import (
+2025-08-14 00:35:37  [mdpreview.py]     ...<2 lines>...
+2025-08-14 00:35:37  [mdpreview.py]     )
+2025-08-14 00:35:37  [mdpreview.py] ImportError: cannot import name 'QAction' from 'PyQt6.QtWidgets' (C:\Users\defau\AppData\Local\Programs\Python\Python313\Lib\site-packages\PyQt6\QtWidgets.pyd)
+2025-08-14 00:35:37  [EXIT] mdpreview.py -> code=1, status=NormalExit
+2025-08-14 00:36:36  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\mdpreview.py
+2025-08-14 00:36:48  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\notes.py
+2025-08-14 00:36:58  [EXIT] notes.py -> code=0, status=NormalExit
+2025-08-14 00:40:22  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\notes.py
+2025-08-14 00:41:37  [EXIT] mdpreview.py -> code=0, status=NormalExit
+2025-08-14 00:41:42  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\htmlpreview.py
+2025-08-14 00:42:35  [htmlpreview.py] QDxgiVSyncService: DXGI Factory is no longer Current
+2025-08-14 00:43:50  [EXIT] htmlpreview.py -> code=0, status=NormalExit
+2025-08-14 00:44:37  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\notes.py
+2025-08-14 00:44:44  [EXIT] notes.py -> code=0, status=NormalExit
+2025-08-14 00:44:47  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\htmlpreview.py
+2025-08-14 00:45:10  [EXIT] htmlpreview.py -> code=0, status=NormalExit
+2025-08-14 00:45:12  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\htmlpreview.py
+2025-08-14 00:47:01  [EXIT] htmlpreview.py -> code=0, status=NormalExit
+2025-08-14 00:47:33  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\htmlpreview.py
+2025-08-14 00:48:47  [EXIT] htmlpreview.py -> code=0, status=NormalExit
+2025-08-14 00:49:05  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\htmlpreview.py
+2025-08-14 00:52:30  [EXIT] htmlpreview.py -> code=0, status=NormalExit
+2025-08-14 00:53:42  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\capycapy.py
+2025-08-14 00:54:13  [EXIT] capycapy.py -> code=0, status=NormalExit
+2025-08-14 00:54:22  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\pomodoro.py
+2025-08-14 00:54:31  [EXIT] pomodoro.py -> code=0, status=NormalExit
+2025-08-14 11:49:55  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\notes.py
+2025-08-14 11:56:58  [EXIT] notes.py -> code=0, status=NormalExit
+2025-08-14 13:56:15  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\notes.py
+2025-08-14 13:56:31  [EXIT] notes.py -> code=0, status=NormalExit
+2025-08-16 15:46:00  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\notes.py
+2025-08-16 16:29:39  [EXIT] notes.py -> code=0, status=NormalExit
+2025-08-16 16:49:33  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\notes.py
+2025-08-16 16:49:45  [EXIT] notes.py -> code=0, status=NormalExit
+2025-08-16 16:50:44  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\notes.py
+2025-08-16 16:50:50  [EXIT] notes.py -> code=0, status=NormalExit
+2025-08-16 16:56:26  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\notes.py
+2025-08-16 17:49:25  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\md2htmlnreverse.py
+2025-08-16 17:49:32  [EXIT] md2htmlnreverse.py -> code=0, status=NormalExit
+2025-08-16 17:49:34  [LAUNCH] C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\htmlpreview.py
+2025-08-16 17:49:58  [EXIT] htmlpreview.py -> code=0, status=NormalExit
