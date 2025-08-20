@@ -10,6 +10,11 @@
 *.userosscache
 *.sln.docstates
 
+# Files I want ignored upon committing
+*.db
+*.txt
+habits.py
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
