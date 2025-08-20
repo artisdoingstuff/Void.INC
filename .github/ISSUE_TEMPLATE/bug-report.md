@@ -1,7 +1,7 @@
 ---
 name: Bug Report
 about: Report a reproducible bug
-title: "[Bug] | [Version]"
+title: "[Bug]:"
 labels: Bug
 assignees: artisdoingstuff
 
