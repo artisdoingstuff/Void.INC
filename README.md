@@ -10,7 +10,7 @@ No manual installation or compiling required — just extract and play.
 
 ## 📚 Documentation
 Full game details, mechanics, and future features can be found on the  
-[**Bubble Incremental Site**](https://artisdoingstuff.github.io/Bubble-Incremental/).
+[**Bubble Incremental**](https://artisdoingstuff.github.io/Bubble-Incremental/) website.
 
 ---
 
