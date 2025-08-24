@@ -22,95 +22,116 @@
     <main>
         <details class="patch">
             <summary>
-                <h2>Beta 1.4.0</h2>
-                <p class="date">August 17, 2025</p>
+                <h2>Beta 1.4</h2>
+                <p class="date">(2)</P>
             </summary>
 
-            <h3>Game Changes</h3>
-            <ul>
-                <li>Achievements have been assigned colored borders to distinguish between achievements easier.</li>
-                <li>5 <strong>NEW</strong> Trader Items
-                    <ul>
-                        <li>Some Names and Descriptions for existing Trader Items have also been refreshed.</li>
-                    </ul>
-                </li>
-                <li>2 <strong>NEW</strong> Weathers
-                    <ul>
-                        <li>Descriptions for existing Weathers have been refreshed.</li>
-                    </ul>
-                </li>
-                <li><strong>New Buff: Mutated Bubble</strong>
-                    <ul>
-                        <li>Gives a +20% × Amount of a RANDOM Item for 30 seconds (e.g., Your 20 Soaps are contributing 400% more towards your production!)</li>
-                        <li>However, there is a 20% chance the Mutated Bubble backfires and HALVES your production instead.</li>
-                    </ul>
-                </li>
-                <li><strong>New Feature: Clicking Hotspots</strong>
-                    <ul>
-                        <li>Clicking Hotspots are a new way to earn more Bubbles through, well, clicks!</li>
-                        <li>Periodically, a hotspot appears on the clicking area. Clicking on this hotspot gives you an extra ×1.2 multiplier to your Clicks. They appear at random intervals and each lasts anywhere between 5 to 15 seconds.</li>
-                    </ul>
-                </li>
-                <li><strong>New Feature: The Library</strong>
-                    <ul>
-                        <li>Achievements now appear in the Library.</li>
-                    </ul>
-                </li>
-            </ul>
+            <details class="patch">
+                <summary>
+                    <h2>Beta 1.4.1</h2>
+                    <p class="date">August 24, 2025</p>
+                </summary>
 
-            <h3>New Items</h3>
-            <ul>
-                <li><strong>Trader: Wishing Star | ~1/1.15k (0.08695%)</strong>
-                    <ul>
-                        <li>Summons a Shooting Star Bubble</li>
-                        <li>Passively earn an additional 15% more Bubbles for 20s</li>
-                    </ul>
-                </li>
-                <li><strong>Trader: Nuclear Waste | 1/1k (0.1%)</strong>
-                    <ul>
-                        <li>Summons a Mutated Bubble</li>
-                        <li>Hinders your Bubble production by 15% for 30s</li>
-                    </ul>
-                </li>
-                <li><strong>Trader: Marshy Goodness | 1/250 (0.4%)</strong>
-                    <ul>
-                        <li>Passively earn 30% more Bubbles for 30s</li>
-                        <li>Clicks are 50% more powerful for 30s</li>
-                    </ul>
-                </li>
-                <li><strong>Trader: Bubble Beacon | 1/50 (2.0%)</strong>
-                    <ul>
-                        <li>Bubbles spawn three times as fast for 60s</li>
-                        <li>Passively earn 10% more Bubbles for 60s</li>
-                    </ul>
-                </li>
-                <li><strong>Trader: Midas Bubbles | 1/500 (0.2%)</strong>
-                    <ul>
-                        <li>Summons a RANDOM Golden Bubble</li>
-                        <li>Passively earn an additional 5% more Bubbles for 10s</li>
-                    </ul>
-                </li>
-            </ul>
+                <h3>Game Fixes</h3>
+                <ul>
+                    <li>Mutated Bubble applying its effects to ALL upgrades instead of targeting those with <code>"isItemUpgrade": true</code>.</li>
+                    <li>Achievement pagination now works as intended.</li>
+                    <li>Trader Items no longer go off screen and have now been paginated.</li>
+                </ul>
+            </details>
+            
+            <details class="patch">
+                <summary>
+                    <h2>Beta 1.4.0</h2>
+                    <p class="date">Augut 17, 2025</p>
+                </summary>
 
-            <h3>New Weathers</h3>
-            <ul>
-                <li><strong>Blissful Bubbly Sunshine</strong>
-                    <ul>
-                        <li>×1.15 Bubbles per Second along with making Bubbles take twice as long to spawn.</li>
-                    </ul>
-                </li>
-                <li><strong>Marshy Springs</strong>
-                    <ul>
-                        <li>×1.5 Bubbles per Second along with making Bubbles spawn 25% faster.</li>
-                    </ul>
-                </li>
-            </ul>
+                <h3>Game Changes</h3>
+                <ul>
+                    <li>Achievements have been assigned colored borders to distinguish between achievements easier.</li>
+                    <li>5 <strong>NEW</strong> Trader Items
+                        <ul>
+                            <li>Some Names and Descriptions for existing Trader Items have also been refreshed.</li>
+                        </ul>
+                    </li>
+                    <li>2 <strong>NEW</strong> Weathers
+                        <ul>
+                            <li>Descriptions for existing Weathers have been refreshed.</li>
+                        </ul>
+                    </li>
+                    <li><strong>New Buff: Mutated Bubble</strong>
+                        <ul>
+                            <li>Gives a +20% × Amount of a RANDOM Item for 30 seconds (e.g., Your 20 Soaps are contributing 400% more towards your production!)</li>
+                            <li>However, there is a 20% chance the Mutated Bubble backfires and HALVES your production instead.</li>
+                        </ul>
+                    </li>
+                    <li><strong>New Feature: Clicking Hotspots</strong>
+                        <ul>
+                            <li>Clicking Hotspots are a new way to earn more Bubbles through, well, clicks!</li>
+                            <li>Periodically, a hotspot appears on the clicking area. Clicking on this hotspot gives you an extra ×1.2 multiplier to your Clicks. They appear at random intervals and each lasts anywhere between 5 to 15 seconds.</li>
+                        </ul>
+                    </li>
+                    <li><strong>New Feature: The Library</strong>
+                        <ul>
+                            <li>Achievements now appear in the Library.</li>
+                        </ul>
+                    </li>
+                </ul>
 
-            <h3>Balance Changes</h3>
-            <ul>
-                <li>Marketplace Restock Interval | 30s → 60s</li>
-                <li>Bubble Mania Buff | +25% → +20%</li>
-            </ul>
+                <h3>New Items</h3>
+                <ul>
+                    <li><strong>Trader: Wishing Star | ~1/1.15k (0.08695%)</strong>
+                        <ul>
+                            <li>Summons a Shooting Star Bubble</li>
+                            <li>Passively earn an additional 15% more Bubbles for 20s</li>
+                        </ul>
+                    </li>
+                    <li><strong>Trader: Nuclear Waste | 1/1k (0.1%)</strong>
+                        <ul>
+                            <li>Summons a Mutated Bubble</li>
+                            <li>Hinders your Bubble production by 15% for 30s</li>
+                        </ul>
+                    </li>
+                    <li><strong>Trader: Marshy Goodness | 1/250 (0.4%)</strong>
+                        <ul>
+                            <li>Passively earn 30% more Bubbles for 30s</li>
+                            <li>Clicks are 50% more powerful for 30s</li>
+                        </ul>
+                    </li>
+                    <li><strong>Trader: Bubble Beacon | 1/50 (2.0%)</strong>
+                        <ul>
+                            <li>Bubbles spawn three times as fast for 60s</li>
+                            <li>Passively earn 10% more Bubbles for 60s</li>
+                        </ul>
+                    </li>
+                    <li><strong>Trader: Midas Bubbles | 1/500 (0.2%)</strong>
+                        <ul>
+                            <li>Summons a RANDOM Golden Bubble</li>
+                            <li>Passively earn an additional 5% more Bubbles for 10s</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>New Weathers</h3>
+                <ul>
+                    <li><strong>Blissful Bubbly Sunshine</strong>
+                        <ul>
+                            <li>×1.15 Bubbles per Second along with making Bubbles take twice as long to spawn.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Marshy Springs</strong>
+                        <ul>
+                            <li>×1.5 Bubbles per Second along with making Bubbles spawn 25% faster.</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>Balance Changes</h3>
+                <ul>
+                    <li>Marketplace Restock Interval | 30s → 60s</li>
+                    <li>Bubble Mania Buff | +25% → +20%</li>
+                </ul>
+            </details>
         </details>
 
         <details class="patch">

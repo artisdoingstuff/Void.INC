@@ -20,9 +20,9 @@ public:
             achievementsTab.draw(window, achievements);
     }
 
-    void handleInput(const sf::Vector2f& mousePos, bool clicked) {
+    void handleInput(const sf::Vector2f& mousePos, bool clicked, sf::RenderWindow& window) {
         if (currentSubTab == LibrarySubTab::Achievements)
-            achievementsTab.handleInput(mousePos, clicked, achievements);
+            achievementsTab.handleInput(mousePos, clicked, achievements, window, slideOffset);
     }
 
     void startAchievementsAnimation() {

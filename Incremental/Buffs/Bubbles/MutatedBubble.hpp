@@ -15,7 +15,7 @@ struct MutatedBubbleBuff {
         if (!backfire) {
             std::vector<int> ownedIndices;
             for (int i = 0; i < static_cast<int>(upgrades.size()); ++i) {
-                if (upgrades[i].count > 0) {
+                if (upgrades[i].isItemUpgrade && upgrades[i].count > 0) {
                     ownedIndices.push_back(i);
                 }
             }

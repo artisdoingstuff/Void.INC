@@ -6,13 +6,13 @@
 #include "Misc/GlobalTextures.hpp"
 #include "Misc/GlobalVariables.hpp"
 
+inline float slideOffset = 0.f;
+
 class AchievementsTab {
 public:
     AchievementsTab(sf::Font& fontRef)
         : font(fontRef)
     {}
-
-    float slideOffset = 0.f;
 
     void draw(sf::RenderWindow& window, const std::vector<Achievement>& achievements)
     {
@@ -34,7 +34,7 @@ public:
         drawPagination(window, achievements, slideOffset);
     }
 
-    void handleInput(const sf::Vector2f& mousePos, bool clicked, const std::vector<Achievement>& achievements)
+    void handleInput(const sf::Vector2f& mousePos, bool clicked, const std::vector<Achievement>& achievements, sf::RenderWindow& window, float slideOffset)
     {
         if (!clicked) return;
 
@@ -46,15 +46,21 @@ public:
         constexpr float spacingX = 24.f;
         constexpr float spacingY = 16.f;
 
-        float startX = 800.f;
-        float startY = 200.f;
+        float totalWidth = columns * boxWidth + (columns - 1) * spacingX;
+        float totalHeight = rows * boxHeight + (rows - 1) * spacingY;
+
+        float offsetX = 10.f;
+        float offsetY = -147.f;
+
+        float startX = (window.getSize().x - totalWidth) / 2.f + slideOffset + offsetX;
+        float startY = (window.getSize().y - totalHeight) / 2.f + offsetY;
 
         int totalPages = (achievements.size() + achievementsPerPage - 1) / achievementsPerPage;
 
         float navY = startY + rows * (boxHeight + spacingY) + 10.f;
         sf::Vector2f navSize = { 80.f, 30.f };
-        sf::Vector2f prevPos = { startX - boxWidth * columns - spacingX * (columns - 1), navY };
-        sf::Vector2f nextPos = { prevPos.x + 100.f, navY };
+        sf::Vector2f prevPos = { startX, navY };
+        sf::Vector2f nextPos = { startX + totalWidth - navSize.x, navY };
 
         sf::FloatRect prevRect(prevPos, navSize);
         sf::FloatRect nextRect(nextPos, navSize);
@@ -170,7 +176,6 @@ private:
         constexpr float spacingX = 24.f;
         constexpr float spacingY = 16.f;
 
-        // Compute total width and height of the grid
         float totalWidth = columns * boxWidth + (columns - 1) * spacingX;
         float totalHeight = rows * boxHeight + (rows - 1) * spacingY;
 

@@ -59,7 +59,7 @@ MultibuyMode currentMultibuy = MultibuyMode::x1;
 
 int itemPage = 0;
 int milestonePage = 0;
-int achievementPage = 0;
+int traderPage = 0;
 constexpr int itemsPerPage = 9;
 
 // Global variables
@@ -70,7 +70,7 @@ ComboSystem comboSystem;
 
 sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.4.0-beta";
+string gameVersion = "v1.4.1-beta";
 
 queue<PopupStruct> popupQueue;
 optional<PopupStruct> currentPopup;
@@ -737,7 +737,7 @@ int main()
                 }
             }
             
-            achievementsTab.handleInput(mousePositionF, !clickHandled, achievements);
+            achievementsTab.handleInput(mousePositionF, !clickHandled, achievements, window, slideOffset);
 
             // Click Bubble
             if (!clickHandled && clickArea.contains(mousePositionF))
@@ -1755,6 +1755,13 @@ int main()
 
         else if (currentTab == GameTabs::Trader)
         {
+            constexpr int itemsPerPage = 5;
+            int totalPages = (traderItems.size() + itemsPerPage - 1) / itemsPerPage;
+            traderPage = std::clamp(traderPage, 0, std::max(0, totalPages - 1));
+
+            int startIdx = traderPage * itemsPerPage;
+            int endIdx = std::min<int>(startIdx + itemsPerPage, traderItems.size());
+
             constexpr float buffBoxWidth = 240.f;
             constexpr float buffBoxHeight = 80.f;
             constexpr float buffSpacingY = 20.f;
@@ -1762,8 +1769,9 @@ int main()
             float buffStartY = startY;
             float buffStartX = startX - buffBoxWidth + 150.f;
 
-            for (auto& item : traderItems)
+            for (int i = startIdx; i < endIdx; i++)
             {
+                auto& item = traderItems[i];
                 sf::Vector2f pos(buffStartX, buffStartY);
                 sf::RectangleShape box({ buffBoxWidth, buffBoxHeight });
                 box.setOrigin({ buffBoxWidth / 2.f, buffBoxHeight / 2.f });
@@ -1781,7 +1789,7 @@ int main()
                 bool isOnCooldown = item.cooldownRemaining > 0.f;
                 bool isSoldOut = (item.maxStock != -1 && item.stockRemaining <= 0);
 
-                // Fill color
+                // Fill color logic
                 if (isSoldOut)
                     box.setFillColor(sf::Color(80, 80, 80));
                 else if (isOnCooldown)
@@ -1832,7 +1840,7 @@ int main()
                     costOrTimerText.setString("Cost: " + formatDisplayBubbles(getEffectiveItemCost(item, realBubblesPerSecond)) + " Bubbles");
                 }
 
-                costOrTimerText.setPosition(pos + sf::Vector2f(12.f, 52.f));
+                costOrTimerText.setPosition(pos + sf::Vector2f(12.f, 55.f));
                 window.draw(costOrTimerText);
 
                 // Stock display
@@ -1886,12 +1894,49 @@ int main()
                 buffStartY += buffBoxHeight + buffSpacingY;
             }
 
-            float restockTimeLeft = max(0.f, traderRestockInterval - traderRestockClock.getElapsedTime().asSeconds());
+            float navY = buffStartY + 20.f;
+            sf::Vector2f navSize = { 80.f, 30.f };
+            sf::Vector2f prevPos = { buffStartX, navY };
+            sf::Vector2f nextPos = { buffStartX + buffBoxWidth - navSize.x, navY };
+
+            // Prev button
+            sf::RectangleShape prevButton(navSize);
+            prevButton.setPosition(prevPos);
+            prevButton.setFillColor(traderPage > 0 ? sf::Color(180, 180, 180) : sf::Color(100, 100, 100));
+            window.draw(prevButton);
+
+            sf::Text prevText(font, "Prev", 14);
+            prevText.setFillColor(sf::Color::Black);
+            prevText.setPosition(prevPos + sf::Vector2f(10.f, 5.f));
+            window.draw(prevText);
+
+            // Next button
+            sf::RectangleShape nextButton(navSize);
+            nextButton.setPosition(nextPos);
+            nextButton.setFillColor((traderPage + 1) < totalPages ? sf::Color(180, 180, 180) : sf::Color(100, 100, 100));
+            window.draw(nextButton);
+
+            sf::Text nextText(font, "Next", 14);
+            nextText.setFillColor(sf::Color::Black);
+            nextText.setPosition(nextPos + sf::Vector2f(10.f, 5.f));
+            window.draw(nextText);
+
+            // Handle clicks
+            if (justClicked)
+            {
+                if (sf::FloatRect(prevPos, navSize).contains(mousePositionF) && traderPage > 0)
+                    traderPage--;
+                if (sf::FloatRect(nextPos, navSize).contains(mousePositionF) && traderPage + 1 < totalPages)
+                    traderPage++;
+            }
+
+            // Restock timer under buttons
+            float restockTimeLeft = std::max(0.f, traderRestockInterval - traderRestockClock.getElapsedTime().asSeconds());
             sf::Text restockTimerText(font);
             restockTimerText.setCharacterSize(14);
             restockTimerText.setFillColor(sf::Color::Black);
-            restockTimerText.setString("Next Restock: " + to_string(static_cast<int>(ceilf(restockTimeLeft))) + "s");
-            restockTimerText.setPosition({ buffStartX, buffStartY + 10.f });
+            restockTimerText.setString("Next Restock: " + std::to_string(static_cast<int>(ceilf(restockTimeLeft))) + "s");
+            restockTimerText.setPosition({ buffStartX, navY + 50.f });
             window.draw(restockTimerText);
         }
 
@@ -2037,7 +2082,7 @@ int main()
 
         // Library
         if (isLibraryOpen) {
-            library.handleInput(mousePositionF, justClicked);
+            library.handleInput(mousePositionF, justClicked, window);
             library.draw(window);
         }
 
