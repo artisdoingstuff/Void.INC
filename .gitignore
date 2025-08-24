@@ -12,7 +12,8 @@
 
 # Files I want ignored upon committing
 *.db
-*.txt
+quick_notes.txt
+dashboard_log.txt
 habits.py
 
 # User-specific files (MonoDevelop/Xamarin Studio)
