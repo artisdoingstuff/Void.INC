@@ -12,7 +12,7 @@ class SQLiteViewer(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("SQLite Viewer")
-        icon_path = r"C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\\App Icons\\dashboard-icon.png"
+        icon_path = r"C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\\App Icons\\global.ico"
         self.setWindowIcon(QIcon(icon_path))
         self.resize(900, 600)
 

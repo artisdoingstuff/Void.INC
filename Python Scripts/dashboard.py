@@ -1,14 +1,11 @@
-import sys
-import os
-import glob
-import datetime
-import psutil
-import random
+import sys, os, glob, datetime, psutil, random, requests
 from pathlib import Path
+from bs4 import BeautifulSoup
 
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QPushButton, QGridLayout, QVBoxLayout, QHBoxLayout,
-    QLabel, QTextEdit, QScrollArea, QFrame, QSizePolicy, QMessageBox
+    QLabel, QTextEdit, QScrollArea, QFrame, QSizePolicy, QMessageBox, QLineEdit,
+    QComboBox
 )
 from PyQt6.QtCore import Qt, QTimer, QSize, QProcess
 from PyQt6.QtGui import QFont, QTextCursor, QIcon
@@ -18,7 +15,7 @@ class Dashboard(QWidget):
         super().__init__()
         self.setWindowTitle("Personal Dashboard")
 
-        icon_path = r"C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\\App Icons\\dashboard-icon.png"
+        icon_path = r"C:\\Users\\defau\\OneDrive\\Documents\\C++ Games\\Buh\\Python Scripts\\App Icons\\global.ico"
         self.setWindowIcon(QIcon(icon_path))
 
         # self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
@@ -53,6 +50,11 @@ class Dashboard(QWidget):
         self.clock_label.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
         self.clock_label.setStyleSheet("color: #e8e8e8;")
         top_bar.addWidget(self.clock_label, 0, Qt.AlignmentFlag.AlignLeft)
+
+        self.weather_label = QLabel("Loading weather…")
+        self.weather_label.setStyleSheet("color: #b0bec5;")
+        self.weather_label.setFont(QFont("Segoe UI", 11))
+        top_bar.addWidget(self.weather_label, 0, Qt.AlignmentFlag.AlignLeft)
 
         top_bar.addStretch(1)
 
@@ -128,6 +130,29 @@ class Dashboard(QWidget):
         sys_layout.addWidget(self.disk_label)
         right_layout.addWidget(sys_box)
 
+        search_box = QFrame()
+        search_box.setStyleSheet("background-color: #262626; border: 1px solid #333; border-radius: 8px;")
+        search_layout = QVBoxLayout(search_box)
+        search_layout.setContentsMargins(10, 10, 10, 10)
+        search_layout.setSpacing(6)
+        search_title = QLabel("Web Search")
+        search_title.setStyleSheet("color: #e0e0e0;")
+        search_title.setFont(QFont("Segoe UI", 11, QFont.Weight.Bold))
+        search_layout.addWidget(search_title)
+        self.search_input = QTextEdit()
+        self.search_input.setPlaceholderText("Search Query")
+        self.search_input.setFixedHeight(40)
+        self.search_input.setStyleSheet(
+            "QTextEdit { background-color: #1f1f1f; color: #e8e8e8; "
+            "border: 1px solid #333; border-radius: 6px; }"
+        )
+        search_layout.addWidget(self.search_input)
+        search_btn = QPushButton("Search")
+        search_btn.setStyleSheet(self._button_style())
+        search_btn.clicked.connect(self._search)
+        search_layout.addWidget(search_btn)
+        right_layout.addWidget(search_box)
+
         notes_box = QFrame()
         notes_box.setStyleSheet("background-color: #262626; border: 1px solid #333; border-radius: 8px;")
         notes_layout = QVBoxLayout(notes_box)
@@ -191,7 +216,13 @@ class Dashboard(QWidget):
         self._ui_timer.timeout.connect(self.update_clock_and_stats)
         self._ui_timer.start()
 
-        # First-time init
+        self._weather_timer = QTimer(self)
+        self._weather_timer.setInterval(30 * 60 * 1000)
+        self._weather_timer.timeout.connect(self.update_weather)
+        self._weather_timer.start()
+
+        self.update_weather()
+
         self.load_notes()
         self.populate_grid()
         self.load_existing_log()
@@ -263,7 +294,7 @@ class Dashboard(QWidget):
 
     def update_clock_and_stats(self):
         now = datetime.datetime.now()
-        self.clock_label.setText(now.strftime("%A, %B %d, %Y  •  %I:%M:%S %p"))
+        self.clock_label.setText(now.strftime("%A, %B %d, %Y  •  %I:%M:%S %p |"))
         try:
             cpu = psutil.cpu_percent(interval=None)
             mem = psutil.virtual_memory().percent
@@ -276,6 +307,53 @@ class Dashboard(QWidget):
             self.mem_label.setText("Memory: n/a")
             self.disk_label.setText("Disk: n/a")
             self.append_log(f"[WARN] psutil error: {e}")
+
+    def update_weather(self, city="Davao,PH"):
+        api_key = "fda7265e8659e8ddaff819bbffdfe0f2"
+        url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid={api_key}"
+        try:
+            r = requests.get(url, timeout=5)
+            data = r.json()
+            if "main" in data:
+                temp = data["main"]["temp"]
+                humidity = data["main"]["humidity"]
+                desc = data["weather"][0]["description"].title()
+                self.weather_label.setText(f"{temp:.1f}°C, {humidity}% • {desc}")
+            else:
+                self.weather_label.setText("Weather unavailable")
+        except Exception as e:
+            self.weather_label.setText("Weather error")
+            self.append_log(f"[ERROR] Weather API: {e}")
+
+    def _search(self):
+        query = self.search_input.toPlainText().strip()
+        if not query:
+            return
+
+        url = "https://api.duckduckgo.com/"
+        params = {"q": query, "format": "json", "pretty": 1}
+
+        try:
+            r = requests.get(url, params=params, timeout=8)
+            data = r.json()
+
+            self.append_log(f"[SEARCH] Results for '{query}':")
+
+            if data.get("AbstractText"):
+                self.append_log(f"  {data['AbstractText']} ({data.get('AbstractURL','')})")
+
+            results = 0
+            for topic in data.get("RelatedTopics", []):
+                if "Text" in topic and "FirstURL" in topic:
+                    self.append_log(f"  - {topic['Text']} ({topic['FirstURL']})")
+                    results += 1
+                    if results >= 5:
+                        break
+
+            if not data.get("AbstractText") and results == 0:
+                self.append_log("  No results found.")
+        except Exception as e:
+            self.append_log(f"[ERROR] DuckDuckGo search failed: {e}")
 
     def random_quote(self):
         return random.choice(self.quotes)
