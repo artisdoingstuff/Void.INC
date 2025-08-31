@@ -10,9 +10,31 @@
 extern long double totalUpgradeCount;
 extern string gameVersion;
 
+// Save the game version to a JSON file
+void versionSave(
+    string version
+)
+{
+    json saveVersion;
+
+    saveVersion["version"] = version;
+
+    ofstream file("version.json");
+
+    if (file.is_open())
+    {
+        file << setw(4) << saveVersion << endl;
+        file.close();
+        cout << version << endl;
+    }
+    else
+    {
+        cerr << "Unable to open version.json for writing." << endl;
+    }
+}
+
 // Save the game to a JSON file
 void saveFileToJson(
-    string version,
     time_t timestamp,
     long double duckCounter,
     long double buffCounter,
@@ -37,7 +59,6 @@ void saveFileToJson(
     for (const auto& item : traderItems)
         traderData.push_back(item);
 
-    saveData["version"] = version;
     saveData["timestamp"] = timestamp;
     saveData["duckCounter"] = round2(duckCounter);
     saveData["buffCounter"] = round2(buffCounter);

@@ -14,7 +14,12 @@
 *.db
 quick_notes.txt
 dashboard_log.txt
+kanban.json
+
+chemistry.py
+kanban.py
 habits.py
+updater.py
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

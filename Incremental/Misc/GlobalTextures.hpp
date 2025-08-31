@@ -25,6 +25,6 @@ inline sf::Texture goldenBubbleTexture("Assets/Buffs/golden_bubble.png");
 inline sf::Texture shootingStarTexture("Assets/Buffs/shooting_star.png");
 
 inline sf::Texture achievementIconTexture("Assets/Achievements/achievement_icon.png");
-inline sf::Texture traderIconTexture("Assets/Trader/trader_icon.png");
+inline sf::Texture marketplaceIconTexture("Assets/Marketplace/marketplace_icon.png");
 
 inline map<string, sf::Texture> achievementTextures;

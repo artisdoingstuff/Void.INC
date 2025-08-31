@@ -1,6 +1,6 @@
 #pragma once
 #include "Misc/Includes.hpp"
-#include "Achievements/AchievementsTab.hpp"
+#include "Library/AchievementsTab.hpp"
 #include "Achievements/Achievements.hpp" // or wherever your achievements vector lives
 
 enum class LibrarySubTab {
