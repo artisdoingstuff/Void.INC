@@ -16,10 +16,21 @@ quick_notes.txt
 dashboard_log.txt
 kanban.json
 
+capycapy-icon.png
+global.ico
+
 chemistry.py
 kanban.py
 habits.py
 updater.py
+sqliteview.py
+pomodoro.py
+notes.py
+mdpreview.py
+md2htmlnreverse.py
+htmlpreview.py
+capycapy.py
+dashboard.py
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

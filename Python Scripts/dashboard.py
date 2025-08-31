@@ -309,7 +309,7 @@ class Dashboard(QWidget):
             self.append_log(f"[WARN] psutil error: {e}")
 
     def update_weather(self, city="Davao,PH"):
-        api_key = "fda7265e8659e8ddaff819bbffdfe0f2"
+        api_key = "c03698e63ebb41feb866715fe018858c"
         url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid={api_key}"
         try:
             r = requests.get(url, timeout=5)
