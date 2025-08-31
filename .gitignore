@@ -12,6 +12,11 @@
 
 # Files I want ignored upon committing
 /Python
+/library
+/include
+
+CMakeLists.txt
+CMakePresets.json
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
