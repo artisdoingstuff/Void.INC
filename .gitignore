@@ -15,9 +15,6 @@
 /library
 /include
 
-CMakeLists.txt
-CMakePresets.json
-
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
