@@ -10,7 +10,12 @@
 #include "Buffs/Bubbles/BubbleMayhem.hpp"
 #include "Buffs/Bubbles/MutatedBubble.hpp"
 #include "Buffs/Bubbles/ShootingStarBubble.hpp"
+
+#include "Buffs/Potions/Potions.hpp"
+#include "Buffs/Potions/PotionsList.hpp"
+
 #include "Buffs/Trader/TradersList.hpp"
+
 #include "Buffs/GlobalBuffHandler.hpp"
 
 #include "Clicking/ClickingHotspots.hpp"
@@ -19,7 +24,9 @@
 #include "Library/AchievementsTab.hpp"
 #include "Library/Library.hpp"
 
+#include "Marketplace/Marketplace.hpp"
 #include "Marketplace/Trader.hpp"
+#include "Marketplace/PotionBrewery.hpp"
 
 #include "Misc/GameFileState.hpp"
 #include "Misc/GlobalFunctions.hpp"
@@ -60,6 +67,7 @@ MultibuyMode currentMultibuy = MultibuyMode::x1;
 int itemPage = 0;
 int milestonePage = 0;
 int traderPage = 0;
+int breweryPage = 0;
 constexpr int itemsPerPage = 9;
 
 // Global variables
@@ -70,7 +78,7 @@ ComboSystem comboSystem;
 
 sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.4.2-beta";
+string gameVersion = "v1.4.3-beta";
 
 queue<PopupStruct> popupQueue;
 optional<PopupStruct> currentPopup;
@@ -986,10 +994,13 @@ int main()
         }
 
         // Buff logic here
-        // Weather Buff
         newsTicker.update(deltaTime);
         updateWeather(popupQueue);
         upgradeTrader(deltaTime);
+        
+        for (auto& potion : potions) {
+            potion.updatePotion(deltaTime);
+        }
 
         if (traderRestockClock.getElapsedTime().asSeconds() >= traderRestockInterval)
         {
@@ -1757,11 +1768,14 @@ int main()
 
         else if (currentTab == GameTabs::Marketplace)
         {
-            renderTraderShop(
-				window, font, mousePositionF, justClicked,
-                deltaTime, startX, startY, traderPage,
-                traderItems, realBubbles, realBubblesPerSecond,
-                traderRestockInterval, traderRestockClock, hoverScales);
+            renderMarketplace(
+                window, font, mousePositionF, justClicked,
+                deltaTime, startX, startY,
+                traderPage, breweryPage,
+                traderItems, potions,
+                realBubbles, realBubblesPerSecond,
+                traderRestockInterval, traderRestockClock, hoverScales
+            );
         }
 
         else if (currentTab == GameTabs::Library)

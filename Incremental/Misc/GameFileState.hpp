@@ -72,6 +72,7 @@ void saveFileToJson(
     saveData["upgrades"] = upgrades;
     saveData["gameAchievements"] = achievements;
     saveData["trader"] = traderData;
+    saveData["potions"] = potions;
 
     ofstream file("save_file.json");
 
@@ -198,6 +199,21 @@ void loadFileFromJson(
                 from_json(savedTrader, *it);
                 // Recalculate current cost from saved timesBought
                 it->cost = round(it->baseCost * pow(itemInflationRate, it->timesBought));
+            }
+        }
+    }
+
+    if (saveData.contains("potions")) {
+        vector<potionsList> loadedPotions = saveData["potions"].get<vector<potionsList>>();
+        for (auto& saved : loadedPotions) {
+            auto it = find_if(potions.begin(), potions.end(), [&](potionsList& p) {
+                return p.potionName == saved.potionName;
+                });
+
+            if (it != potions.end()) {
+                *it = saved;
+                it->onActivate = saved.onActivate;
+                it->onExpire = saved.onExpire;
             }
         }
     }
