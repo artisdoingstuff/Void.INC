@@ -1,0 +1,43 @@
+#pragma once
+#include "GIncludes.hpp"
+
+inline void hideConsole() {
+    ::ShowWindow(::GetConsoleWindow(), SW_HIDE);
+}
+
+inline void centerText(sf::Text& text, sf::Vector2f targetPos) {
+    sf::FloatRect textRect = text.getLocalBounds();
+    text.setOrigin({ textRect.position.x + textRect.size.x / 2.0f, textRect.position.y + textRect.size.y / 2.0f });
+    text.setPosition(targetPos);
+}
+
+struct Vortex {
+    sf::VertexArray vortex;
+};
+
+inline void updateVortex(Vortex& vortex, sf::Vector2f center, float time, float currentScale) {
+    size_t totalVertices = vortex.vortex.getVertexCount();
+    const int numArms = 4;
+    size_t pointsPerArm = totalVertices / numArms;
+
+    for (int arm = 0; arm < numArms; ++arm) {
+        float armOffset = (arm * 2.f * 3.14159265358979323846) / numArms;
+
+        for (size_t i = 0; i < pointsPerArm; ++i) {
+            size_t idx = arm * pointsPerArm + i;
+            float ratio = i / static_cast<float>(pointsPerArm);
+
+            float angle = ratio * 80.f - (time * 0.5f) + armOffset;
+
+            float radius = ratio * 250.f * currentScale;
+
+            float thickness = std::sin(time * 15.f + i) * 3.5f;
+
+            float x = center.x + (radius + thickness) * std::cos(angle);
+            float y = center.y + (radius + thickness) * std::sin(angle);
+
+            vortex.vortex[idx].position = { x, y };
+            vortex.vortex[idx].color = sf::Color(243, 238, 225, 120);
+        }
+    }
+}

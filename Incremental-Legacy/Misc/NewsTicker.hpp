@@ -48,7 +48,7 @@ public:
             { "Rain of tiny, harmless bubbles puzzles scientists.", 60.f },
             { "The moon appears unusually glossy tonight.", 60.f },
             { "Festival of Foam attracts record-breaking crowds.", 60.f },
-            { "A new spa opens promising \"quantum exfoliation\".", 60.f },
+            { "A new spa opens promising \"logGatetum exfoliation\".", 60.f },
             { "Sudsy Seer predicts \"Bubbly times ahead\".", 60.f },
             { "Pop Idol finalists prepare for the finale concert.", 60.f },
             { "Stray bubble whispers secrets to those who listen.", 60.f },
