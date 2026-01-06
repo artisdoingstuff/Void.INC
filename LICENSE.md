@@ -1,5 +1,3 @@
-# License
-
 **Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)**
 
 This license allows you to **download** and **share** the project **as-is**, with proper credit to the author. However, you **may not**:
@@ -13,27 +11,25 @@ This license allows you to **download** and **share** the project **as-is**, wit
 - **Share** — copy and redistribute the material in any medium or format  
   Under the following terms:
 
-### Attribution
+Attribution
 
 You must give **appropriate credit**, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but **not in any way that suggests the licensor endorses you or your use**.
 
-### NonCommercial
+NonCommercial
 
 You may **not use the material for commercial purposes**.
 
-### NoDerivatives
+NoDerivatives
 
 If you remix, transform, or build upon the material, **you may not distribute the modified material**.
 
 ---
 
-## Full License Text
+Full License Text
 
 Read the full license here:  
 [https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode](https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode)
 
-## Author
+Author
 
-This project is created and maintained by **Scott**.  
-See the official repository:  
-🫧 [Bubble Incremental](https://github.com/artisdoingstuff/Bubble-Incremental)
+This project is created and maintained by **Scott**.
