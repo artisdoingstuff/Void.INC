@@ -6,7 +6,7 @@ This license allows you to **download** and **share** the project **as-is**, wit
 - Distribute modified versions of the content.
 - Remix, transform, or build upon the material in any way.
 
-## You are free to:
+You are free to:
 
 - **Share** — copy and redistribute the material in any medium or format  
   Under the following terms:
