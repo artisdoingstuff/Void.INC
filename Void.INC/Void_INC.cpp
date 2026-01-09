@@ -12,6 +12,9 @@
 #include "Re-initialization/Re-initialization.hpp"
 #include "Re-initialization/RootDir.hpp"
 
+#include "UI/Terminal.hpp"
+#include "UI/Vortex.hpp"
+
 #include "UserData/Local/Loading.hpp"
 #include "UserData/Local/Saving.hpp"
 
@@ -32,7 +35,7 @@ int main() {
 
 	sf::Clock deltaClock;
 	sf::Clock elapsedClock;
-	sf::Clock fluctuationClock;
+	sf::Clock patch_1Clock;
 
 	sf::RectangleShape clickRect;
 	clickRect.setSize(sf::Vector2f(256, 256));
@@ -71,22 +74,29 @@ int main() {
 	offline(timeEnd, bits, allBits, bitsPerSecond, hotfixMult);
 	
 	while (gameWindow.isOpen()) {
-		if (rootTree[1].patched && root1Clock.getElapsedTime().asSeconds() >= 60.f) {
-			root1CurrentMult = 1.1f + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (1.3f - 1.1f)));
-			root1Clock.restart();
+		if (rootTree[1].patched && patch_1Clock.getElapsedTime().asSeconds() >= 30.f) {
+			patch_1Mult = 1.5f + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (1.7f - 1.5f)));
+			patch_1Clock.restart();
 		}
 
 		bitsToBytesRate = 1e-8L;
 		if (rootTree[0].patched) bitsToBytesRate = 1e-6L;
-		if (rootTree[3].patched) bitsToBytesRate = 1e-7L;
+		if (rootTree[3].patched) bitsToBytesRate = 3e-7L;
 
 		bitMultiplier = 1.0L;
 		byteMultiplier = 1.0L;
-		if (rootTree[2].patched) bitMultiplier *= 2.0L;
-		if (rootTree[3].patched) bitMultiplier *= 4.0L;
-		if (rootTree[4].patched) byteMultiplier *= (1.0L + (bytes * 0.001L));
+		clickMultiplier = 1.0L;
+		if (rootTree[2].patched) {
+			bitMultiplier *= 3.0L;
+			clickMultiplier *= 2.0L;
+		}
+		if (rootTree[3].patched) bitMultiplier *= 5.5L;
+		if (rootTree[4].patched) {
+			long double patch3_2Mult = 1.0L + (bytes * 0.002L);
+			byteMultiplier = std::min(patch3_2Mult, 100.0L);
+		}
 
-		long double realBitsPerSecond = (bitsPerSecond * hotfixMult * bitMultiplier * root1CurrentMult) * byteMultiplier;
+		long double realBitsPerSecond = (bitsPerSecond * hotfixMult * bitMultiplier * patch_1Mult) * byteMultiplier;
 		float deltaTime = deltaClock.restart().asSeconds();
 		float elapsedTime = elapsedClock.getElapsedTime().asSeconds();
 
@@ -95,13 +105,13 @@ int main() {
 		updateVortex(vortex, center, elapsedTime, vortexScale);
 		vortexScale += (1.f - vortexScale) * 0.1f;
 
-		bitsText.setString("-" + formatBits(bits) + " Bits");
+		bitsText.setString("-" + format(bits) + " Bits");
 		centerText(bitsText, { clickRect.getPosition().x, clickRect.getPosition().y + 400 });
 
-		bitsPerSecondText.setString("-" + formatBits(realBitsPerSecond, true) + " Bits per Second");
+		bitsPerSecondText.setString("-" + format(realBitsPerSecond, true) + " Bits per Second");
 		centerText(bitsPerSecondText, { clickRect.getPosition().x, clickRect.getPosition().y + 440 });
 
-		bytesText.setString("-" + formatBits(bytes, true) + " Bytes");
+		bytesText.setString("-" + format(bytes, true) + " Bytes");
 		centerText(bytesText, { clickRect.getPosition().x, clickRect.getPosition().y + 400 });
 
 		sf::RenderStates states;
@@ -114,10 +124,7 @@ int main() {
 			gameWindow.draw(bitsPerSecondText);
 
 			updateLogicGateUI(gameWindow, allBits);
-			drawLogicGates(gameWindow, allBits);
-			drawHotfixes(gameWindow);
-
-			drawAscensionUI(gameWindow, bits);
+			drawTerminalUI(gameWindow, bits, allBits);
 
 			gameWindow.draw(vortex.vortex, states);
 
@@ -165,7 +172,7 @@ int main() {
 			}
 
 			case InitState::LOADING_BAR:
-				loadingProgress = (initTimer - 0.7f) / 10.0f;
+				loadingProgress = (initTimer - 0.7f) / 5.0f;
 
 				if (loadingProgress >= 1.0f) {
 					loadingProgress = 1.0f;
@@ -206,45 +213,68 @@ int main() {
 
 			if (gameEvent->is<sf::Event::MouseButtonPressed>()) {
 				const auto& mouseEvent = gameEvent->getIf<sf::Event::MouseButtonPressed>();
-				sf::Vector2i mousePos = sf::Mouse::getPosition(gameWindow);
-				if (mouseEvent->button == sf::Mouse::Button::Left && canClick) {
-					sf::Vector2f worldMousePos = gameWindow.mapPixelToCoords(mousePos, uiView);
+				sf::Vector2i mousePixelPos = sf::Mouse::getPosition(gameWindow);
+				sf::Vector2f mousePos = gameWindow.mapPixelToCoords(mousePixelPos);
 
-					if (clickRect.getGlobalBounds().contains(static_cast<sf::Vector2f>(mousePos))) {
+				if (mouseEvent->button == sf::Mouse::Button::Left && canClick) {
+
+					if (clickRect.getGlobalBounds().contains(mousePos)) {
 						long double bitsClicked = bitsPerClick * clickMultiplier * (1 + realBitsPerSecond * 0.05f);
 						vortexScale = 1.1f; bits += bitsClicked; allBits += bitsClicked; allClickedBits += bitsClicked;
 					}
 
-					for (auto& logGate : logicGateList) {
-						if (logGate.rect.getGlobalBounds().contains(worldMousePos)) {
-							if (bits >= logGate.currentBits) {
-								bits -= logGate.currentBits;
-								logGate.ver++;
+					float startX = 40.f;
+					float folder1Y = 105.f;
+					float folder2Y = folder1Y + 40.f + (currentDir == Directory::LOGIC_GATES ? (getLogicHeight()) : 0.f);
+					float folder3Y = folder2Y + 40.f + (currentDir == Directory::HOTFIXES ? (getHotfixHeight()) : 0.f);
 
-								bitsPerSecond += logGate.bps;
+					if (sf::FloatRect({ startX, folder1Y }, { 350.f, 30.f }).contains(mousePos)) {
+						currentDir = (currentDir == Directory::LOGIC_GATES) ? Directory::NONE : Directory::LOGIC_GATES;
+					}
+					else if (sf::FloatRect({ startX, folder2Y }, { 350.f, 30.f }).contains(mousePos)) {
+						currentDir = (currentDir == Directory::HOTFIXES) ? Directory::NONE : Directory::HOTFIXES;
+					}
+					else if (sf::FloatRect({ startX, folder3Y }, { 350.f, 30.f }).contains(mousePos)) {
+						currentDir = (currentDir == Directory::REINIT) ? Directory::NONE : Directory::REINIT;
+					}
 
-								logGate.currentBits = logGate.baseBits * std::pow(logicGateInflation, logGate.ver);
+					if (currentDir == Directory::LOGIC_GATES) {
+						for (auto& lg : logicGateList) {
+							if (lg.ver > 0 || allBits >= lg.baseBits) {
+								if (lg.rect.getGlobalBounds().contains(mousePos)) {
+									if (bits >= lg.currentBits) {
+										bits -= lg.currentBits;
+										lg.ver++;
+										bitsPerSecond += lg.bps;
+										lg.currentBits = lg.baseBits * std::pow(logicGateInflation, lg.ver);
+									}
+								}
 							}
 						}
 					}
-
-					for (auto& hf : hotfixList) {
-						if (hf.written == 0 && hf.rect.getGlobalBounds().contains(worldMousePos)) {
-							if (bits >= hf.bits) {
-								bits -= hf.bits;
-								hf.written = 1;
-								hotfixMult += hf.bitMult;
+					else if (currentDir == Directory::HOTFIXES) {
+						for (auto& hf : hotfixList) {
+							if (hf.written == 0 && hf.rect.getGlobalBounds().contains(mousePos)) {
+								if (bits >= hf.bits) {
+									bits -= hf.bits;
+									hf.written = 1;
+									hotfixMult += hf.bitMult;
+								}
 							}
+						}
+					}
+					else if (currentDir == Directory::REINIT) {
+						sf::FloatRect reinitBatHitbox({ startX + 25.f, folder3Y + 40.f }, { 300.f, 30.f });
+						if (reinitBatHitbox.contains(mousePos)) {
+							showConfirmPopup = true;
 						}
 					}
 				}
 
 				if (mouseEvent->button == sf::Mouse::Button::Left && canClickInit) {
-					sf::Vector2f screenMouse = gameWindow.mapPixelToCoords(mousePos, gameWindow.getDefaultView());
-
 					for (size_t i = 0; i < rootTree.size(); ++i) {
 						auto& patch = rootTree[i];
-						if (patch.patched == 0 && patch.rect.getGlobalBounds().contains(screenMouse)) {
+						if (patch.patched == 0 && patch.rect.getGlobalBounds().contains(mousePos)) {
 
 							bool canBuy = false;
 							if (i == 0) canBuy = true;
@@ -259,7 +289,7 @@ int main() {
 									bitsToBytesRate = 1e-6L;
 								}
 								if (patch.name == "Patch_3_1") {
-									bitsToBytesRate = 1e-7L;
+									bitsToBytesRate = 3e-7L;
 								}
 							}
 						}

@@ -62,42 +62,6 @@ inline void initHotfixes() {
     hotfixList.push_back({ "root_grant", 10000000000.0L, 0.03f });
 }
 
-inline void drawHotfixes(sf::RenderWindow& window) {
-    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-    float startX = 50.0f;
-    float startY = 150.0f;
-
-    int displayedCount = 0;
-    for (auto& hf : hotfixList) {
-        if (hf.written == 1) continue;
-
-        int col = displayedCount % 3;
-        int row = displayedCount / 3;
-
-        float x = startX + (col * (hfWidth + hfSpacing));
-        float y = startY + (row * (hfHeight + hfSpacing));
-
-        hf.rect.setSize({ hfWidth, hfHeight });
-        hf.rect.setPosition({ x, y });
-        hf.rect.setFillColor(sf::Color::Black);
-
-        if (hf.rect.getGlobalBounds().contains(window.mapPixelToCoords(mousePos))) {
-            hf.rect.setFillColor(sf::Color(10, 10, 10));
-        }
-
-        window.draw(hf.rect);
-
-        sf::Text text(jetBrainsMono);
-        int percent = static_cast<int>(hf.bitMult * 100);
-        text.setString(hf.name + "\nBits: -" + formatBits(hf.bits) + "\n+" + std::to_string(percent) + "%");
-        text.setCharacterSize(14);
-        text.setPosition(sf::Vector2f(x + 5.f, y + 5.f));
-        window.draw(text);
-
-        displayedCount++;
-    }
-}
-
 inline void to_json(json& j, const Hotfix& h) {
     j = json{ {"n", h.name}, {"w", h.written} };
 }

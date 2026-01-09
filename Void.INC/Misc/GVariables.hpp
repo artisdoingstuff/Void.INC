@@ -2,7 +2,7 @@
 #include "GIncludes.hpp"
 
 // Global references
-inline std::string voidVersion = "v1.0.0"; // Version control for the game (Updater purposes)
+inline std::string voidVersion = "v1.0.1"; // Version control for the game (Updater purposes)
 
 inline bool initialization = false;
 
@@ -20,6 +20,13 @@ float initTimer = 0.0f;
 
 inline bool canClick = true; // Pre-initialization
 inline bool canClickInit = false; // Post-reinitialization
+
+enum class Directory { NONE, LOGIC_GATES, HOTFIXES, REINIT };
+inline Directory currentDir = Directory::LOGIC_GATES;
+
+inline sf::FloatRect logicFolderBounds;
+inline sf::FloatRect hotfixFolderBounds;
+inline sf::FloatRect reinitFolderBounds;
 
 // Dynamic shenanigans
 inline float costMult = 1.0f; // Change the cost of all logicGate
@@ -43,6 +50,7 @@ inline long long timesInitialized = 0LL; // Re-initializing is "Ascending"
 inline long double bitsToBytesRate = 1e-8;
 inline long double bitMultiplier = 1.0L;
 inline long double byteMultiplier = 1.0L;
+inline float patch_1Mult = 1.0f;
 inline bool showConfirmPopup = false;
 
 inline long double malbytes = 0.0L;

@@ -2,7 +2,7 @@
 
 #include "../Misc/GIncludes.hpp"
 
-inline std::string formatBits(long double bits, bool forceDecimals = false) {
+inline std::string format(long double bits, bool forceDecimals = false) {
    if (bits < 1000.L) {
        if (forceDecimals) {
            std::ostringstream oss;

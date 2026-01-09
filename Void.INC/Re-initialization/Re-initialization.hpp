@@ -130,33 +130,3 @@ inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit) {
     window.draw(yesText);
     window.draw(noText);
 }
-
-inline void drawAscensionUI(sf::RenderWindow& window, long double bits) {
-    if (bits < 5000000.0L) return;
-
-    std::stringstream stream;
-    stream << std::fixed << std::setprecision(2) << getPendingBytes(bits);
-    std::string formattedBytes = stream.str();
-
-    float uiX = window.getSize().x - 390.f;
-
-    sf::RectangleShape btn({ 350.f, 60.f });
-    btn.setPosition({ uiX, 40.f });
-    btn.setFillColor(sf::Color(15, 0, 30));
-    btn.setOutlineColor(sf::Color(180, 0, 255));
-    btn.setOutlineThickness(2.f);
-
-    sf::Text txt(jetBrainsMono, "REINIT();\nBytes Yield: -" + formattedBytes +" Bytes", 16);
-    txt.setPosition(sf::Vector2f(uiX + 10.f, 45.f));
-
-    sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-    if (btn.getGlobalBounds().contains(mousePos)) {
-        btn.setFillColor(sf::Color(40, 0, 80));
-        if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
-            showConfirmPopup = true;
-        }
-    }
-
-    window.draw(btn);
-    window.draw(txt);
-}

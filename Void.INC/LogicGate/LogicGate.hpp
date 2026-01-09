@@ -26,7 +26,6 @@ inline float scrollOffset = 0.f;
 inline float logicGateHeight = 70.f;
 inline float logicGateSpacing = 10.f;
 inline float uiWidth = 350.f;
-inline sf::View uiView(sf::FloatRect({ 0.f, 100.f }, { static_cast<float>(1920), 500.f }));
 
 inline void initLogicGates() {
     logicGateList.emplace_back("not_gate", "Inverts existence into non-existence.", 10.L, 10.L, 1.L);
@@ -50,56 +49,6 @@ inline void updateLogicGateUI(sf::RenderWindow& gameWindow, long double allBits)
             logicGateList[i].rect.setPosition({ startX, yPos });
             visibleCount++;
         }
-    }
-}
-
-inline void drawLogicGates(sf::RenderWindow& gameWindow, long double allBits) {
-    sf::Vector2i mousePos = sf::Mouse::getPosition(gameWindow);
-    LogicGate* hoveredLogicGate = nullptr;
-
-    uiView.setViewport(sf::FloatRect({ 0.f, 0.1f }, { 1.f, 0.7f }));
-    gameWindow.setView(uiView);
-
-    for (auto& logGate : logicGateList) {
-        if (logGate.ver > 0 || allBits >= logGate.baseBits) {
-            gameWindow.draw(logGate.rect);
-
-            sf::Text text(jetBrainsMono);
-            text.setString(logGate.name + " v" + std::to_string(logGate.ver) + "\nBits: -" + formatBits(logGate.currentBits));
-            text.setCharacterSize(18);
-            text.setFillColor(sf::Color::White);
-            text.setPosition(logGate.rect.getPosition() + sf::Vector2f(10.f, 10.f));
-            gameWindow.draw(text);
-
-            if (logGate.rect.getGlobalBounds().contains(gameWindow.mapPixelToCoords(mousePos))) {
-                logGate.rect.setFillColor(sf::Color(20, 20, 20));
-                hoveredLogicGate = &logGate;
-            }
-            else {
-                logGate.rect.setFillColor(sf::Color(0, 0, 0));
-            }
-        }
-    }
-
-    gameWindow.setView(gameWindow.getDefaultView());
-
-    if (hoveredLogicGate) {
-        sf::Text tooltip(jetBrainsMono);
-        tooltip.setString(hoveredLogicGate->desc);
-        tooltip.setCharacterSize(16);
-        tooltip.setFillColor(sf::Color(243, 238, 225));
-
-        tooltip.setPosition(static_cast<sf::Vector2f>(mousePos) + sf::Vector2f(20.f, 5.f));
-
-        sf::RectangleShape tipBox;
-        tipBox.setSize({ tooltip.getGlobalBounds().size.x + 10.f, tooltip.getGlobalBounds().size.y + 10.f });
-        tipBox.setPosition(tooltip.getPosition() - sf::Vector2f(5.f, 2.f));
-        tipBox.setFillColor(sf::Color(0, 0, 0, 200));
-        tipBox.setOutlineColor(sf::Color::White);
-        tipBox.setOutlineThickness(1.f);
-
-        gameWindow.draw(tipBox);
-        gameWindow.draw(tooltip);
     }
 }
 

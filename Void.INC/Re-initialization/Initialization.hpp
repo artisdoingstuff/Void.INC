@@ -18,16 +18,14 @@ struct RootPatch {
 };
 
 inline std::vector<RootPatch> rootTree;
-inline float root1CurrentMult = 1.0f;
-inline sf::Clock root1Clock;
 
 inline void initRootTree() {
     if (!rootTree.empty()) return;
     rootTree.emplace_back("Patch_0", "Upgrade bit-to-byte protocols (1e-6).", 0.05L);
-    rootTree.emplace_back("Patch_1", "Inject minute-based variance (x1.1 - x1.3).", 10.0L);
-    rootTree.emplace_back("Patch_2", "Double total bits per second output.", 50.0L);
-    rootTree.emplace_back("Patch_3_1", "x4 BPS but lowers byte rate to 1e-7.", 444.0L);
-    rootTree.emplace_back("Patch_3_2", "Byte-scaled feedback loop (0.1% per Byte).", 1000.0L);
+    rootTree.emplace_back("Patch_1", "Inject minute-based variance (x1.5 - x1.7).", 10.0L);
+    rootTree.emplace_back("Patch_2", "Triples bits and doubles clicks.", 50.0L);
+    rootTree.emplace_back("Patch_3_1", "x5.5 BPS but lowers byte rate to 3e-7.", 500.0L);
+    rootTree.emplace_back("Patch_3_2", "Byte-scaled feedback loop (0.2% per Byte).", 1000.0L);
 }
 
 inline void drawRootDirectory(sf::RenderWindow& window, long double currentBytes) {
